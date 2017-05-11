@@ -1522,6 +1522,12 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (setq inhibit-startup-screen t )  ; inhibit useless and old-school startup screen
 (setq ring-bell-function 'ignore )  ; silent bell when you make a mistake
 
+(setq redisplay-dont-pause t
+  scroll-margin 1
+  scroll-step 1
+  scroll-conservatively 10000
+  scroll-preserve-screen-position 1)
+
 ;; Disable menu bars, etc.
 (if window-system (scroll-bar-mode -1))
 (tool-bar-mode -1)
