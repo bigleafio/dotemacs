@@ -456,7 +456,7 @@ directory to make multiple eshell windows easier.
   :mode (("\\.epub\\'" . ereader-mode)))
 
 (use-package evil-matchit
-  :diminish t
+  :diminish ""
   :init (global-evil-matchit-mode 1))
 
 ;; path fix
@@ -465,6 +465,7 @@ directory to make multiple eshell windows easier.
   (when (memq window-system '(mac ns))
     (exec-path-from-shell-initialize)))
 
+(use-package esup)
 ;; -------------------------------------------------------
 ;; FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 ;; -------------------------------------------------------
