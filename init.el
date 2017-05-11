@@ -60,6 +60,8 @@
     (setq ag-reuse-buffers t)
     (add-to-list 'ag-arguments "--word-regexp")))
 
+(use-package all-the-icons)
+
 (use-package anzu :ensure t
   :diminish ""
   :commands (global-anzu-mode)
@@ -82,7 +84,6 @@
   (beacon-mode 1))
 
 (use-package bind-key)
-
 
 (use-package bongo :ensure t
   :commands (bongo)
@@ -239,6 +240,24 @@
   (add-hook 'cider-repl-mode-hook #'paredit-mode)
   (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode))
 
+;;; Solarized
+(use-package color-theme :ensure t)
+(use-package color-theme-solarized
+  :ensure t
+  :init
+  (set-frame-parameter nil 'background-mode 'dark)
+  (load-theme 'solarized t)
+  (defun jsg-swap-theme-light-dark ()
+    "Swaps between solarized light and dark"
+    (interactive)
+    (if (eq 'light (frame-parameter nil 'background-mode))
+  (set-frame-parameter nil 'background-mode 'dark)
+      (set-frame-parameter nil 'background-mode 'light)
+      )
+    (enable-theme 'solarized)
+    )
+  )
+
 ;; -------------------------------------------------------
 ;; DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
 ;; -------------------------------------------------------
@@ -377,6 +396,7 @@ _e_xtension"
   :init (evilem-default-keybindings "SPC"))
 
 (use-package evil-escape
+  :diminish ""
   :init 
    (evil-escape-mode)
   )
@@ -481,19 +501,32 @@ directory to make multiple eshell windows easier.
     "/"   'counsel-ag
     "TAB" '(switch-to-other-buffer :which-key "prev buffer")
     "SPC" '(avy-goto-word-or-subword-1  :which-key "go to char")
-    "B" 'ivy-switch-buffer  ; change buffer, chose using ivy
+    "B" 'ivy-switch-buffer  
+
     ;; Applications
     "a" '(:ignore t :which-key "Applications")
     "ar" 'ranger
     "ad" 'dired
     "ao" 'org-agenda
     "ac" 'org-capture
+
+    ;; Windows
     "w" '(:ignore t :which-key "Window")
     "wd" 'delete-window
-    "b" '(:ignore t :which-key "Window")
+    "wt" 'jsg-swap-theme-light-dark
+    "wg" 'golden-ratio-adjust
+    "w-" 'split-window-below
+    "w|" 'split-window-right
+    "b" '(:ignore t :which-key "Buffer")
     "bi" 'ibuffer
     "bb" 'helm-buffers-list
-     ;; bind to double key press
+
+     ;; Tools
+    "t" '(:ignore t :which-key "Tools")
+    "tj" 'cider-jack-in
+    "tt" 'neotree-toggle
+
+     ;; Files
     "f"   '(:ignore t :which-key "files")
     "ff"  'counsel-find-file
     "fr"  'counsel-recentf
@@ -527,6 +560,13 @@ directory to make multiple eshell windows easier.
 
 (use-package grab-mac-link :ensure t
   :commands grab-mac-link)
+
+(use-package golden-ratio
+  diminish ""
+  :disabled t
+  )
+
+
 
 ;; -------------------------------------------------------
 ;; HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
@@ -1042,6 +1082,7 @@ _r_: show    _R_: show  ^   ^          _M-s_: move up
     ("t" . pdf-view-next-line-or-next-page)))
 
 (use-package paredit
+  :diminish ""
   :ensure t
   :config
   (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
@@ -1099,13 +1140,6 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (use-package popwin
   :config
   (popwin-mode 1))
-
-;; powerline
-(use-package powerline
- :init
-  (powerline-evil-center-color-theme))
-
-(add-hook 'after-init-hook 'powerline-reset)
 
 (use-package powerline-evil)
 
@@ -1203,10 +1237,21 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   :config
   (load-file "~/.emacs.d/config/python-config.el"))
 
+(use-package powerline
+  :ensure t
+  :after spaceline-config
+  :config
+  (setq
+   powerline-height (truncate (* 1.0 (frame-char-height)))
+   powerline-default-separator 'utf-8)
+  )
+
+
 ;; -------------------------------------------------------
 ;; RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
 ;; -------------------------------------------------------
 ;; Rainbow Mode
+
 (use-package rainbow-mode
   :diminish rainbow-mode
   :init (rainbow-mode))
@@ -1253,10 +1298,100 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   ("M-X" . smex-major-mode-commands)
   ("C-c M-x" . execute-extended-command))
 
-(use-package smart-mode-line)
-(use-package smart-mode-line-powerline-theme)
-(setq sml/no-confirm-load-theme t)
-(sml/setup)
+(use-package spaceline-config
+  :ensure spaceline
+  :config
+  ;; Set some parameters of the spaceline
+  (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
+  (setq powerline-default-separator 'bar)
+
+  ;; Define a better buffer position line
+  (spaceline-define-segment jsg-buffer-position
+    "a better buffer position display"
+    (let ((buffer-position (format-mode-line "%p")))
+      (if (string= buffer-position "Top") "top"
+      (if (string= buffer-position "Bottom") "bot"
+      (if (string= buffer-position "All") "all"
+      "%p")))
+      )
+    )
+
+  ;; Removes the " Git:" from the 'version-control' segment.
+  (spaceline-define-segment jsg-version-control
+    "Version control information."
+    (when vc-mode
+      (powerline-raw
+       (s-trim (concat
+    (let ((backend (symbol-name (vc-backend (buffer-file-name)))))
+      (substring vc-mode (+ (length backend) 2)))
+    (when (buffer-file-name)
+      (pcase (vc-state (buffer-file-name))
+        (`up-to-date " ")
+        (`edited "*")
+        (`added "@")
+        (`unregistered "?")
+        (`removed "-")
+        (`needs-merge " Con")
+        (`needs-update " Upd")
+        (`ignored "!")
+        (_ " Unk"))))))))
+
+  ;; Makes a shorter org-clock string.
+  (defun jsg-org-clock-get-clock-string ()
+    "Makes a clock string for org."
+    (let ((clocked-time (org-clock-get-clocked-time)))
+      (if org-clock-effort
+    (let* ((effort-in-minutes
+      (org-duration-string-to-minutes org-clock-effort))
+     (work-done-str
+      (propertize
+       (org-minutes-to-clocksum-string clocked-time)
+       'face (if (and org-clock-task-overrun (not org-clock-task-overrun-text))
+           'org-mode-line-clock-overrun 'org-mode-line-clock)))
+     (effort-str (org-minutes-to-clocksum-string effort-in-minutes))
+     (clockstr (propertize
+          (concat  "%s/" effort-str
+             " " (replace-regexp-in-string "%" "%%" org-clock-heading))
+          'face 'org-mode-line-clock)))
+      (format clockstr work-done-str))
+  (propertize (concat (org-minutes-to-clocksum-string clocked-time)
+          (format " %s" org-clock-heading))
+        'face 'org-mode-line-clock))))
+  (setq spaceline-org-clock-format-function 'jsg-org-clock-get-clock-string)
+
+  (spaceline-compile
+   'jsg
+   ;; Left side of the mode line (all the important stuff)
+   '(((buffer-modified buffer-size input-method) :face highlight-face)
+     '(buffer-id remote-host major-mode)
+     ((point-position line-column jsg-buffer-position) :separator "|" )
+     process
+     ((flycheck-error flycheck-warning flycheck-info) :separator "" :when active)
+     ((which-function projectile-root (jsg-version-control :when active)) :separator ":")
+     )
+
+   ;; Right segment (the unimportant stuff)
+   '((org-clock)
+     (minor-modes :separator " ") :when active))
+  
+  (spaceline-helm-mode)
+
+  (setq-default mode-line-format '("%e" (:eval (spaceline-ml-jsg)))))
+
+(defmacro rename-major-mode (package-name mode new-name)
+  "Renames a major mode."
+ `(eval-after-load ,package-name
+   '(defadvice ,mode (after rename-modeline activate)
+      (setq mode-name ,new-name))))
+
+(rename-major-mode "python" python-mode "π")
+(rename-major-mode "markdown-mode" markdown-mode "Md")
+(rename-major-mode "shell" shell-mode "σ")
+(rename-major-mode "org" org-mode "ω")
+(rename-major-mode "Web" web-mode "w")
+
+(add-hook 'web-mode-hook (lambda() (setq mode-name "w")))
+(add-hook 'emacs-lisp-mode-hook (lambda() (setq mode-name "ελ")))
 
 (use-package solarized-color-themes
   :disabled t
@@ -1284,6 +1419,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; -------------------------------------------------------
 ;; TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 ;; -------------------------------------------------------
+
 (use-package tile :ensure t
   :defines (hydra-tile/body)
   :bind* (("C-c t" . hydra-tile/body)
@@ -1401,9 +1537,12 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (delete-selection-mode 1) ; Deleting selected text if typed in/pasted
 (fset 'yes-or-no-p 'y-or-n-p) ; Use y or n instead of yes or no
 
+(setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+
 ;; date and time in status bar
 (setq display-time-day-and-date t
       display-time-24hr-format t)
+
 (display-time)
 (setq frame-title-format "Some days you eat the bear, some days the bear eats you.")
 (setq version-control t )   ; use version control
@@ -1415,6 +1554,18 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (setq inhibit-startup-screen t )  ; inhibit useless and old-school startup screen
 (setq ring-bell-function 'ignore )  ; silent bell when you make a mistake
 
+;; Disable menu bars, etc.
+(if window-system (scroll-bar-mode -1))
+(tool-bar-mode -1)
+(menu-bar-mode 1)
+
+;; Set default fill column
+(setq-default fill-column 80)
+
+;;; Customize the modeline
+(setq line-number-mode 1)
+(setq column-number-mode 1)
+(setq ns-use-srgb-colorspace nil)
 
 ;; ------------------------------------------------------
 ;; Theme
@@ -1425,7 +1576,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 
 ;;(use-package color-theme-solarized)
 ;;(load-theme color-theme-solarized t)
-(load-theme 'leuven t)
+;;(load-theme 'leuven t)
 (set-frame-font "Source Code Pro 12")
 ;;(load-theme 'tomorrow-night t)
 
