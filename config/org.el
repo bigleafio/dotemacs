@@ -1,5 +1,6 @@
 (use-package org
-  :load-path ("~/.emacs.d/private/org-mode")
+  ;;:load-path ("~/.emacs.d/private/org-mode")
+  :defer t
   :commands (org-mode
              org-agenda-list
              org-capture

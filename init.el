@@ -7,7 +7,7 @@
 ;; -------------------------------------------------------
 ;; User Info
 ;; -------------------------------------------------------
-
+(message "***** Loading (Initialize): %s" (current-time-string))
 (setq user-full-name "Jason Graham")
 (setq user-mail-address "jgraham20@gmail.com")
 (load "~/.emacs.d/config/functions")
@@ -41,6 +41,7 @@
 (defconst base-path (file-name-directory load-file-name))
 (setq custom-file (concat base-path "config/custom.el"))
 
+(message "****** Loading Packages: %s" (current-time-string))
 ;; -------------------------------------------------------
 ;; AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 ;; -------------------------------------------------------
@@ -969,6 +970,10 @@ undo               _u_: undo
 ;; OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 ;; -------------------------------------------------------
 
+(use-package org
+  ;;:load-path ("~/.emacs.d/private/org-mode")
+  :defer t)
+
 (use-package osx-clipboard :ensure t
   :if (not (window-system))
   :init
@@ -1043,44 +1048,6 @@ _r_: show    _R_: show  ^   ^          _M-s_: move up
   :if (not (display-graphic-p))
   :init
   (turn-on-pbcopy))
-
-(use-package pdf-tools :ensure t
-  :mode ("\\.pdf\\'" . pdf-view-mode)
-  :config
-  (setq pdf-tools-enabled-modes
-        '(pdf-isearch-minor-mode
-          pdf-links-minor-mode
-          pdf-misc-minor-mode
-          pdf-outline-minor-mode
-          pdf-misc-size-indication-minor-mode
-          pdf-misc-menu-bar-minor-mode
-          pdf-sync-minor-mode
-          pdf-misc-context-menu-minor-mode
-          pdf-cache-prefetch-minor-mode
-          pdf-view-auto-slice-minor-mode))
-  (setq pdf-info-epdfinfo-program "/usr/local/bin/epdfinfo")
-  (require 'pdf-occur)
-  (require 'pdf-links)
-  (require 'pdf-outline)
-  (require 'pdf-sync)
-  (pdf-tools-install)
-
-  (setq pdf-view-continuous t)
-
-  (defun pdf-view-open-in-external-app ()
-    (interactive)
-    (shell-command (format "open -a Preview %s" (buffer-file-name))))
-
-  (defun pdf-view-finder ()
-    (interactive)
-    (shell-command "open -a Finder ./"))
-
-  (bind-keys :map pdf-view-mode-map
-    ("r" . pdf-view-next-page)
-    ("c" . pdf-view-previous-page)
-    ("O" . pdf-view-open-in-external-app)
-    ("s" . pdf-view-previous-line-or-previous-page)
-    ("t" . pdf-view-next-line-or-next-page)))
 
 (use-package paredit
   :diminish ""
@@ -1527,11 +1494,11 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
   (add-to-list 'auto-mode-alist '("\\.yaml$" . yaml-mode)))
 
-
+(message "Loading Packages - Complete: %s" (current-time-string))
 ;; ------------------------------------------------------
 ;; Misc settings
 ;; ------------------------------------------------------
-
+(message "Applying Setttings: %s" (current-time-string))
 (show-paren-mode 1) ; Always show matching parenthesis
 (tool-bar-mode -1)
 (setq-default cursor-type 'bar)
@@ -1572,18 +1539,15 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; Theme
 ;; ------------------------------------------------------
 
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-(add-to-list 'load-path "~/.emacs.d/themes")
-
-;;(use-package color-theme-solarized)
-;;(load-theme color-theme-solarized t)
-;;(load-theme 'leuven t)
 (set-frame-font "Source Code Pro 12")
 ;;(load-theme 'tomorrow-night t)
 
+(message "***** Loading Additional Config Files: %s" (current-time-string))
 (load "~/.emacs.d/config/custom")
 (load "~/.emacs.d/config/keybindings")
 (load "~/.emacs.d/config/org")
+
+(message "***** Startup Complete: %s" (current-time-string))
 
 ;; go full screen
 (toggle-frame-maximized) 
