@@ -1438,8 +1438,8 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   ("s-Z" . redo))
 
 
-(use-package undohist
-  :config (undohist-initialize))
+;;(use-package undohist
+;;  :config (undohist-initialize))
 
 ;; -------------------------------------------------------
 ;; WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -1543,7 +1543,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;;(load-theme 'tomorrow-night t)
 
 (message "***** Loading Additional Config Files: %s" (current-time-string))
-(load "~/.emacs.d/config/custom")
+;;(load "~/.emacs.d/config/custom")
 (load "~/.emacs.d/config/keybindings")
 (load "~/.emacs.d/config/org")
 
