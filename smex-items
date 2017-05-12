@@ -1,13 +1,13 @@
 
 ;; ----- smex-history -----
 (
+ org-beamer-export-to-pdf
+ org-latex-export-to-pdf
  cycle-my-theme
  org-mode
  profiler-find-profile
  evil-escape
  evil-window-down
- windmove-down
- esup
 )
 
 ;; ----- smex-data -----
@@ -21,4 +21,6 @@
  (cycle-themes . 1)
  (icicle-color-theme . 1)
  (cycle-my-theme . 1)
+ (org-latex-export-to-pdf . 1)
+ (org-beamer-export-to-pdf . 1)
 )

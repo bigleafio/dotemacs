@@ -1428,7 +1428,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; Theme
 ;; ------------------------------------------------------
 
-(set-frame-font "Source Code Pro 12")
+(set-frame-font "Source Code Pro-14")
 
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 (load-theme 'gruvbox t)
