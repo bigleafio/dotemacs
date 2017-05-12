@@ -16,7 +16,7 @@
 ;; Define package repositories
 ;; -------------------------------------------------------
 (require 'package)
-(setq package-enable-at-startup nil)
+
 (setq package-archives (append package-archives
 			 '(("melpa" . "http://melpa.org/packages/")
 			   ("marmalade" . "http://marmalade-repo.org/packages/")
@@ -25,17 +25,12 @@
 
 (package-initialize)
 
-;; install use package, the rest of the time we use :ensure to install.
-(package-install 'use-package)
+(setq use-package-verbose t)
 
 (eval-when-compile
   (require 'use-package))
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)                ;; if you use any :bind variant
-
-;; bring in use-package
-(require 'use-package)
-(setq use-package-always-ensure t)
 
 ;; Keep custom in a separate file
 (defconst base-path (file-name-directory load-file-name))
@@ -47,6 +42,8 @@
 ;; -------------------------------------------------------
 
 (use-package avy :ensure t)
+
+(use-package autothemer :ensure t)
 
 ;; autocomplete editor
 (use-package auto-complete
@@ -91,6 +88,8 @@
   :config
   (define-key bongo-playlist-mode-map (kbd "g") #'bongo-redisplay)
   (setq bongo-default-directory "~/Music/iTunes/iTunes Music/"))
+
+(use-package buffer-move)
 
 ;; -------------------------------------------------------
 ;; CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -233,6 +232,8 @@
   (add-hook 'clojure-mode-hook #'subword-mode)
   (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode))
 
+(use-package clojure-cheatsheet)
+
 (use-package cider
   :ensure t
   :config
@@ -241,23 +242,17 @@
   (add-hook 'cider-repl-mode-hook #'paredit-mode)
   (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode))
 
-;;; Solarized
-(use-package color-theme :ensure t)
-(use-package color-theme-solarized
+(use-package color-theme 
   :ensure t
-  :init
-  (set-frame-parameter nil 'background-mode 'dark)
-  (load-theme 'solarized t)
-  (defun jsg-swap-theme-light-dark ()
-    "Swaps between solarized light and dark"
-    (interactive)
-    (if (eq 'light (frame-parameter nil 'background-mode))
-  (set-frame-parameter nil 'background-mode 'dark)
-      (set-frame-parameter nil 'background-mode 'light)
-      )
-    (enable-theme 'solarized)
-    )
-  )
+  :config
+  (setq my-color-themes (list 'gruvbox 'leuven)))
+
+
+; (use-package cycle-themes
+;   :ensure t
+;   :init (setq cycle-themes-theme-list
+;           '(gruvbox leuven))
+;   :config (cycle-themes-mode))
 
 ;; -------------------------------------------------------
 ;; DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
@@ -466,7 +461,7 @@ directory to make multiple eshell windows easier.
   (when (memq window-system '(mac ns))
     (exec-path-from-shell-initialize)))
 
-(use-package esup)
+;;(use-package esup)
 ;; -------------------------------------------------------
 ;; FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 ;; -------------------------------------------------------
@@ -515,7 +510,7 @@ directory to make multiple eshell windows easier.
     ;; Windows
     "w" '(:ignore t :which-key "Window")
     "wd" 'delete-window
-    "wt" 'jsg-swap-theme-light-dark
+    "wt" 'cycle-my-theme
     "wg" 'golden-ratio-adjust
     "w-" 'split-window-below
     "w|" 'split-window-right
@@ -567,8 +562,6 @@ directory to make multiple eshell windows easier.
   diminish ""
   :disabled t
   )
-
-
 
 ;; -------------------------------------------------------
 ;; HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
@@ -837,7 +830,6 @@ _c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)
 
 ;; magit
 (use-package magit
-  ;;:quelpa (magit :fetcher github :repo "magit/magit")
   :commands (magit-blame
              magit-commit
              magit-commit-popup
@@ -856,9 +848,7 @@ _c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)
   :bind (("s-v" . magit-status))
 
   :config
-  (use-package git-modes
-    ;;:quelpa (git-modes :fetcher github :repo "magit/git-modes")
-    )
+  (use-package git-modes)
 
   (global-git-commit-mode)
 
@@ -1205,14 +1195,14 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   :config
   (load-file "~/.emacs.d/config/python-config.el"))
 
-(use-package powerline
-  :ensure t
-  :after spaceline-config
-  :config
-  (setq
-   powerline-height (truncate (* 1.0 (frame-char-height)))
-   powerline-default-separator 'utf-8)
-  )
+; (use-package powerline
+;   :ensure t
+;   :after spaceline-config
+;   :config
+;   (setq
+;    powerline-height (truncate (* 1.0 (frame-char-height)))
+;    powerline-default-separator 'utf-8)
+;   )
 
 
 ;; -------------------------------------------------------
@@ -1258,6 +1248,15 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; -------------------------------------------------------
 ;; SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
 ;; -------------------------------------------------------
+;;(use-package smart-mode-line-powerline-theme
+;;    :ensure t)
+
+(use-package smart-mode-line
+    :ensure t)
+
+(setq sml/no-confirm-load-theme t)
+(setq sml/theme nil)
+(add-hook 'after-init-hook #'sml/setup)
 
 ;; SMEX
 (use-package smex
@@ -1266,116 +1265,100 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   ("M-X" . smex-major-mode-commands)
   ("C-c M-x" . execute-extended-command))
 
-(use-package spaceline-config
-  :ensure spaceline
-  :config
-  ;; Set some parameters of the spaceline
-  (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
-  (setq powerline-default-separator 'bar)
+; (use-package spaceline-config
+;   :ensure spaceline
+;   :config
+;   ;; Set some parameters of the spaceline
+;   (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
+;   (setq powerline-default-separator 'bar)
 
-  ;; Define a better buffer position line
-  (spaceline-define-segment jsg-buffer-position
-    "a better buffer position display"
-    (let ((buffer-position (format-mode-line "%p")))
-      (if (string= buffer-position "Top") "top"
-      (if (string= buffer-position "Bottom") "bot"
-      (if (string= buffer-position "All") "all"
-      "%p")))
-      )
-    )
+;   ;; Define a better buffer position line
+;   (spaceline-define-segment jsg-buffer-position
+;     "a better buffer position display"
+;     (let ((buffer-position (format-mode-line "%p")))
+;       (if (string= buffer-position "Top") "top"
+;       (if (string= buffer-position "Bottom") "bot"
+;       (if (string= buffer-position "All") "all"
+;       "%p")))
+;       )
+;     )
 
-  ;; Removes the " Git:" from the 'version-control' segment.
-  (spaceline-define-segment jsg-version-control
-    "Version control information."
-    (when vc-mode
-      (powerline-raw
-       (s-trim (concat
-    (let ((backend (symbol-name (vc-backend (buffer-file-name)))))
-      (substring vc-mode (+ (length backend) 2)))
-    (when (buffer-file-name)
-      (pcase (vc-state (buffer-file-name))
-        (`up-to-date " ")
-        (`edited "*")
-        (`added "@")
-        (`unregistered "?")
-        (`removed "-")
-        (`needs-merge " Con")
-        (`needs-update " Upd")
-        (`ignored "!")
-        (_ " Unk"))))))))
+;   ;; Removes the " Git:" from the 'version-control' segment.
+;   (spaceline-define-segment jsg-version-control
+;     "Version control information."
+;     (when vc-mode
+;       (powerline-raw
+;        (s-trim (concat
+;     (let ((backend (symbol-name (vc-backend (buffer-file-name)))))
+;       (substring vc-mode (+ (length backend) 2)))
+;     (when (buffer-file-name)
+;       (pcase (vc-state (buffer-file-name))
+;         (`up-to-date " ")
+;         (`edited "*")
+;         (`added "@")
+;         (`unregistered "?")
+;         (`removed "-")
+;         (`needs-merge " Con")
+;         (`needs-update " Upd")
+;         (`ignored "!")
+;         (_ " Unk"))))))))
 
-  ;; Makes a shorter org-clock string.
-  (defun jsg-org-clock-get-clock-string ()
-    "Makes a clock string for org."
-    (let ((clocked-time (org-clock-get-clocked-time)))
-      (if org-clock-effort
-    (let* ((effort-in-minutes
-      (org-duration-string-to-minutes org-clock-effort))
-     (work-done-str
-      (propertize
-       (org-minutes-to-clocksum-string clocked-time)
-       'face (if (and org-clock-task-overrun (not org-clock-task-overrun-text))
-           'org-mode-line-clock-overrun 'org-mode-line-clock)))
-     (effort-str (org-minutes-to-clocksum-string effort-in-minutes))
-     (clockstr (propertize
-          (concat  "%s/" effort-str
-             " " (replace-regexp-in-string "%" "%%" org-clock-heading))
-          'face 'org-mode-line-clock)))
-      (format clockstr work-done-str))
-  (propertize (concat (org-minutes-to-clocksum-string clocked-time)
-          (format " %s" org-clock-heading))
-        'face 'org-mode-line-clock))))
-  (setq spaceline-org-clock-format-function 'jsg-org-clock-get-clock-string)
+  ; ;; Makes a shorter org-clock string.
+  ; (defun jsg-org-clock-get-clock-string ()
+  ;   "Makes a clock string for org."
+  ;   (let ((clocked-time (org-clock-get-clocked-time)))
+  ;     (if org-clock-effort
+  ;   (let* ((effort-in-minutes
+  ;     (org-duration-string-to-minutes org-clock-effort))
+  ;    (work-done-str
+  ;     (propertize
+  ;      (org-minutes-to-clocksum-string clocked-time)
+  ;      'face (if (and org-clock-task-overrun (not org-clock-task-overrun-text))
+  ;          'org-mode-line-clock-overrun 'org-mode-line-clock)))
+  ;    (effort-str (org-minutes-to-clocksum-string effort-in-minutes))
+  ;    (clockstr (propertize
+  ;         (concat  "%s/" effort-str
+  ;            " " (replace-regexp-in-string "%" "%%" org-clock-heading))
+  ;         'face 'org-mode-line-clock)))
+  ;     (format clockstr work-done-str))
+  ; (propertize (concat (org-minutes-to-clocksum-string clocked-time)
+  ;         (format " %s" org-clock-heading))
+  ;       'face 'org-mode-line-clock))))
+  ; (setq spaceline-org-clock-format-function 'jsg-org-clock-get-clock-string)
 
-  (spaceline-compile
-   'jsg
-   ;; Left side of the mode line (all the important stuff)
-   '(((buffer-modified buffer-size input-method) :face highlight-face)
-     '(buffer-id remote-host major-mode)
-     ((point-position line-column jsg-buffer-position) :separator "|" )
-     process
-     ((flycheck-error flycheck-warning flycheck-info) :separator "" :when active)
-     ((which-function projectile-root (jsg-version-control :when active)) :separator ":")
-     )
+  ; (spaceline-compile
+  ;  'jsg
+  ;  ;; Left side of the mode line (all the important stuff)
+  ;  '(((buffer-modified buffer-size input-method) :face highlight-face)
+  ;    '(buffer-id remote-host major-mode)
+  ;    ((point-position line-column jsg-buffer-position) :separator "|" )
+  ;    process
+  ;    ((flycheck-error flycheck-warning flycheck-info) :separator "" :when active)
+  ;    ((which-function projectile-root (jsg-version-control :when active)) :separator ":")
+  ;    )
 
-   ;; Right segment (the unimportant stuff)
-   '((org-clock)
-     (minor-modes :separator " ") :when active))
+  ;  ;; Right segment (the unimportant stuff)
+  ;  '((org-clock)
+  ;    (minor-modes :separator " ") :when active))
   
-  (spaceline-helm-mode)
+  ; (spaceline-helm-mode)
 
-  (setq-default mode-line-format '("%e" (:eval (spaceline-ml-jsg)))))
+  ; (setq-default mode-line-format '("%e" (:eval (spaceline-ml-jsg)))))
 
-(defmacro rename-major-mode (package-name mode new-name)
-  "Renames a major mode."
- `(eval-after-load ,package-name
-   '(defadvice ,mode (after rename-modeline activate)
-      (setq mode-name ,new-name))))
+; (defmacro rename-major-mode (package-name mode new-name)
+;   "Renames a major mode."
+;  `(eval-after-load ,package-name
+;    '(defadvice ,mode (after rename-modeline activate)
+;       (setq mode-name ,new-name))))
 
-(rename-major-mode "python" python-mode "π")
-(rename-major-mode "markdown-mode" markdown-mode "Md")
-(rename-major-mode "shell" shell-mode "σ")
-(rename-major-mode "org" org-mode "ω")
-(rename-major-mode "Web" web-mode "w")
+; (rename-major-mode "python" python-mode "π")
+; (rename-major-mode "markdown-mode" markdown-mode "Md")
+; (rename-major-mode "shell" shell-mode "σ")
+; (rename-major-mode "org" org-mode "ω")
+; (rename-major-mode "Web" web-mode "w")
 
-(add-hook 'web-mode-hook (lambda() (setq mode-name "w")))
-(add-hook 'emacs-lisp-mode-hook (lambda() (setq mode-name "ελ")))
-
-(use-package solarized-color-themes
-  :disabled t
-  :init
-  (add-to-list 'custom-theme-load-path "~/.emacs.d/elpa/color-theme-solarized-20160626.743/")
-  (set-frame-parameter (selected-frame) 'background-mode 'dark)
-  (load-theme 'solarized t)
-
-  (setq-default cursor-type 'box)
-  (add-to-list 'default-frame-alist '(cursor-color . "#d33682"))
-  (set-cursor-color "#d33682")
-
-  (defun solarized--dark-or-light (bgd)
-    (set-frame-parameter (selected-frame) 'background-mode bgd)
-    (enable-theme 'solarized)
-    (set-cursor-color "#d33682")))
+; (add-hook 'web-mode-hook (lambda() (setq mode-name "w")))
+; (add-hook 'emacs-lisp-mode-hook (lambda() (setq mode-name "ελ")))
 
 (use-package swiper :ensure t
   :bind* (("M-s" . swiper)
@@ -1495,9 +1478,11 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   (add-to-list 'auto-mode-alist '("\\.yaml$" . yaml-mode)))
 
 (message "Loading Packages - Complete: %s" (current-time-string))
+
 ;; ------------------------------------------------------
 ;; Misc settings
 ;; ------------------------------------------------------
+
 (message "Applying Setttings: %s" (current-time-string))
 (show-paren-mode 1) ; Always show matching parenthesis
 (tool-bar-mode -1)
@@ -1506,6 +1491,10 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (fset 'yes-or-no-p 'y-or-n-p) ; Use y or n instead of yes or no
 
 (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+
+;; OSX specific settings
+(when (eq system-type 'darwin)
+  (load "~/.emacs.d/config/osx"))
 
 ;; date and time in status bar
 (setq display-time-day-and-date t
@@ -1522,12 +1511,15 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (setq inhibit-startup-screen t )  ; inhibit useless and old-school startup screen
 (setq ring-bell-function 'ignore )  ; silent bell when you make a mistake
 
+;; nice scrolling
 (setq redisplay-dont-pause t
-  scroll-margin 1
-  scroll-step 1
-  scroll-conservatively 10000
-  scroll-preserve-screen-position 1)
+      scroll-margin 0
+      scroll-conservatively 100000
+      scroll-preserve-screen-position 1)
 
+;; mode line settings
+
+(size-indication-mode t)
 ;; Disable menu bars, etc.
 (if window-system (scroll-bar-mode -1))
 (tool-bar-mode -1)
@@ -1539,14 +1531,39 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;;; Customize the modeline
 (setq line-number-mode 1)
 (setq column-number-mode 1)
-(setq ns-use-srgb-colorspace nil)
+;;(setq ns-use-srgb-colorspace nil)
 
 ;; ------------------------------------------------------
 ;; Theme
 ;; ------------------------------------------------------
 
 (set-frame-font "Source Code Pro 12")
-;;(load-theme 'tomorrow-night t)
+
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+(load-theme 'gruvbox t)
+
+;;;;; Theme ;;;;;
+;; Cycle through this set of themes
+(setq my-themes '(gruvbox leuven))
+
+(setq my-cur-theme nil)
+(defun cycle-my-theme ()
+  "Cycle through a list of themes, my-themes"
+  (interactive)
+  (when my-cur-theme
+    (disable-theme my-cur-theme)
+    (setq my-themes (append my-themes (list my-cur-theme))))
+  (setq my-cur-theme (pop my-themes))
+  (load-theme my-cur-theme t))
+
+;; Switch to the first theme in the list above
+(cycle-my-theme)
+
+;; Bind this to C-t
+(global-set-key (kbd "C-t") 'cycle-my-theme)
+
+(add-hook 'org-mode-hook 
+  (lambda nil (color-theme-buffer-local 'lueven (current-buffer))))
 
 (message "***** Loading Additional Config Files: %s" (current-time-string))
 ;;(load "~/.emacs.d/config/custom")

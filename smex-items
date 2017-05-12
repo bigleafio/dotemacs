@@ -1,16 +1,24 @@
 
 ;; ----- smex-history -----
 (
+ cycle-my-theme
+ org-mode
+ profiler-find-profile
+ evil-escape
+ evil-window-down
+ windmove-down
  esup
- ag
- cd
- 5x5
- arp
- dbx
- dig
 )
 
 ;; ----- smex-data -----
 (
  (esup . 1)
+ (windmove-down . 1)
+ (evil-window-down . 1)
+ (evil-escape . 1)
+ (profiler-find-profile . 2)
+ (org-mode . 4)
+ (cycle-themes . 1)
+ (icicle-color-theme . 1)
+ (cycle-my-theme . 1)
 )

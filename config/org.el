@@ -124,7 +124,6 @@ SCHEDULED: %t
   (defun hour-minute-timestamp ()
     (format-time-string "%H:%M" (current-time)))
 
-  (add-to-list 'org-modules 'org-mac-iCal)
   (setq org-agenda-include-diary nil)
 ;;;*** src block and babel
   (setq
