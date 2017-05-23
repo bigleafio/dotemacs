@@ -37,8 +37,9 @@
 (setq custom-file (concat base-path "config/custom.el"))
 
 (message "****** Loading Packages: %s" (current-time-string))
+
 ;; -------------------------------------------------------
-;; AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+;; A
 ;; -------------------------------------------------------
 
 (use-package avy :ensure t)
@@ -73,7 +74,7 @@
   (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp))
 
 ;; -------------------------------------------------------
-;; BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+;; B
 ;; -------------------------------------------------------
 
 (use-package beacon
@@ -89,15 +90,19 @@
   (define-key bongo-playlist-mode-map (kbd "g") #'bongo-redisplay)
   (setq bongo-default-directory "~/Music/iTunes/iTunes Music/"))
 
+;;This file is for lazy people wanting to swap buffers without typing C-x b on each window.
 (use-package buffer-move)
 
 ;; -------------------------------------------------------
-;; CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+;; C
 ;; -------------------------------------------------------
 
 ;; Chords
+;;Define chords using the :chords keyword in the same manner as :bind and related keywords, 
+;;using a cons or a list of conses
 (use-package use-package-chords :config (key-chord-mode 1))
 
+;;Text completion framework for Emacs
 (use-package company :ensure t
   :diminish ""
   :commands global-company-mode
@@ -140,6 +145,7 @@
            company-etags
            company-keywords))))
 
+;;Completion functions using Ivy
 (use-package counsel :ensure t
   :bind*
   (("M-x"     . counsel-M-x)
@@ -153,68 +159,7 @@
   :config
   (setq counsel-find-file-at-point t)
   (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
-  (setq counsel-find-file-ignore-regexp "\\.DS_Store\\|.git")
-
-  ;; from http://blog.binchen.org/posts/use-ivy-mode-to-search-bash-history.html
-  (defun counsel-yank-bash-history ()
-    "Yank the bash history"
-    (interactive)
-    (let (hist-cmd collection val)
-      (shell-command "history -r")      ; reload history
-      (setq collection
-            (nreverse
-             (split-string (with-temp-buffer (insert-file-contents (file-truename "~/.bash_history"))
-                                             (buffer-string))
-                           "\n"
-                           t)))
-      (when (and collection (> (length collection) 0)
-                 (setq val (if (= 1 (length collection)) (car collection)
-                             (ivy-read (format "Bash history:") collection))))
-        (insert val)
-        (message "%s => kill-ring" val))))
-
-  ;; TODO make the function respects reverse order of file
-  (defun counsel-yank-zsh-history ()
-    "Yank the zsh history"
-    (interactive)
-    (let (hist-cmd collection val)
-      (shell-command "history -r")      ; reload history
-      (setq collection
-            (nreverse
-             (split-string (with-temp-buffer (insert-file-contents (file-truename "~/.zhistory"))
-                                             (buffer-string))
-                           "\n"
-                           t)))
-      (setq collection (mapcar (lambda (it) (replace-regexp-in-string ".*;" "" it)) collection))
-      (when (and collection (> (length collection) 0)
-                 (setq val (if (= 1 (length collection)) (car collection)
-                             (ivy-read (format "Zsh history:") collection :re-builder #'ivy--regex-ignore-order))))
-        (kill-new val)
-        (insert val)
-        (message "%s => kill-ring" val))))
-
-  (defun counsel-package-install ()
-    (interactive)
-    (ivy-read "Install package: "
-              (delq nil
-                    (mapcar (lambda (elt)
-                              (unless (package-installed-p (car elt))
-                                (symbol-name (car elt))))
-                            package-archive-contents))
-              :action (lambda (x)
-                        (package-install (intern x)))
-              :caller 'counsel-package-install))
-  (ivy-set-actions
-   'counsel-find-file
-   '(("o" (lambda (x) (counsel-find-file-extern x)) "open extern"))))
-
-(use-package counsel-osx-app :ensure t
-  :commands counsel-osx-app
-  :bind*
-  ("C-c a" . counsel-osx-app)
-  :config
-  (setq counsel-osx-app-location
-        '("/Applications/" "~/Applications/" )))
+  (setq counsel-find-file-ignore-regexp "\\.DS_Store\\|.git"))
 
 (use-package counsel-projectile :ensure t
   :bind* (("H-P" . counsel-projectile-switch-to-buffer)
@@ -247,20 +192,9 @@
   :config
   (setq my-color-themes (list 'gruvbox 'leuven)))
 
-
-; (use-package cycle-themes
-;   :ensure t
-;   :init (setq cycle-themes-theme-list
-;           '(gruvbox leuven))
-;   :config (cycle-themes-mode))
-
 ;; -------------------------------------------------------
-;; DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+;; D
 ;; -------------------------------------------------------
-
-;; duplication things
-(use-package duplicate-thing
-  :bind ("s-d" . duplicate-thing))
 
 ;; deft
 (use-package deft
@@ -294,67 +228,6 @@
     (setq-default dired-details-hidden-string " --- "
                   dired-details-hide-link-targets nil))
 
-  (use-package dired-sort 
-    :ensure t
-    :defines (hydra-dired-sort/body)
-    :commands (hydra-dired-sort/body
-               dired-sort-name
-               dired-sort-size
-               dired-sort-time
-               dired-sort-ctime
-               dired-sort-utime
-               dired-sort-extension)
-    :config
-    (defhydra hydra-dired-sort
-      (:color blue
-       :hint nil
-       :post (hydra-dired-main/body))
-      "
-_n_ame
-_s_ize
-_t_ime
-_e_xtension"
-      ("n" dired-sort-name)
-      ("s" dired-sort-size)
-      ("t" dired-sort-time)
-      ("e" dired-sort-extension)))
-
-
-  (let ((gls "/usr/local/bin/gls"))
-    (if (file-exists-p gls)
-        (setq insert-directory-program gls)))
-
-  (setq dired-listing-switches "-XGalg --group-directories-first --human-readable --dired")
-  (setq dired-dwim-target t)     ; guess copy target based on other dired window
-
-  (defun dired-view-other-window ()
-    "View the current file in another window (possibly newly created)."
-    (interactive)
-    (if (not (window-parent))
-        (split-window))
-    (let ((file (dired-get-file-for-visit))
-          (dbuffer (current-buffer)))
-      (other-window 1)
-      (unless (equal dbuffer (current-buffer))
-        (if (or view-mode (equal major-mode 'dired-mode))
-            (kill-buffer)))
-      (let ((filebuffer (get-file-buffer file)))
-        (if filebuffer
-            (switch-to-buffer filebuffer)
-          (view-file file))
-        (other-window -1))))
-
-  (defun dired-mkdir-date (dir-name)
-    "Make a directory with current date style"
-    (interactive "sDirectory content: ")
-    (mkdir (format "%s-%s" (format-time-string "%Y-%m-%d" (current-time)) dir-name))
-    (revert-buffer))
-
-  (defun dired-mkdir-date-rstyle (dir-name)
-    (interactive "sDirectory content: ")
-    (mkdir (format "%s.%s" dir-name (format-time-string "%Y%m%d" (current-time))))
-    (revert-buffer))
-
   (bind-keys :map dired-mode-map
     ("SPC" . dired-view-other-window)
     ("."   . hydra-dired-main/body)
@@ -369,7 +242,7 @@ _e_xtension"
     ("q"   . (lambda () (interactive) (quit-window 4)))))
 
 ;; -------------------------------------------------------
-;; EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+;; E
 ;; -------------------------------------------------------
 
 ;; evil (vim) mode
@@ -392,12 +265,6 @@ _e_xtension"
    (evil-escape-mode)
   )
 
-(use-package edebug
-  :defer t
-  :config
-  (setq edebug-active nil)
-  (setq edebug-outside-windows t))
-
 (use-package eshell
   :defines eshell-here
   :commands (eshell
@@ -411,54 +278,20 @@ _e_xtension"
         eshell-list-files-after-cd t
         eshell-ls-initial-args "-alh")
 
-  (setq eshell-directory-name "~/dotfile/emacs/eshell/")
-
-;; from http://www.howardism.org/Technical/Emacs/eshell-fun.html
-(defun eshell-here ()
-"
-Opens up a new shell in the directory associated with the
-current buffer's file. The eshell is renamed to match that
-directory to make multiple eshell windows easier.
-"
-    (interactive)
-    (let* ((parent (if (buffer-file-name)
-                       (file-name-directory (buffer-file-name))
-                     default-directory))
-           (height (/ (window-total-height) 3))
-           (name   (car (last (split-string parent "/" t)))))
-      (split-window-vertically (- height))
-      (other-window 1)
-      (eshell "new")
-      (rename-buffer (concat "*eshell: " name "*"))
-
-      (insert (concat "ls"))
-      (eshell-send-input)))
-
-  (defun eshell/ll ()
-    (insert "ls -l")
-    (eshell-send-input))
-
   (general-define-key
    :keymaps 'eshell-mode-map
     "<tab>" (lambda () (interactive) (pcomplete-std-complete))
     "C-'" (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window))))
 
-(use-package ereader :ensure t
-  :mode (("\\.epub\\'" . ereader-mode)))
-
 (use-package evil-matchit
   :diminish ""
   :init (global-evil-matchit-mode 1))
 
-;; path fix
-(use-package exec-path-from-shell
-  :init
-  (when (memq window-system '(mac ns))
-    (exec-path-from-shell-initialize)))
+
 
 ;;(use-package esup)
 ;; -------------------------------------------------------
-;; FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+;; F
 ;; -------------------------------------------------------
 
 ; flycheck
@@ -469,7 +302,7 @@ directory to make multiple eshell windows easier.
   (setq flycheck-highlighting-mode 'symbols))
 
 ;; -------------------------------------------------------
-;; GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+;; G
 ;; -------------------------------------------------------
 
 (use-package ggtags :ensure t
@@ -550,16 +383,13 @@ directory to make multiple eshell windows easier.
   :commands (goto-last-change
              goto-last-change-reverse))
 
-(use-package grab-mac-link :ensure t
-  :commands grab-mac-link)
-
 (use-package golden-ratio
   diminish ""
   :disabled t
   )
 
 ;; -------------------------------------------------------
-;; HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+;; H
 ;; -------------------------------------------------------
 
 ;; Helm
@@ -619,7 +449,7 @@ directory to make multiple eshell windows easier.
   (add-hook 'hy-mode-hook (lambda () (lispy-mode 1))))
 
 ;; -------------------------------------------------------
-;; IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+;; I
 ;; -------------------------------------------------------
 
 (use-package ibuffer :ensure t
@@ -820,7 +650,7 @@ _c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)
      ("r" projectile-remove-known-project "Remove project(s)"))))
 
 ;; -------------------------------------------------------
-;; MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+;; M
 ;; -------------------------------------------------------
 
 ;; magit
@@ -936,8 +766,64 @@ undo               _u_: undo
     "C-c C-t" "header"
     "C-c C-x" "move"))
 
+(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu/mu4e/")
+
+(require 'mu4e)
+
+;; default
+(setq mu4e-maildir "~/Maildir")
+
+(setq mu4e-drafts-folder "/[Gmail].Drafts")
+(setq mu4e-sent-folder   "/[Gmail].Sent Mail")
+(setq mu4e-trash-folder  "/[Gmail].Trash")
+
+;; don't save message to Sent Messages, Gmail/IMAP takes care of this
+(setq mu4e-sent-messages-behavior 'delete)
+
+(setq mu4e-maildir-shortcuts
+    '( ("/INBOX"               . ?i)
+       ("/[Gmail].Sent Mail"   . ?s)
+       ("/[Gmail].Trash"       . ?t)
+       ("/[Gmail].All Mail"    . ?a)))
+
+;; allow for updating mail using 'U' in the main view:
+(setq mu4e-get-mail-command "offlineimap")
+
+;;store org-mode links to messages
+(require 'org-mu4e)
+
+;;store link to message if in header view, not to header query
+(setq org-mu4e-link-query-in-headers-mode nil)
+
+;; something about ourselves
+(setq
+   user-mail-address "jgraham20@gmail.com"
+   user-full-name  "Jason Graham"
+   mu4e-compose-signature
+    (concat
+      "Thanks,\n"
+      "Jason"))
+
+;; sending mail -- replace USERNAME with your gmail username
+;; also, make sure the gnutls command line utils are installed
+;; package 'gnutls-bin' in Debian/Ubuntu
+
+(use-package smtpmail
+  :ensure t)
+(setq message-send-mail-function 'smtpmail-send-it
+   starttls-use-gnutls t
+   smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
+   smtpmail-auth-credentials
+     '(("smtp.gmail.com" 587 "jgraham20@gmail.com" nil))
+   smtpmail-default-smtp-server "smtp.gmail.com"
+   smtpmail-smtp-server "smtp.gmail.com"
+   smtpmail-smtp-service 587)
+
+;; don't keep message buffers around
+(setq message-kill-buffer-on-exit t)
+
 ;; -------------------------------------------------------
-;; NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+;; N
 ;; -------------------------------------------------------
 
 ;; neo-tree
@@ -952,87 +838,21 @@ undo               _u_: undo
   :bind ("<f1>" . neotree-project-dir))
 
 ;; -------------------------------------------------------
-;; OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+;; O
 ;; -------------------------------------------------------
 
 (use-package org
-  ;;:load-path ("~/.emacs.d/private/org-mode")
-  :defer t)
-
-(use-package osx-clipboard :ensure t
-  :if (not (window-system))
-  :init
-  (osx-clipboard-mode +1))
-
-;; TODO work on outline hydra. useful for tex
-(use-package outline
-  :bind (("H-<tab>" . hydra-outline/body))
-  :commands (outline-hide-body
-             outline-show-all
-             outline-minor-mode
-             hydra-outline/body)
-  :general ("M-s-c" 'outline-previous-heading
-            "M-s-r" 'outline-next-heading)
-  :diminish ((outline-minor-mode . "")
-             (outline-mode . ""))
+  :defer t
   :config
-  (outline-minor-mode)
-
-  (defun outline-narrow-to-subtree ()
-    (interactive)
-    (outline-mark-subtree)
-    (narrow-to-region (region-beginning) (region-end)))
-
-  (defun outline-indent-subtree ()
-    (interactive)
-    (save-excursion
-      (outline-mark-subtree)
-      (indent-region (region-beginning) (region-end))
-      (message nil)))
-
-  (bind-key "C-c @ n" 'outline-narrow-to-subtree)
-  (bind-key "C-c @ i" 'outline-indent-subtree)
-
-  (defhydra hydra-outline
-    (:hint nil :body-pre (outline-minor-mode 1))
-    "
-Outline
-^CURRENT^    ^ALL^      ^LEAVES^      ^MANIPULATE^
-_c_: hide    _C_: hide  _C-c_: hide    _M-r_: demote
-_t_: next    ^ ^        _C-r_: show    _M-c_: promote
-_s_: prev    ^ ^        ^   ^          _M-t_: move down
-_r_: show    _R_: show  ^   ^          _M-s_: move up
-"
-    ("C" outline-hide-body)
-    ("t" outline-next-visible-heading)
-    ("s" outline-previous-visible-heading)
-    ("R" outline-show-all)
-    ("c" outline-hide-subtree)
-    ("r" outline-show-subtree)
-
-    ("C-c" outline-hide-leaves)
-    ("C-r" outline-show-subtree)
-
-    ("M-r" outline-demote)
-    ("M-c" outline-promote)
-    ("M-t" outline-move-subtree-down)
-    ("M-s" outline-move-subtree-up)
-
-    ("i" outline-insert-heading "insert heading" :color blue)
-    ("q" nil "quit" :color blue)))
+  (load-file "~/.emacs.d/config/org.el"))
 
 ;; -------------------------------------------------------
-;; PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
+;; P
 ;; -------------------------------------------------------
 
 (use-package paradox :ensure t
   :commands (paradox-list-packages
              package-list-packages))
-
-(use-package pbcopy :ensure t
-  :if (not (display-graphic-p))
-  :init
-  (turn-on-pbcopy))
 
 (use-package paredit
   :diminish ""
@@ -1192,7 +1012,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 
 
 ;; -------------------------------------------------------
-;; RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
+;; R
 ;; -------------------------------------------------------
 ;; Rainbow Mode
 
@@ -1232,10 +1052,8 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   :commands restart-emacs)
 
 ;; -------------------------------------------------------
-;; SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+;; S
 ;; -------------------------------------------------------
-;;(use-package smart-mode-line-powerline-theme
-;;    :ensure t)
 
 (use-package smart-mode-line
     :ensure t)
@@ -1259,7 +1077,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
           ("C-t" . ivy-yank-word)))
 
 ;; -------------------------------------------------------
-;; TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+;; T
 ;; -------------------------------------------------------
 
 (use-package tile :ensure t
@@ -1299,7 +1117,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   :bind* (("C-;" . tiny-expand)))
 
 ;; -------------------------------------------------------
-;; UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
+;; U
 ;; -------------------------------------------------------
 
 ;; better redo/undo
@@ -1311,12 +1129,8 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   :bind ("s-z" . undo)
   ("s-Z" . redo))
 
-
-;;(use-package undohist
-;;  :config (undohist-initialize))
-
 ;; -------------------------------------------------------
-;; WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+;; W
 ;; -------------------------------------------------------
 ;; Which-Key - displays available keybindings in popup
 ;; https://github.com/justbur/emacs-which-key
@@ -1355,7 +1169,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   :defer t)
 
 ;; -------------------------------------------------------
-;; YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+;; Y
 ;; -------------------------------------------------------
 
 ;; snippets
@@ -1368,13 +1182,12 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
   (add-to-list 'auto-mode-alist '("\\.yaml$" . yaml-mode)))
 
-(message "Loading Packages - Complete: %s" (current-time-string))
+
 
 ;; ------------------------------------------------------
 ;; Misc settings
 ;; ------------------------------------------------------
 
-(message "Applying Setttings: %s" (current-time-string))
 (show-paren-mode 1) ; Always show matching parenthesis
 (tool-bar-mode -1)
 (setq-default cursor-type 'bar)
@@ -1390,8 +1203,8 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; date and time in status bar
 (setq display-time-day-and-date t
       display-time-24hr-format t)
-
 (display-time)
+
 (setq frame-title-format "Some days you eat the bear, some days the bear eats you.")
 (setq version-control t )   ; use version control
 (setq vc-make-backup-files t )    ; make backups file even when in version controlled dir
@@ -1409,8 +1222,8 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
       scroll-preserve-screen-position 1)
 
 ;; mode line settings
-
 (size-indication-mode t)
+
 ;; Disable menu bars, etc.
 (if window-system (scroll-bar-mode -1))
 (tool-bar-mode -1)
@@ -1422,7 +1235,6 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;;; Customize the modeline
 (setq line-number-mode 1)
 (setq column-number-mode 1)
-;;(setq ns-use-srgb-colorspace nil)
 
 ;; ------------------------------------------------------
 ;; Theme
@@ -1434,7 +1246,6 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (load-theme 'gruvbox t)
 
 ;;;;; Theme ;;;;;
-;; Cycle through this set of themes
 (setq my-themes '(gruvbox leuven))
 
 (setq my-cur-theme nil)
@@ -1453,15 +1264,9 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; Bind this to C-t
 (global-set-key (kbd "C-t") 'cycle-my-theme)
 
-(add-hook 'org-mode-hook 
-  (lambda nil (color-theme-buffer-local 'lueven (current-buffer))))
-
 (message "***** Loading Additional Config Files: %s" (current-time-string))
-;;(load "~/.emacs.d/config/custom")
+(load "~/.emacs.d/config/custom")
 (load "~/.emacs.d/config/keybindings")
-(load "~/.emacs.d/config/org")
-
-(message "***** Startup Complete: %s" (current-time-string))
 
 ;; go full screen
 (toggle-frame-maximized) 

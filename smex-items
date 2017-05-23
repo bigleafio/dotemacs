@@ -1,13 +1,13 @@
 
 ;; ----- smex-history -----
 (
- org-beamer-export-to-pdf
- org-latex-export-to-pdf
- cycle-my-theme
+ org-trello/sync-card
+ org-trello-sync-buffer
+ org-trello-install-board-metadata
+ org-trello-install-key-and-token
+ org-trello-mode
+ mu4e
  org-mode
- profiler-find-profile
- evil-escape
- evil-window-down
 )
 
 ;; ----- smex-data -----
@@ -17,10 +17,16 @@
  (evil-window-down . 1)
  (evil-escape . 1)
  (profiler-find-profile . 2)
- (org-mode . 4)
+ (org-mode . 7)
  (cycle-themes . 1)
  (icicle-color-theme . 1)
  (cycle-my-theme . 1)
  (org-latex-export-to-pdf . 1)
  (org-beamer-export-to-pdf . 1)
+ (mu4e . 6)
+ (org-trello-install-key-and-token . 2)
+ (org-trello-mode . 2)
+ (org-trello/sync-card . 3)
+ (org-trello-install-board-metadata . 2)
+ (org-trello-sync-buffer . 2)
 )
