@@ -20,3 +20,6 @@ auto-save-list
 .smex-items
 *.data
 .DS_Store
+.trello/@jgraham20.el
+
+.trello/jgraham20.el
