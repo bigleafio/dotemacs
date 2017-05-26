@@ -59,7 +59,7 @@
     (setq ag-reuse-buffers t)
     (add-to-list 'ag-arguments "--word-regexp")))
 
-(use-package all-the-icons)
+(use-package all-the-icons :ensure t)
 
 (use-package anzu :ensure t
   :diminish ""
@@ -246,7 +246,7 @@
 ;; -------------------------------------------------------
 
 ;; evil (vim) mode
-(use-package evil
+(use-package evil :ensure t
   :config (setq evil-default-cursor t)
   (setq evil-insert-state-cursor '(bar "white")
       evil-emacs-state-cursor '(bar "white") 
@@ -256,16 +256,16 @@
   (evil-mode t))
 
 ;; Easy Motion
-(use-package evil-easymotion
+(use-package evil-easymotion :ensure t
   :init (evilem-default-keybindings "SPC"))
 
-(use-package evil-escape
+(use-package evil-escape :ensure t
   :diminish ""
   :init 
    (evil-escape-mode)
   )
 
-(use-package eshell
+(use-package eshell :ensure t
   :defines eshell-here
   :commands (eshell
              eshell-here)
@@ -283,7 +283,7 @@
     "<tab>" (lambda () (interactive) (pcomplete-std-complete))
     "C-'" (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window))))
 
-(use-package evil-matchit
+(use-package evil-matchit :ensure t
   :diminish ""
   :init (global-evil-matchit-mode 1))
 
@@ -766,62 +766,6 @@ undo               _u_: undo
     "C-c C-t" "header"
     "C-c C-x" "move"))
 
-(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu/mu4e/")
-
-(require 'mu4e)
-
-;; default
-(setq mu4e-maildir "~/Maildir")
-
-(setq mu4e-drafts-folder "/[Gmail].Drafts")
-(setq mu4e-sent-folder   "/[Gmail].Sent Mail")
-(setq mu4e-trash-folder  "/[Gmail].Trash")
-
-;; don't save message to Sent Messages, Gmail/IMAP takes care of this
-(setq mu4e-sent-messages-behavior 'delete)
-
-(setq mu4e-maildir-shortcuts
-    '( ("/INBOX"               . ?i)
-       ("/[Gmail].Sent Mail"   . ?s)
-       ("/[Gmail].Trash"       . ?t)
-       ("/[Gmail].All Mail"    . ?a)))
-
-;; allow for updating mail using 'U' in the main view:
-(setq mu4e-get-mail-command "offlineimap")
-
-;;store org-mode links to messages
-(require 'org-mu4e)
-
-;;store link to message if in header view, not to header query
-(setq org-mu4e-link-query-in-headers-mode nil)
-
-;; something about ourselves
-(setq
-   user-mail-address "jgraham20@gmail.com"
-   user-full-name  "Jason Graham"
-   mu4e-compose-signature
-    (concat
-      "Thanks,\n"
-      "Jason"))
-
-;; sending mail -- replace USERNAME with your gmail username
-;; also, make sure the gnutls command line utils are installed
-;; package 'gnutls-bin' in Debian/Ubuntu
-
-(use-package smtpmail
-  :ensure t)
-(setq message-send-mail-function 'smtpmail-send-it
-   starttls-use-gnutls t
-   smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
-   smtpmail-auth-credentials
-     '(("smtp.gmail.com" 587 "jgraham20@gmail.com" nil))
-   smtpmail-default-smtp-server "smtp.gmail.com"
-   smtpmail-smtp-server "smtp.gmail.com"
-   smtpmail-smtp-service 587)
-
-;; don't keep message buffers around
-(setq message-kill-buffer-on-exit t)
-
 ;; -------------------------------------------------------
 ;; N
 ;; -------------------------------------------------------
@@ -854,16 +798,16 @@ undo               _u_: undo
   :commands (paradox-list-packages
              package-list-packages))
 
-(use-package paredit
-  :diminish ""
-  :ensure t
-  :config
-  (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
-  ;; enable in the *scratch* buffer
-  (add-hook 'lisp-interaction-mode-hook #'paredit-mode)
-  (add-hook 'ielm-mode-hook #'paredit-mode)
-  (add-hook 'lisp-mode-hook #'paredit-mode)
-  (add-hook 'eval-expression-minibuffer-setup-hook #'paredit-mode))
+; (use-package paredit
+;   :diminish ""
+;   :ensure t
+;   :config
+;   (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
+;   ;; enable in the *scratch* buffer
+;   (add-hook 'lisp-interaction-mode-hook #'paredit-mode)
+;   (add-hook 'ielm-mode-hook #'paredit-mode)
+;   (add-hook 'lisp-mode-hook #'paredit-mode)
+;   (add-hook 'eval-expression-minibuffer-setup-hook #'paredit-mode))
 
 (use-package persp-mode
   :defer t
@@ -1061,6 +1005,13 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (setq sml/no-confirm-load-theme t)
 (setq sml/theme nil)
 (add-hook 'after-init-hook #'sml/setup)
+
+(use-package smartparens
+  :ensure t
+  :config
+  (progn
+    (require 'smartparens-config)
+    (smartparens-global-mode 1)))
 
 ;; SMEX
 (use-package smex

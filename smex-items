@@ -1,13 +1,13 @@
 
 ;; ----- smex-history -----
 (
+ sp-backward-slurp-sexp
+ smartparens-mode
+ list-packages
  org-trello/sync-card
  org-trello-sync-buffer
  org-trello-install-board-metadata
  org-trello-install-key-and-token
- org-trello-mode
- mu4e
- org-mode
 )
 
 ;; ----- smex-data -----
@@ -29,4 +29,8 @@
  (org-trello/sync-card . 3)
  (org-trello-install-board-metadata . 2)
  (org-trello-sync-buffer . 2)
+ (paredit-forward-slurp-sexp . 1)
+ (list-packages . 1)
+ (smartparens-mode . 2)
+ (sp-backward-slurp-sexp . 1)
 )
