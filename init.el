@@ -566,7 +566,7 @@ Info-mode:
     ("C-g" nil "cancel" :color blue))
   )
 
-(use-package ivy
+(use-package ivy :ensure t
   :diminish (ivy-mode . "")
   :commands (ivy-switch-buffer
              ivy-switch-buffer-other-window)
@@ -654,7 +654,7 @@ _c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)
 ;; -------------------------------------------------------
 
 ;; magit
-(use-package magit
+(use-package magit :ensure t
   :commands (magit-blame
              magit-commit
              magit-commit-popup
@@ -809,7 +809,7 @@ undo               _u_: undo
 ;   (add-hook 'lisp-mode-hook #'paredit-mode)
 ;   (add-hook 'eval-expression-minibuffer-setup-hook #'paredit-mode))
 
-(use-package persp-mode
+(use-package persp-mode :ensure t
   :defer t
   ;;:quelpa (persp-mode :fetcher github :repo "Bad-ptr/persp-mode.el")
   :diminish (persp-mode . "")
@@ -854,11 +854,11 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   (global-set-key (kbd "H-n") 'persp-next))
 
 ;; popwin
-(use-package popwin
+(use-package popwin :ensure t
   :config
   (popwin-mode 1))
 
-(use-package powerline-evil)
+(use-package powerline-evil :ensure t)
 
 (use-package projectile :ensure t
   :defines hydra-projectile/body
@@ -960,7 +960,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; -------------------------------------------------------
 ;; Rainbow Mode
 
-(use-package rainbow-mode
+(use-package rainbow-mode :ensure t
   :diminish rainbow-mode
   :init (rainbow-mode))
 
@@ -986,7 +986,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   :config
   (setq ranger-cleanup-eagerly t))
 
-(use-package recentf
+(use-package recentf :ensure t
   :commands (recentf-mode
              counsel-recentf)
   :config
@@ -1014,7 +1014,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
     (smartparens-global-mode 1)))
 
 ;; SMEX
-(use-package smex
+(use-package smex :ensure t
   :config (smex-initialize)
   :bind ("M-x" . smex)
   ("M-X" . smex-major-mode-commands)
@@ -1072,7 +1072,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; -------------------------------------------------------
 
 ;; better redo/undo
-(use-package undo-tree
+(use-package undo-tree :ensure t
   :diminish undo-tree-mode
   :init
   (global-undo-tree-mode 1)
@@ -1124,7 +1124,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; -------------------------------------------------------
 
 ;; snippets
-(use-package yasnippet
+(use-package yasnippet :ensure t
   :diminish yas-minor-mode
   :init (yas-global-mode 1))
 
