@@ -84,11 +84,19 @@
 
 (use-package bind-key)
 
-(use-package bongo :ensure t
+; (use-package bongo :ensure t
+;   :commands (bongo)
+;   :config
+;   (define-key bongo-playlist-mode-map (kbd "g") #'bongo-redisplay)
+;   (setq bongo-default-directory "~/Music/iTunes/iTunes Music/"))
+(use-package bongo
+  :defer
   :commands (bongo)
   :config
-  (define-key bongo-playlist-mode-map (kbd "g") #'bongo-redisplay)
-  (setq bongo-default-directory "~/Music/iTunes/iTunes Music/"))
+  (use-package volume)
+  (setq bongo-display-inline-playback-progress t)
+  (setq bongo-insert-album-covers t))
+
 
 ;;This file is for lazy people wanting to swap buffers without typing C-x b on each window.
 (use-package buffer-move)
@@ -172,6 +180,7 @@
 
 (use-package clojure-mode
   :ensure t
+  :diminish "Cλ"
   :config
   (add-hook 'clojure-mode-hook #'paredit-mode)
   (add-hook 'clojure-mode-hook #'subword-mode)
@@ -181,11 +190,22 @@
 
 (use-package cider
   :ensure t
+  :diminish "Ç»"
   :config
   (add-hook 'cider-mode-hook #'eldoc-mode)
   (add-hook 'cider-repl-mode-hook #'eldoc-mode)
   (add-hook 'cider-repl-mode-hook #'paredit-mode)
   (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode))
+
+(use-package clojure-mode-extra-font-locking :ensure t)
+
+(use-package clj-refactor :ensure t
+  :init (add-hook 'clojure-mode-hook (lambda ()
+                                       (clj-refactor-mode 1)
+                                       (cljr-add-keybindings-with-prefix "C-c M-r")))
+  :diminish "")
+
+(use-package cljsbuild-mode :ensure t)
 
 (use-package color-theme 
   :ensure t
@@ -244,6 +264,22 @@
 ;; -------------------------------------------------------
 ;; E
 ;; -------------------------------------------------------
+
+;; emms
+; (use-package emms
+;   :ensure t
+;   :config
+;   (progn
+;     (emms-standard)
+;     (emms-default-players)
+;     (setq emms-playlist-buffer-name "Music-EMMS")
+;     (setq emms-source-file-default-directory "~/Music/iTunes/")
+;     (require 'emms-player-simple)
+;     (require 'emms-source-file)
+;     (require 'emms-source-playlist)
+;     (require 'emms-player-mplayer)
+;     (setq emms-player-list '(emms-player-mplayer))
+;     ))
 
 ;; evil (vim) mode
 (use-package evil :ensure t
@@ -325,7 +361,7 @@
     "?"   '(iterm-goto-filedir-or-home :which-key "iterm - goto dir")
     "/"   'counsel-ag
     "TAB" '(switch-to-other-buffer :which-key "prev buffer")
-    "SPC" '(avy-goto-word-or-subword-1  :which-key "go to char")
+    "SPC" '(counsel-M-x)
     "B" 'ivy-switch-buffer  
 
     ;; Applications
@@ -426,6 +462,12 @@
           ("C-c p c" . helm-make-projectile))
   :config
   (setq helm-make-completion-method 'ivy))
+
+(use-package helm-projectile :ensure t
+  :config 
+  (setq projectile-completion-system 'helm)
+  :init 
+  (helm-projectile-on))
 
 (use-package helm-google :ensure t
   :commands (helm-google))
@@ -798,16 +840,10 @@ undo               _u_: undo
   :commands (paradox-list-packages
              package-list-packages))
 
-; (use-package paredit
-;   :diminish ""
-;   :ensure t
-;   :config
-;   (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
-;   ;; enable in the *scratch* buffer
-;   (add-hook 'lisp-interaction-mode-hook #'paredit-mode)
-;   (add-hook 'ielm-mode-hook #'paredit-mode)
-;   (add-hook 'lisp-mode-hook #'paredit-mode)
-;   (add-hook 'eval-expression-minibuffer-setup-hook #'paredit-mode))
+(global-prettify-symbols-mode +1)
+
+(use-package paredit-mode
+  :diminish (paredit-mode . "(P)"))
 
 (use-package persp-mode :ensure t
   :defer t
@@ -886,6 +922,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
          ("s-b" . projectile-switch-to-buffer))
   :config
   (projectile-global-mode 1)
+  (helm-projectile-on)
 
   (use-package org-projectile :ensure t
     :config
@@ -1067,6 +1104,8 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (use-package tiny :ensure t
   :bind* (("C-;" . tiny-expand)))
 
+(use-package transpose-frame :ensure t)
+
 ;; -------------------------------------------------------
 ;; U
 ;; -------------------------------------------------------
@@ -1194,10 +1233,10 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (set-frame-font "Source Code Pro-14")
 
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-(load-theme 'gruvbox t)
+(load-theme 'monokai t)
 
 ;;;;; Theme ;;;;;
-(setq my-themes '(gruvbox leuven))
+(setq my-themes '(monokai leuven))
 
 (setq my-cur-theme nil)
 (defun cycle-my-theme ()

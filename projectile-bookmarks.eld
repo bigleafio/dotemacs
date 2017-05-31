@@ -1,1 +1,0 @@
-("~/Projects/learning-clojure/" "~/Configs/dotemacs/" "~/")

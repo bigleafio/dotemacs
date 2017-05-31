@@ -1,13 +1,13 @@
 
 ;; ----- smex-history -----
 (
- sp-backward-slurp-sexp
- smartparens-mode
- list-packages
- org-trello/sync-card
- org-trello-sync-buffer
- org-trello-install-board-metadata
- org-trello-install-key-and-token
+ describe-key
+ paredit-forward-slurp-sexp
+ transpose-frame
+ package-install
+ bongo
+ emms-add-directory-tree
+ bongo-playlist
 )
 
 ;; ----- smex-data -----
@@ -29,8 +29,26 @@
  (org-trello/sync-card . 3)
  (org-trello-install-board-metadata . 2)
  (org-trello-sync-buffer . 2)
- (paredit-forward-slurp-sexp . 1)
+ (paredit-forward-slurp-sexp . 6)
  (list-packages . 1)
  (smartparens-mode . 2)
- (sp-backward-slurp-sexp . 1)
+ (sp-backward-slurp-sexp . 2)
+ (projectile-mode . 2)
+ (counsel-projectile . 1)
+ (helm-projectile-on . 1)
+ (projectile-switch-project . 1)
+ (paredit-mode . 2)
+ (bongo-show . 1)
+ (bongo-library . 1)
+ (bongo-playlist . 1)
+ (emms-show . 2)
+ (emms . 3)
+ (emms-browser . 3)
+ (emms-add-directory-tree . 1)
+ (emms-browse-by-album . 1)
+ (emms-mode-line . 1)
+ (bongo . 2)
+ (package-install . 1)
+ (transpose-frame . 1)
+ (describe-key . 1)
 )

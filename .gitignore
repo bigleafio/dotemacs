@@ -25,3 +25,17 @@ auto-save-list
 .trello/jgraham20.el
 
 config/custom.el
+
+ac-comphist.dat
+
+ac-comphist.dat
+
+emms/cache
+
+emms/history
+
+emms/scores
+
+projectile-bookmarks.eld
+
+company-statistics-cache.el
