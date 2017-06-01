@@ -1253,6 +1253,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (message "***** Loading Additional Config Files: %s" (current-time-string))
 (load "~/.emacs.d/config/custom")
 (load "~/.emacs.d/config/keybindings")
+(load "~/.emacs.d/config/mouse")
 
 ;; go full screen
 (toggle-frame-maximized) 

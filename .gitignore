@@ -43,3 +43,5 @@ company-statistics-cache.el
 ac-comphist.dat
 
 smex-items
+
+config/tags
