@@ -39,3 +39,7 @@ emms/scores
 projectile-bookmarks.eld
 
 company-statistics-cache.el
+
+ac-comphist.dat
+
+smex-items

@@ -84,6 +84,8 @@
 
 (use-package bind-key)
 
+(use-package better-defaults :ensure t)
+
 ; (use-package bongo :ensure t
 ;   :commands (bongo)
 ;   :config
@@ -180,32 +182,21 @@
 
 (use-package clojure-mode
   :ensure t
-  :diminish "Cλ"
+  :diminish "λ"
   :config
-  (add-hook 'clojure-mode-hook #'paredit-mode)
-  (add-hook 'clojure-mode-hook #'subword-mode)
+  (add-hook 'clojure-mode-hook #'smartparens-strict-mode)
+  (add-hook 'clojure-mode-hook #'aggressive-indent-mode)
   (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode))
 
 (use-package clojure-cheatsheet)
 
 (use-package cider
   :ensure t
-  :diminish "Ç»"
+  :diminish "[Ƈ]" 
   :config
-  (add-hook 'cider-mode-hook #'eldoc-mode)
   (add-hook 'cider-repl-mode-hook #'eldoc-mode)
-  (add-hook 'cider-repl-mode-hook #'paredit-mode)
+  (add-hook 'cider-repl-mode-hook #'smartparens-strict-mode)
   (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode))
-
-(use-package clojure-mode-extra-font-locking :ensure t)
-
-(use-package clj-refactor :ensure t
-  :init (add-hook 'clojure-mode-hook (lambda ()
-                                       (clj-refactor-mode 1)
-                                       (cljr-add-keybindings-with-prefix "C-c M-r")))
-  :diminish "")
-
-(use-package cljsbuild-mode :ensure t)
 
 (use-package color-theme 
   :ensure t
@@ -228,7 +219,7 @@
           ("C-x C-d" . dired))
   :commands (dired)
   :config
-
+  (setq dired-use-ls-dired nil)
   (use-package dired-x
     :ensure nil
     :bind* (("C-x C-'" . dired-jump))
@@ -374,14 +365,17 @@
     ;; Windows
     "w" '(:ignore t :which-key "Window")
     "wd" 'delete-window
-    "wt" 'cycle-my-theme
+    "wc" 'cycle-my-theme
+    "wt" 'transpose-frame
     "wg" 'golden-ratio-adjust
     "w-" 'split-window-below
     "w|" 'split-window-right
+
     "b" '(:ignore t :which-key "Buffer")
     "bi" 'ibuffer
     "bb" 'helm-buffers-list
-
+    "bd" 'kill-buffer
+    
      ;; Tools
     "t" '(:ignore t :which-key "Tools")
     "tj" 'cider-jack-in
@@ -842,9 +836,6 @@ undo               _u_: undo
 
 (global-prettify-symbols-mode +1)
 
-(use-package paredit-mode
-  :diminish (paredit-mode . "(P)"))
-
 (use-package persp-mode :ensure t
   :defer t
   ;;:quelpa (persp-mode :fetcher github :repo "Bad-ptr/persp-mode.el")
@@ -1048,7 +1039,12 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   :config
   (progn
     (require 'smartparens-config)
-    (smartparens-global-mode 1)))
+    (smartparens-global-mode 1))) 
+
+(define-key smartparens-mode-map (kbd "C-<right>") 'sp-forward-slurp-sexp)
+(define-key smartparens-mode-map (kbd "C-<left>") 'sp-forward-barf-sexp)
+(define-key smartparens-mode-map (kbd "C-M-<left>") 'sp-backward-slurp-sexp)
+(define-key smartparens-mode-map (kbd "C-M-<right>") 'sp-backward-barf-sexp)
 
 ;; SMEX
 (use-package smex :ensure t
