@@ -128,10 +128,10 @@
   :config
   (global-company-mode)
 
-  (use-package company-statistics
-    :defer t
-    :config
-    (company-statistics-mode))
+  ;;(use-package company-statistics
+  ;;  :defer t
+  ;;  :config
+  ;;  (company-statistics-mode))
 
   (bind-keys :map company-active-map
     ("C-d" . company-show-doc-buffer)
