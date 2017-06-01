@@ -44,7 +44,7 @@
 
 (use-package avy :ensure t)
 
-(use-package autothemer :ensure t)
+;;(use-package autothemer :ensure t)
 
 ;; autocomplete editor
 (use-package auto-complete
@@ -59,7 +59,8 @@
     (setq ag-reuse-buffers t)
     (add-to-list 'ag-arguments "--word-regexp")))
 
-(use-package all-the-icons :ensure t)
+(use-package all-the-icons :ensure t
+  :defer t)
 
 (use-package anzu :ensure t
   :diminish ""
@@ -78,6 +79,8 @@
 ;; -------------------------------------------------------
 
 (use-package beacon
+  :ensure t
+  :defer t
   :diminish ""
   :config
   (beacon-mode 1))
@@ -86,13 +89,8 @@
 
 (use-package better-defaults :ensure t)
 
-; (use-package bongo :ensure t
-;   :commands (bongo)
-;   :config
-;   (define-key bongo-playlist-mode-map (kbd "g") #'bongo-redisplay)
-;   (setq bongo-default-directory "~/Music/iTunes/iTunes Music/"))
 (use-package bongo
-  :defer
+  :defer t
   :commands (bongo)
   :config
   (use-package volume)
@@ -131,6 +129,7 @@
   (global-company-mode)
 
   (use-package company-statistics
+    :defer t
     :config
     (company-statistics-mode))
 
@@ -182,16 +181,17 @@
 
 (use-package clojure-mode
   :ensure t
-  :diminish "λ"
+  :defer t
+  :diminish (clojure-mode . "λ")
   :config
   (add-hook 'clojure-mode-hook #'smartparens-strict-mode)
-  (add-hook 'clojure-mode-hook #'aggressive-indent-mode)
   (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode))
 
-(use-package clojure-cheatsheet)
+(use-package clojure-cheatsheet :defer t)
 
 (use-package cider
   :ensure t
+  :defer t
   :diminish "[Ƈ]" 
   :config
   (add-hook 'cider-repl-mode-hook #'eldoc-mode)
@@ -209,6 +209,7 @@
 
 ;; deft
 (use-package deft
+  :defer t
   :config (setq deft-extensions '("txt" "tex" "org"))
   (setq deft-directory "~/Notes")
   :bind ("<f7>" . deft))
@@ -463,7 +464,7 @@
   :init 
   (helm-projectile-on))
 
-(use-package helm-google :ensure t
+(use-package helm-google :ensure t :defer t
   :commands (helm-google))
 
 (use-package helm-gitignore :ensure t
@@ -530,6 +531,7 @@
    
 (use-package ibuffer-vc
   :requires ibuffer
+  :defer t
   :config
   (add-hook 'ibuffer-hook
       (lambda ()
@@ -690,7 +692,8 @@ _c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)
 ;; -------------------------------------------------------
 
 ;; magit
-(use-package magit :ensure t
+(use-package magit :ensure t   
+  :defer t
   :commands (magit-blame
              magit-commit
              magit-commit-popup
@@ -717,10 +720,10 @@ _c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)
    :keymaps 'magit-mode-map
     "'" #'eshell-here)
 
-  (use-package magit-popup :ensure t)
+  (use-package magit-popup :ensure t :defer t)
   (use-package git-commit :ensure t :defer t)
 
-  (use-package magit-gitflow :ensure t
+  (use-package magit-gitflow :ensure t :defer t
     :commands
     turn-on-magit-gitflow
     :general
@@ -733,7 +736,7 @@ _c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)
 
 ;; markdown mode
 
-(use-package markdown-mode :ensure t
+(use-package markdown-mode :ensure t :defer t
   :mode (("\\.md\\'" . markdown-mode)
          ("README\\'"   . markdown-mode))
   :config
@@ -808,6 +811,8 @@ undo               _u_: undo
 
 ;; neo-tree
 (use-package neotree
+  :ensure t
+  :defer t
   :config
   (add-hook 'neotree-mode-hook
             (lambda ()
@@ -822,6 +827,7 @@ undo               _u_: undo
 ;; -------------------------------------------------------
 
 (use-package org
+  :ensure t
   :defer t
   :config
   (load-file "~/.emacs.d/config/org.el"))
@@ -830,13 +836,13 @@ undo               _u_: undo
 ;; P
 ;; -------------------------------------------------------
 
-(use-package paradox :ensure t
+(use-package paradox :ensure t :defer t
   :commands (paradox-list-packages
              package-list-packages))
 
 (global-prettify-symbols-mode +1)
 
-(use-package persp-mode :ensure t
+(use-package persp-mode :ensure t 
   :defer t
   ;;:quelpa (persp-mode :fetcher github :repo "Bad-ptr/persp-mode.el")
   :diminish (persp-mode . "")
@@ -882,12 +888,14 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 
 ;; popwin
 (use-package popwin :ensure t
+  :defer t
   :config
   (popwin-mode 1))
 
 (use-package powerline-evil :ensure t)
 
-(use-package projectile :ensure t
+(use-package projectile 
+  :ensure t
   :defines hydra-projectile/body
   :diminish (projectile-mode . " ⓟ")
   :bind* (("C-c p p" . projectile-switch-project))
@@ -915,7 +923,8 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   (projectile-global-mode 1)
   (helm-projectile-on)
 
-  (use-package org-projectile :ensure t
+  (use-package org-projectile :ensure t 
+    :defer t
     :config
     (org-projectile:per-repo)
     (setq org-projectile:per-repo-filename "project_todo.org")
@@ -988,17 +997,20 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; -------------------------------------------------------
 ;; Rainbow Mode
 
-(use-package rainbow-mode :ensure t
+(use-package rainbow-mode :ensure t 
+  :defer t
   :diminish rainbow-mode
   :init (rainbow-mode))
 
 (use-package rainbow-delimiters  :ensure t
+  :defer t
   :commands rainbow-delimiters-mode
   :init
   (add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
 (use-package ranger :ensure t
+  :defer t
   :commands
   (ranger
    deer)
@@ -1014,13 +1026,13 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   :config
   (setq ranger-cleanup-eagerly t))
 
-(use-package recentf :ensure t
+(use-package recentf :ensure t  :defer t
   :commands (recentf-mode
              counsel-recentf)
   :config
   (setq recentf-max-saved-items 50))
 
-(use-package restart-emacs :ensure t
+(use-package restart-emacs :ensure t  :defer t
   :commands restart-emacs)
 
 ;; -------------------------------------------------------
@@ -1036,6 +1048,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 
 (use-package smartparens
   :ensure t
+  :defer t
   :config
   (progn
     (require 'smartparens-config)
@@ -1048,6 +1061,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 
 ;; SMEX
 (use-package smex :ensure t
+  :defer t
   :config (smex-initialize)
   :bind ("M-x" . smex)
   ("M-X" . smex-major-mode-commands)
@@ -1064,7 +1078,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; T
 ;; -------------------------------------------------------
 
-(use-package tile :ensure t
+(use-package tile :ensure t :defer t
   :defines (hydra-tile/body)
   :bind* (("C-c t" . hydra-tile/body)
           ("s-t" . tile))
@@ -1097,7 +1111,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
                 tile-master-top-3
                 tile-one))))
 
-(use-package tiny :ensure t
+(use-package tiny :ensure t :defer t
   :bind* (("C-;" . tiny-expand)))
 
 (use-package transpose-frame :ensure t)
@@ -1225,11 +1239,13 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; ------------------------------------------------------
 ;; Theme
 ;; ------------------------------------------------------
-
+(setq custom-safe-themes t)
 (set-frame-font "Source Code Pro-14")
 
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-(load-theme 'monokai t)
+
+(require 'color-theme-sanityinc-solarized)
+(color-theme-sanityinc-solarized-dark)
 
 ;;;;; Theme ;;;;;
 (setq my-themes '(monokai leuven))

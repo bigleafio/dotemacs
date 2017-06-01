@@ -21,17 +21,18 @@
  (use-package ob-shell :ensure t
     :disabled t)
 
- (use-package org-trello
-   :ensure t)
+ ;;(use-package org-trello
+ ;;  :ensure t)
  
   (use-package org-bullets :ensure t
+    :defer t
     :init
     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
     :config
     (setq org-bullets-bullet-list  '("➡" "➠" "➟" "➝" "↪")))
 
-  (use-package org-indent :ensure nil :diminish "")
+  (use-package org-indent :ensure nil :diminish "" :defer t)
 
   (use-package orgit :ensure t :disabled t)
 
