@@ -1,13 +1,13 @@
 
 ;; ----- smex-history -----
 (
- describe-key
- paredit-forward-slurp-sexp
- transpose-frame
- package-install
- bongo
- emms-add-directory-tree
- bongo-playlist
+ paradox-list-packages
+ load-theme
+ profiler-start
+ smartparens-mode
+ emacs-init-time
+ neotree
+ speedbar
 )
 
 ;; ----- smex-data -----
@@ -29,9 +29,9 @@
  (org-trello/sync-card . 3)
  (org-trello-install-board-metadata . 2)
  (org-trello-sync-buffer . 2)
- (paredit-forward-slurp-sexp . 6)
+ (paredit-forward-slurp-sexp . 7)
  (list-packages . 1)
- (smartparens-mode . 2)
+ (smartparens-mode . 4)
  (sp-backward-slurp-sexp . 2)
  (projectile-mode . 2)
  (counsel-projectile . 1)
@@ -49,6 +49,15 @@
  (emms-mode-line . 1)
  (bongo . 2)
  (package-install . 1)
- (transpose-frame . 1)
- (describe-key . 1)
+ (transpose-frame . 2)
+ (describe-key . 2)
+ (package-list-packages . 1)
+ (paradox-list-packages . 7)
+ (sp-forward-slurp-sexp . 1)
+ (speedbar . 1)
+ (neotree . 1)
+ (emacs-init-time . 2)
+ (profiler-start . 1)
+ (profiler-report . 1)
+ (load-theme . 2)
 )

@@ -32,6 +32,8 @@
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)                ;; if you use any :bind variant
 
+(prefer-coding-system 'utf-8)
+
 ;; Keep custom in a separate file
 (defconst base-path (file-name-directory load-file-name))
 (setq custom-file (concat base-path "config/custom.el"))
@@ -1244,27 +1246,31 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 
-(require 'color-theme-sanityinc-solarized)
-(color-theme-sanityinc-solarized-dark)
+(require 'moe-theme)
+
+(setq moe-theme-highlight-buffer-id t)
+
+(moe-dark)
+
 
 ;;;;; Theme ;;;;;
-(setq my-themes '(monokai leuven))
+;;(setq my-themes '(moe-dark leuven))
 
-(setq my-cur-theme nil)
-(defun cycle-my-theme ()
-  "Cycle through a list of themes, my-themes"
-  (interactive)
-  (when my-cur-theme
-    (disable-theme my-cur-theme)
-    (setq my-themes (append my-themes (list my-cur-theme))))
-  (setq my-cur-theme (pop my-themes))
-  (load-theme my-cur-theme t))
+;;(setq my-cur-theme nil)
+;;(defun cycle-my-theme ()
+;;  "Cycle through a list of themes, my-themes"
+;;  (interactive)
+;;  (when my-cur-theme
+;;    (disable-theme my-cur-theme)
+;;    (setq my-themes (append my-themes (list my-cur-theme))))
+;;  (setq my-cur-theme (pop my-themes))
+;;  (load-theme my-cur-theme t))
 
 ;; Switch to the first theme in the list above
-(cycle-my-theme)
+;;(cycle-my-theme)
 
 ;; Bind this to C-t
-(global-set-key (kbd "C-t") 'cycle-my-theme)
+;;(global-set-key (kbd "C-t") 'cycle-my-theme)
 
 (message "***** Loading Additional Config Files: %s" (current-time-string))
 (load "~/.emacs.d/config/custom")
