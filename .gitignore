@@ -1,8 +1,8 @@
 *.elc
 *.pyc
-elpa
-melpa
 sandbox*
+elpa
+backups
 *.bbl
 *.blg
 *.pyg
@@ -21,7 +21,6 @@ auto-save-list
 *.data
 .DS_Store
 .trello/@jgraham20.el
-
 .trello/jgraham20.el
 
 config/custom.el
@@ -47,3 +46,9 @@ smex-items
 config/tags
 
 recentf
+
+recentf
+
+smex-items
+
+ac-comphist.dat

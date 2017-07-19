@@ -1,7 +1,5 @@
 ;;;;
 ;; Packages
-;;;;
-
 ;;; code:
 
 ;; -------------------------------------------------------
@@ -208,6 +206,10 @@
 ;; -------------------------------------------------------
 ;; D
 ;; -------------------------------------------------------
+
+(use-package dashboard
+  :config
+  (dashboard-setup-startup-hook))
 
 ;; deft
 (use-package deft
@@ -1170,6 +1172,8 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (use-package winner
   :defer t)
 
+(use-package whitespace
+  :defer t)
 ;; -------------------------------------------------------
 ;; Y
 ;; -------------------------------------------------------
@@ -1184,8 +1188,6 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
   (add-to-list 'auto-mode-alist '("\\.yaml$" . yaml-mode)))
 
-
-
 ;; ------------------------------------------------------
 ;; Misc settings
 ;; ------------------------------------------------------
@@ -1195,6 +1197,10 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (setq-default cursor-type 'bar)
 (delete-selection-mode 1) ; Deleting selected text if typed in/pasted
 (fset 'yes-or-no-p 'y-or-n-p) ; Use y or n instead of yes or no
+
+(whitespace-mode +1)
+(setq whitespace-line-column 80) ;; limit line length
+(setq whitespace-style '(face tabs empty trailing lines-tail))
 
 (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
 
@@ -1246,36 +1252,25 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 
-(require 'moe-theme)
+;; (setq moe-theme-highlight-buffer-id t)
+(color-theme-sanityinc-solarized-light)
 
-(setq moe-theme-highlight-buffer-id t)
+(setq dashboard-items '((recents  . 5)
+                        (bookmarks . 5)
+                        (projects . 5)
+                        (agenda . 5)))
 
-(moe-dark)
-
-
-;;;;; Theme ;;;;;
-;;(setq my-themes '(moe-dark leuven))
-
-;;(setq my-cur-theme nil)
-;;(defun cycle-my-theme ()
-;;  "Cycle through a list of themes, my-themes"
-;;  (interactive)
-;;  (when my-cur-theme
-;;    (disable-theme my-cur-theme)
-;;    (setq my-themes (append my-themes (list my-cur-theme))))
-;;  (setq my-cur-theme (pop my-themes))
-;;  (load-theme my-cur-theme t))
-
-;; Switch to the first theme in the list above
-;;(cycle-my-theme)
-
-;; Bind this to C-t
-;;(global-set-key (kbd "C-t") 'cycle-my-theme)
+;; Set the title
+(setq dashboard-banner-logo-title "Welcome to Emacs - BearMode")
+;; Set the banner
+(setq dashboard-startup-banner "~/.emacs.d/themes/bear.png")
 
 (message "***** Loading Additional Config Files: %s" (current-time-string))
 (load "~/.emacs.d/config/custom")
 (load "~/.emacs.d/config/keybindings")
 (load "~/.emacs.d/config/mouse")
+
+
 
 ;; go full screen
 (toggle-frame-maximized) 
