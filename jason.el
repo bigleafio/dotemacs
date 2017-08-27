@@ -5,80 +5,32 @@
 ;; -------------------------------------------------------
 ;; User Info
 ;; -------------------------------------------------------
-(defconst emacs-start-time (current-time))
-(load "~/.emacs.d/local/core-debug")
-(setq spacemacs-debug-with-adv-timers t)
-(spacemacs/init-debug)
 (message "***** Loading (Initialize): %s" (current-time-string))
 (setq user-full-name "Jason Graham")
 (setq user-mail-address "jgraham20@gmail.com")
-
-(setq gc-cons-threshold 64000000)
-(add-hook 'after-init-hook #'(lambda ()
-                               ;; restore GC after startup
-                               (setq gc-cons-threshold 8000000)))
+(load "~/.emacs.d/config/functions")
 
 ;; -------------------------------------------------------
 ;; Define package repositories
 ;; -------------------------------------------------------
-;; The comment below is needed DO NOT REMOVE
-;; (package-initialize)
+(require 'package)
 
-(setq inhibit-startup-screen nil
-      initial-scratch-message ";; ready\n\n"
-      package-enable-at-startup nil
-      package-user-dir "~/.emacs.d/elpa/"
-      package-archives '(("melpa" . "http://melpa.milkbox.net/packages/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")))
+(setq package-archives (append package-archives
+			 '(("melpa" . "http://melpa.org/packages/")
+			   ("marmalade" . "http://marmalade-repo.org/packages/")
+         ("org" . "http://orgmode.org/elpa/")
+			   ("elpy" . "http://jorgenschaefer.github.io/packages/"))))
 
-;; Disable package initialize after us.  We either initialize it
-;; anyway in case of interpreted .emacs, or we don't want slow
-;; initizlization in case of byte-compiled .emacs.elc.
-(setq package-enable-at-startup nil)
-;; Ask package.el to not add (package-initialize) to .emacs.
-(setq package--init-file-ensured t)
-;; set use-package-verbose to t for interpreted .emacs,
-;; and to nil for byte-compiled .emacs.elc
-(eval-and-compile
-  (setq use-package-verbose (not (bound-and-true-p byte-compile-current-file))))
-;; Add the macro generated list of package.el loadpaths to load-path.
-(mapc #'(lambda (add) (add-to-list 'load-path add))
-      (eval-when-compile
-        ;; (require 'package)
-        (package-initialize)
-        ;; Install use-package if not installed yet.
-        (unless (package-installed-p 'use-package)
-          (package-refresh-contents)
-          (package-install 'use-package))
-        ;; (require 'use-package)
-        (setq use-package-always-ensure t)
-        (let ((package-user-dir-real (file-truename package-user-dir)))
-          ;; The reverse is necessary, because outside we mapc
-          ;; add-to-list element-by-element, which reverses.
-          (nreverse (apply #'nconc
-                           ;; Only keep package.el provided loadpaths.
-                           (mapcar #'(lambda (path)
-                                       (if (string-prefix-p package-user-dir-real path)
-                                           (list path)
-                                         nil))
-                                   load-path))))))
+(package-initialize)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; real .emacs starts here
-
-
-(eval-when-compile
-  (require 'package)
-  (package-initialize)
-  (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package))
-  (require 'use-package)
-  (setq use-package-always-ensure t))
+(setq use-package-verbose t)
 
 (eval-when-compile
   (require 'use-package))
-(require 'bind-key)
-(require 'diminish)
+(require 'diminish)                ;; if you use :diminish
+(require 'bind-key)                ;; if you use any :bind variant
+(require 'graphene)
+(prefer-coding-system 'utf-8)
 
 ;; Keep custom in a separate file
 (defconst base-path (file-name-directory load-file-name))
@@ -89,7 +41,10 @@
 ;; -------------------------------------------------------
 ;; A
 ;; -------------------------------------------------------
-(use-package avy)
+
+(use-package avy :ensure t)
+
+;;(use-package autothemer :ensure t)
 
 ;; autocomplete editor
 (use-package auto-complete
@@ -104,10 +59,11 @@
     (setq ag-reuse-buffers t)
     (add-to-list 'ag-arguments "--word-regexp")))
 
-(use-package all-the-icons)
+(use-package all-the-icons :ensure t
+  :defer t)
 
-(use-package anzu
-  ;;:delight
+(use-package anzu :ensure t
+  :diminish ""
   :commands (global-anzu-mode)
   :init
   (global-anzu-mode 1)
@@ -123,12 +79,24 @@
 ;; -------------------------------------------------------
 
 (use-package beacon
+  :ensure t
+  :defer t
+  :diminish ""
   :config
   (beacon-mode 1))
 
 (use-package bind-key)
 
 (use-package better-defaults :ensure t)
+
+(use-package bongo
+  :defer t
+  :commands (bongo)
+  :config
+  (use-package volume)
+  (setq bongo-display-inline-playback-progress t)
+  (setq bongo-insert-album-covers t))
+
 
 ;;This file is for lazy people wanting to swap buffers without typing C-x b on each window.
 (use-package buffer-move)
@@ -143,8 +111,8 @@
 (use-package use-package-chords :config (key-chord-mode 1))
 
 ;;Text completion framework for Emacs
-(use-package company
-  ;;:delight
+(use-package company :ensure t
+  :diminish ""
   :commands global-company-mode
   :init
   (add-hook 'after-init-hook #'global-company-mode)
@@ -156,8 +124,14 @@
    company-dabbrev-ignore-case nil
    company-dabbrev-downcase nil
    company-show-numbers t)
+
   :config
   (global-company-mode)
+
+  ;;(use-package company-statistics
+  ;;  :defer t
+  ;;  :config
+  ;;  (company-statistics-mode))
 
   (bind-keys :map company-active-map
     ("C-d" . company-show-doc-buffer)
@@ -181,7 +155,7 @@
            company-keywords))))
 
 ;;Completion functions using Ivy
-(use-package counsel ;;:ensure t
+(use-package counsel :ensure t
   :bind*
   (("M-x"     . counsel-M-x)
    ("C-x C-f" . counsel-find-file)
@@ -196,15 +170,18 @@
   (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
   (setq counsel-find-file-ignore-regexp "\\.DS_Store\\|.git"))
 
-(use-package counsel-projectile
+(use-package counsel-projectile :ensure t
   :bind* (("H-P" . counsel-projectile-switch-to-buffer)
           ("H-p" . counsel-projectile))
   :config
   (counsel-projectile-on))
 
-(use-package counsel-gtags)
+(use-package counsel-gtags :ensure t
+  :defer t)
 
 (use-package clojure-mode
+  :ensure t
+  :defer t
   :diminish (clojure-mode . "λ")
   :config
   (add-hook 'clojure-mode-hook #'smartparens-strict-mode)
@@ -213,8 +190,8 @@
 (use-package clojure-cheatsheet :defer t)
 
 (use-package cider
-  ;;:ensure t
-  ;;:defer t
+  :ensure t
+  :defer t
   :diminish "[Ƈ]"
   :config
   (add-hook 'cider-repl-mode-hook #'eldoc-mode)
@@ -222,7 +199,7 @@
   (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode))
 
 (use-package color-theme
-  ;;:ensure t
+  :ensure t
   :config
   (setq my-color-themes (list 'gruvbox 'leuven)))
 
@@ -235,34 +212,37 @@
   (dashboard-setup-startup-hook))
 
 ;; deft
-; (use-package deft
-;   :config (setq deft-extensions '("txt" "tex" "org"))
-;           (setq deft-directory "~/Dropbox/Documents/Organizer")
-;   :bind ("<f7>" . deft))
+(use-package deft
+  :defer t
+  :config (setq deft-extensions '("txt" "tex" "org"))
+  (setq deft-directory "~/Notes")
+  :bind ("<f7>" . deft))
 
 (use-package dired
+  :ensure nil
   :bind* (("C-x d" . dired-other-window)
           ("C-x C-d" . dired))
   :commands (dired)
   :config
   (setq dired-use-ls-dired nil)
-  ; (use-package dired-x
-  ;   :bind* (("C-x C-'" . dired-jump))
-  ;   :commands (dired-omit-mode)
-  ;   :init
-  ;   (add-hook 'dired-load-hook (lambda () (load "dired-x")))
-  ;   (add-hook 'dired-mode-hook #'dired-omit-mode)
-  ;   :config
-  ;   (setq dired-omit-verbose nil)
-  ;   (setq dired-omit-files
-  ;         (concat dired-omit-files "\\|^\\..*$\\|^.DS_Store$\\|^.projectile$\\|^.git$")))
+  (use-package dired-x
+    :ensure nil
+    :bind* (("C-x C-'" . dired-jump))
+    :commands (dired-omit-mode)
+    :init
+    (add-hook 'dired-load-hook (lambda () (load "dired-x")))
+    (add-hook 'dired-mode-hook #'dired-omit-mode)
+    :config
+    (setq dired-omit-verbose nil)
+    (setq dired-omit-files
+          (concat dired-omit-files "\\|^\\..*$\\|^.DS_Store$\\|^.projectile$\\|^.git$")))
 
-  ; (use-package dired-details+
-  ;   ;;:ensure t
-  ;   :config
-  ;   (dired-details-install)
-  ;   (setq-default dired-details-hidden-string " --- "
-  ;                 dired-details-hide-link-targets nil))
+  (use-package dired-details+
+    :ensure t
+    :config
+    (dired-details-install)
+    (setq-default dired-details-hidden-string " --- "
+                  dired-details-hide-link-targets nil))
 
   (bind-keys :map dired-mode-map
     ("SPC" . dired-view-other-window)
@@ -281,8 +261,24 @@
 ;; E
 ;; -------------------------------------------------------
 
+;; emms
+; (use-package emms
+;   :ensure t
+;   :config
+;   (progn
+;     (emms-standard)
+;     (emms-default-players)
+;     (setq emms-playlist-buffer-name "Music-EMMS")
+;     (setq emms-source-file-default-directory "~/Music/iTunes/")
+;     (require 'emms-player-simple)
+;     (require 'emms-source-file)
+;     (require 'emms-source-playlist)
+;     (require 'emms-player-mplayer)
+;     (setq emms-player-list '(emms-player-mplayer))
+;     ))
+
 ;; evil (vim) mode
-(use-package evil
+(use-package evil :ensure t
   :config (setq evil-default-cursor t)
   (setq evil-insert-state-cursor '(bar "white")
       evil-emacs-state-cursor '(bar "white") 
@@ -292,15 +288,16 @@
   (evil-mode t))
 
 ;; Easy Motion
-(use-package evil-easymotion
+(use-package evil-easymotion :ensure t
   :init (evilem-default-keybindings "SPC"))
 
-(use-package evil-escape
+(use-package evil-escape :ensure t
+  :diminish ""
   :init
    (evil-escape-mode)
   )
 
-(use-package eshell
+(use-package eshell :ensure t
   :defines eshell-here
   :commands (eshell
              eshell-here)
@@ -318,7 +315,8 @@
     "<tab>" (lambda () (interactive) (pcomplete-std-complete))
     "C-'" (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window))))
 
-(use-package evil-matchit
+(use-package evil-matchit :ensure t
+  :diminish ""
   :init (global-evil-matchit-mode 1))
 
 
@@ -329,7 +327,7 @@
 ;; -------------------------------------------------------
 
 ; flycheck
-(use-package flycheck
+(use-package flycheck :ensure t
   :commands flycheck-mode
   :diminish (flycheck-mode . "ⓕ")
   :config
@@ -347,7 +345,7 @@
     "M-s-." 'ggtags-find-tag-dwim))
 
 ;; General
-(use-package general
+(use-package general :ensure t
   :config
   (general-define-key
    :states '(normal visual insert emacs)
@@ -397,7 +395,9 @@
 
 (use-package git-timemachine)
 
-(use-package git-gutter
+(use-package git-gutter :ensure t
+  :disabled t
+  :diminish ""
   :commands (global-git-gutter-mode)
   :init
   (global-git-gutter-mode +1)
@@ -414,9 +414,14 @@
   :diminish git-gutter-mode
   :config (global-git-gutter-mode))
 
-(use-package goto-chg
+(use-package goto-chg :ensure t
   :commands (goto-last-change
              goto-last-change-reverse))
+
+(use-package golden-ratio
+  diminish ""
+  :disabled t
+  )
 
 ;; -------------------------------------------------------
 ;; H
@@ -425,6 +430,9 @@
 ;; Helm
 (use-package helm-config
   :ensure helm
+  ;; disabled for now, but I've copy and pasted here the advice from
+  ;; tuhdo about helm.
+  :disabled t
   :config
   (setq
    ;; open helm buffer inside current window, not occupy whole other window
@@ -445,8 +453,8 @@
   (add-hook 'helm-minibuffer-set-up-hook 'helm-hide-minibuffer-maybe)
 
   (setq helm-autoresize-max-height 0)
-  (setq helm-autoresize-min-height 20))
-  ;;(helm-autoresize-mode 1))
+  (setq helm-autoresize-min-height 20)
+  (helm-autoresize-mode 1))
 
 (use-package helm-make
   :bind* (("C-c C" . helm-make)
@@ -454,16 +462,16 @@
   :config
   (setq helm-make-completion-method 'ivy))
 
-(use-package helm-projectile
+(use-package helm-projectile :ensure t
   :config
   (setq projectile-completion-system 'helm)
   :init
   (helm-projectile-on))
 
-(use-package helm-google
+(use-package helm-google :ensure t :defer t
   :commands (helm-google))
 
-(use-package helm-gitignore
+(use-package helm-gitignore :ensure t
   :commands helm-gitignore)
 
 (use-package hideshow
@@ -472,11 +480,11 @@
   :init
   (add-hook 'prog-mode-hook 'hs-minor-mode))
 
-(use-package hydra
+(use-package hydra :ensure t
   :config
   (setq hydra-is-helpful t))
 
-(use-package hy-mode
+(use-package hy-mode :ensure t
   :mode (("\\.hy\\'" . hy-mode))
   :init
   (add-hook 'hy-mode-hook (lambda () (lispy-mode 1))))
@@ -536,80 +544,71 @@
     (ibuffer-do-sort-by-alphabetic)))))
 
 
-; (use-package info
-;   :mode (("\\.info\\'" . Info-mode))
-;   :config
-;   (define-key Info-mode-map (kbd ".") #'hydra-info/body)
+(use-package info
+  :mode (("\\.info\\'" . Info-mode))
+  :config
+  (define-key Info-mode-map (kbd ".") #'hydra-info/body)
 
-;   (defhydra hydra-info (:color pink
-;                         :hint nil)
-;     "
-; Info-mode:
-;   ^^_]_ forward  (next logical node)       ^^_l_ast (←)        _u_p (↑)                             _f_ollow reference       _T_OC
-;   ^^_[_ backward (prev logical node)       ^^_r_eturn (→)      _m_enu (↓) (C-u for new window)      _i_ndex                  _d_irectory
-;   ^^_n_ext (same level only)               ^^_H_istory         _g_oto (C-u for new window)          _,_ next index item      _c_opy node name
-;   ^^_p_rev (same level only)               _<_/_t_op           _b_eginning of buffer                virtual _I_ndex          _C_lone buffer
-;   regex _s_earch (_S_ case sensitive)      ^^_>_ final         _e_nd of buffer                      ^^                       _a_propos
-;   _1_ .. _9_ Pick first .. ninth item in the node's menu.
-; "
-;     ("]"   Info-forward-node)
-;     ("["   Info-backward-node)
-;     ("n"   Info-next)
-;     ("p"   Info-prev)
-;     ("s"   Info-search)
-;     ("S"   Info-search-case-sensitively)
+  (defhydra hydra-info (:color pink
+                        :hint nil)
+    "
+Info-mode:
+  ^^_]_ forward  (next logical node)       ^^_l_ast (←)        _u_p (↑)                             _f_ollow reference       _T_OC
+  ^^_[_ backward (prev logical node)       ^^_r_eturn (→)      _m_enu (↓) (C-u for new window)      _i_ndex                  _d_irectory
+  ^^_n_ext (same level only)               ^^_H_istory         _g_oto (C-u for new window)          _,_ next index item      _c_opy node name
+  ^^_p_rev (same level only)               _<_/_t_op           _b_eginning of buffer                virtual _I_ndex          _C_lone buffer
+  regex _s_earch (_S_ case sensitive)      ^^_>_ final         _e_nd of buffer                      ^^                       _a_propos
+  _1_ .. _9_ Pick first .. ninth item in the node's menu.
+"
+    ("]"   Info-forward-node)
+    ("["   Info-backward-node)
+    ("n"   Info-next)
+    ("p"   Info-prev)
+    ("s"   Info-search)
+    ("S"   Info-search-case-sensitively)
 
-;     ("l"   Info-history-back)
-;     ("r"   Info-history-forward)
-;     ("H"   Info-history)
-;     ("t"   Info-top-node)
-;     ("<"   Info-top-node)
-;     (">"   Info-final-node)
+    ("l"   Info-history-back)
+    ("r"   Info-history-forward)
+    ("H"   Info-history)
+    ("t"   Info-top-node)
+    ("<"   Info-top-node)
+    (">"   Info-final-node)
 
-;     ("u"   Info-up)
-;     ("^"   Info-up)
-;     ("m"   Info-menu)
-;     ("g"   Info-goto-node)
-;     ("b"   beginning-of-buffer)
-;     ("e"   end-of-buffer)
+    ("u"   Info-up)
+    ("^"   Info-up)
+    ("m"   Info-menu)
+    ("g"   Info-goto-node)
+    ("b"   beginning-of-buffer)
+    ("e"   end-of-buffer)
 
-;     ("f"   Info-follow-reference)
-;     ("i"   Info-index)
-;     (","   Info-index-next)
-;     ("I"   Info-virtual-index)
+    ("f"   Info-follow-reference)
+    ("i"   Info-index)
+    (","   Info-index-next)
+    ("I"   Info-virtual-index)
 
-;     ("T"   Info-toc)
-;     ("d"   Info-directory)
-;     ("c"   Info-copy-current-node-name)
-;     ("C"   clone-buffer)
-;     ("a"   info-apropos)
+    ("T"   Info-toc)
+    ("d"   Info-directory)
+    ("c"   Info-copy-current-node-name)
+    ("C"   clone-buffer)
+    ("a"   info-apropos)
 
-;     ("1"   Info-nth-menu-item)
-;     ("2"   Info-nth-menu-item)
-;     ("3"   Info-nth-menu-item)
-;     ("4"   Info-nth-menu-item)
-;     ("5"   Info-nth-menu-item)
-;     ("6"   Info-nth-menu-item)
-;     ("7"   Info-nth-menu-item)
-;     ("8"   Info-nth-menu-item)
-;     ("9"   Info-nth-menu-item)
+    ("1"   Info-nth-menu-item)
+    ("2"   Info-nth-menu-item)
+    ("3"   Info-nth-menu-item)
+    ("4"   Info-nth-menu-item)
+    ("5"   Info-nth-menu-item)
+    ("6"   Info-nth-menu-item)
+    ("7"   Info-nth-menu-item)
+    ("8"   Info-nth-menu-item)
+    ("9"   Info-nth-menu-item)
 
-;     ("?"   Info-summary "Info summary")
-;     ("h"   Info-help "Info help")
-;     ("q"   Info-exit "Info exit")
-;     ("C-g" nil "cancel" :color blue))
-;   )
+    ("?"   Info-summary "Info summary")
+    ("h"   Info-help "Info help")
+    ("q"   Info-exit "Info exit")
+    ("C-g" nil "cancel" :color blue))
+  )
 
-(with-eval-after-load "info"
-  (info-initialize)
-  (dolist (dir (directory-files package-user-dir))
-    (let ((fdir (concat (file-name-as-directory package-user-dir) dir)))
-      (unless (or (member dir '("." ".." "archives" "gnupg"))
-                  (not (file-directory-p fdir))
-                  (not (file-exists-p (concat (file-name-as-directory fdir) "dir"))))
-        (add-to-list 'Info-directory-list fdir)))))
-
-(use-package ivy
+(use-package ivy :ensure t
   :diminish (ivy-mode . "")
   :commands (ivy-switch-buffer
              ivy-switch-buffer-other-window)
@@ -697,51 +696,51 @@ _c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)
 ;; -------------------------------------------------------
 
 ;; magit
-; (use-package magit
-;   :defer t
-;   :commands (magit-blame
-;              magit-commit
-;              magit-commit-popup
-;              magit-diff-popup
-;              magit-diff-unstaged
-;              magit-fetch-popup
-;              magit-init
-;              magit-log-popup
-;              magit-pull-popup
-;              magit-push-popup
-;              magit-revert
-;              magit-stage-file
-;              magit-status
-;              magit-unstage-file
-;              magit-blame-mode)
-;   :bind (("s-v" . magit-status))
+(use-package magit :ensure t
+  :defer t
+  :commands (magit-blame
+             magit-commit
+             magit-commit-popup
+             magit-diff-popup
+             magit-diff-unstaged
+             magit-fetch-popup
+             magit-init
+             magit-log-popup
+             magit-pull-popup
+             magit-push-popup
+             magit-revert
+             magit-stage-file
+             magit-status
+             magit-unstage-file
+             magit-blame-mode)
+  :bind (("s-v" . magit-status))
 
-;   :config
-;   (use-package git-modes)
+  :config
+  (use-package git-modes)
 
-;   (global-git-commit-mode)
+  (global-git-commit-mode)
 
-;   (general-define-key
-;    :keymaps 'magit-mode-map
-;     "'" #'eshell-here)
+  (general-define-key
+   :keymaps 'magit-mode-map
+    "'" #'eshell-here)
 
-;   (use-package magit-popup :ensure t :defer t)
-;   (use-package git-commit :ensure t :defer t)
+  (use-package magit-popup :ensure t :defer t)
+  (use-package git-commit :ensure t :defer t)
 
-;   (use-package magit-gitflow :ensure t :defer t
-;     :commands
-;     turn-on-magit-gitflow
-;     :general
-;     (:keymaps 'magit-mode-map
-;      "%" 'magit-gitflow-popup)
-;     :init
-;     (add-hook 'magit-mode-hook 'turn-on-magit-gitflow))
+  (use-package magit-gitflow :ensure t :defer t
+    :commands
+    turn-on-magit-gitflow
+    :general
+    (:keymaps 'magit-mode-map
+     "%" 'magit-gitflow-popup)
+    :init
+    (add-hook 'magit-mode-hook 'turn-on-magit-gitflow))
 
-;   (setq magit-completing-read-function 'ivy-completing-read))
+  (setq magit-completing-read-function 'ivy-completing-read))
 
 ;; markdown mode
 
-(use-package markdown-mode
+(use-package markdown-mode :ensure t :defer t
   :mode (("\\.md\\'" . markdown-mode)
          ("README\\'"   . markdown-mode))
   :config
@@ -832,6 +831,8 @@ undo               _u_: undo
 ;; -------------------------------------------------------
 
 (use-package org
+  :ensure t
+  :defer t
   :config
   (load-file "~/.emacs.d/config/org.el"))
 
@@ -843,7 +844,7 @@ undo               _u_: undo
   :commands (paradox-list-packages
              package-list-packages))
 
-;;(global-prettify-symbols-mode +1)
+(global-prettify-symbols-mode +1)
 
 (use-package persp-mode :ensure t
   :defer t
@@ -890,15 +891,15 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   (global-set-key (kbd "H-n") 'persp-next))
 
 ;; popwin
-(use-package popwin
+(use-package popwin :ensure t
   :defer t
   :config
   (popwin-mode 1))
 
 (use-package powerline-evil :ensure t)
 
-;;TODO Fix the load paths
 (use-package projectile
+  :ensure t
   :defines hydra-projectile/body
   :diminish (projectile-mode . " ⓟ")
   :bind* (("C-c p p" . projectile-switch-project))
@@ -926,7 +927,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   (projectile-global-mode 1)
   (helm-projectile-on)
 
-  (use-package org-projectile
+  (use-package org-projectile :ensure t
     :defer t
     :config
     (org-projectile:per-repo)
@@ -1012,6 +1013,23 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   (add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
+(use-package ranger :ensure t
+  :defer t
+  :commands
+  (ranger
+   deer)
+  :general
+  (:keymaps 'ranger-mode-map
+   "t" 'ranger-next-file      ; j
+   "s" 'ranger-prev-file      ; k
+   "r" 'ranger-find-file      ; l
+   "c" 'ranger-up-directory   ; c
+   "j" 'ranger-toggle-mark    ; t
+   )
+
+  :config
+  (setq ranger-cleanup-eagerly t))
+
 (use-package recentf :ensure t  :defer t
   :commands (recentf-mode
              counsel-recentf)
@@ -1025,13 +1043,16 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; S
 ;; -------------------------------------------------------
 
-(use-package smart-mode-line)
+(use-package smart-mode-line
+    :ensure t)
 
 (setq sml/no-confirm-load-theme t)
 (setq sml/theme nil)
 (add-hook 'after-init-hook #'sml/setup)
 
 (use-package smartparens
+  :ensure t
+  :defer t
   :config
   (progn
     (require 'smartparens-config)
@@ -1043,7 +1064,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (define-key smartparens-mode-map (kbd "C-M-<right>") 'sp-backward-barf-sexp)
 
 ;; SMEX
-(use-package smex
+(use-package smex :ensure t
   :defer t
   :config (smex-initialize)
   :bind ("M-x" . smex)
@@ -1104,7 +1125,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; -------------------------------------------------------
 
 ;; better redo/undo
-(use-package undo-tree
+(use-package undo-tree :ensure t
   :diminish undo-tree-mode
   :init
   (global-undo-tree-mode 1)
@@ -1184,8 +1205,8 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
 
 ;; OSX specific settings
-;;(when (eq system-type 'darwin)
-;;  (load "~/.emacs.d/config/osx"))
+(when (eq system-type 'darwin)
+  (load "~/.emacs.d/config/osx"))
 
 ;; date and time in status bar
 (setq display-time-day-and-date t
@@ -1227,11 +1248,11 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; Theme
 ;; ------------------------------------------------------
 (setq custom-safe-themes t)
-;;(set-frame-font "Source Code Pro-14")
-(set-frame-font "Ubuntu Mono-14")
+(set-frame-font "Source Code Pro-14")
 
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 
+;; (setq moe-theme-highlight-buffer-id t)
 (color-theme-sanityinc-solarized-light)
 
 (setq dashboard-items '((recents  . 5)
@@ -1240,13 +1261,14 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
                         (agenda . 5)))
 
 ;; Set the title
-(setq dashboard-banner-logo-title "Welcome to BearMode")
+(setq dashboard-banner-logo-title "Welcome to Emacs - BearMode")
 ;; Set the banner
 (setq dashboard-startup-banner "~/.emacs.d/themes/bear.png")
 
 (message "***** Loading Additional Config Files: %s" (current-time-string))
-;;(load "~/.emacs.d/config/custom")
+(load "~/.emacs.d/config/custom")
 (load "~/.emacs.d/config/keybindings")
+(load "~/.emacs.d/config/mouse")
 
 
 
