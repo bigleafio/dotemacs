@@ -1,5 +1,6 @@
 *.elc
 *.pyc
+elpa
 sandbox*
 backups
 *.bbl
