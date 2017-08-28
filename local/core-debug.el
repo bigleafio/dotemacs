@@ -19,7 +19,7 @@
 
 (require 'profiler)
 
-(defvar spacemacs-debug-timer-threshold 0.05
+(defvar spacemacs-debug-timer-threshold 0.01
   "Generate message if file takes longer than this number of
 seconds to load")
 

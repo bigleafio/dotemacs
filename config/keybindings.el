@@ -1,4 +1,5 @@
-(use-package general :ensure t
+(use-package general
+  :ensure t
   :config
 
 ;;; Shift

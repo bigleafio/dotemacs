@@ -143,7 +143,7 @@ _SR_: region → _SB_: buffer →      ^ ^
   ("ST" python-shell-send-defun-switch)
   ("sb" python-shell-send-buffer)
   ("SB" python-shell-send-buffer-switch)
-  
+
   ;; code nav
   ("." anaconda-mode-find-definitions)
   ("," anaconda-mode-find-assignments :color red)
