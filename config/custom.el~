@@ -1,0 +1,14 @@
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (dired-x dired yasnippet yaml-mode window-numbering which-key use-package-chords transpose-frame tiny tile smex smartparens smart-mode-line restart-emacs rainbow-mode rainbow-delimiters python-mode powerline-evil popwin persp-mode pbcopy paradox osx-clipboard org-projectile neotree markdown-mode magit key-seq ibuffer-vc hy-mode helm-projectile helm-make helm-google helm-gitignore grab-mac-link git-timemachine git-gutter-fringe ggtags general flycheck exec-path-from-shell evil-matchit evil-escape evil-easymotion eshell-z dired-details+ deft dashboard counsel-projectile counsel-gtags company color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized color-theme clojure-cheatsheet buffer-move better-defaults beacon auto-complete anzu all-the-icons ag))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

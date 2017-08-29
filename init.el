@@ -6,7 +6,7 @@
 ;; User Info
 ;; -------------------------------------------------------
 (defconst emacs-start-time (current-time))
-(load "~/.emacs.d/local/core-debug")
+(load "~/.emacs.d/config/core-debug")
 (setq spacemacs-debug-with-adv-timers t)
 (spacemacs/init-debug)
 (message "***** Loading (Initialize): %s" (current-time-string))
@@ -131,7 +131,7 @@
    company-dabbrev-downcase nil
    company-show-numbers t)
   :config
-  (global-company-mode)
+  ;;(global-company-mode)
 
   (bind-keys :map company-active-map
     ("C-d" . company-show-doc-buffer)
@@ -215,6 +215,16 @@
 
 (use-package dashboard
   :config
+  (setq dashboard-items '((recents  . 5)
+                          (bookmarks . 5)
+                          (projects . 5)))
+                       ;; (agenda . 5)))
+  (setq frame-title-format "Welcome to BearMode")
+  ;; Set the title
+  (setq dashboard-banner-logo-title "Some days you eat the bear, some days the bear eats you.")
+  ;; Set the banner
+  (setq dashboard-startup-banner "~/.emacs.d/themes/emacs.png")
+  :init
   (dashboard-setup-startup-hook))
 
 ;; deft
@@ -224,43 +234,43 @@
            (setq deft-directory "~/Dropbox/Documents/Organizer")
    :bind ("<f7>" . deft))
 
-; (use-package dired
-;   :defer t
-;   :bind* (("C-x d" . dired-other-window)
-;           ("C-x C-d" . dired))
-;   :commands (dired)
-;   :config
-;   (setq dired-use-ls-dired nil)
-  ; (use-package dired-x
-  ;   :bind* (("C-x C-'" . dired-jump))
-  ;   :commands (dired-omit-mode)
-  ;   :init
-  ;   (add-hook 'dired-load-hook (lambda () (load "dired-x")))
-  ;   (add-hook 'dired-mode-hook #'dired-omit-mode)
-  ;   :config
-  ;   (setq dired-omit-verbose nil)
-  ;   (setq dired-omit-files
-  ;         (concat dired-omit-files "\\|^\\..*$\\|^.DS_Store$\\|^.projectile$\\|^.git$")))
+(use-package dired
+  :defer t
+  :bind* (("C-x d" . dired-other-window)
+          ("C-x C-d" . dired))
+  :commands (dired)
+  :config
+  (setq dired-use-ls-dired nil)
+  (use-package dired-x
+    :bind* (("C-x C-'" . dired-jump))
+    :commands (dired-omit-mode)
+    :init
+    (add-hook 'dired-load-hook (lambda () (load "dired-x")))
+    (add-hook 'dired-mode-hook #'dired-omit-mode)
+    :config
+    (setq dired-omit-verbose nil)
+    (setq dired-omit-files
+          (concat dired-omit-files "\\|^\\..*$\\|^.DS_Store$\\|^.projectile$\\|^.git$")))
 
-  ; (use-package dired-details+
-  ;   ;;:ensure t
-  ;   :config
-  ;   (dired-details-install)
-  ;   (setq-default dired-details-hidden-string " --- "
-  ;                 dired-details-hide-link-targets nil))
+  (use-package dired-details+
+    :ensure t
+    :config
+    (dired-details-install)
+    (setq-default dired-details-hidden-string " --- "
+                  dired-details-hide-link-targets nil))
 
-  ; (bind-keys :map dired-mode-map
-  ;   ("SPC" . dired-view-other-window)
-  ;   ("."   . hydra-dired-main/body)
-  ;   ("t"   . dired-next-line)
-  ;   ("s"   . dired-previous-line)
-  ;   ("r"   . dired-find-file)
-  ;   ("c"   . dired-up-directory)
-  ;   ("'"   . eshell-here)
-  ;   ("8"   . dired-mkdir-date)
-  ;   ("9"   . dired-mkdir-date-rstyle)
-  ;   ("C-'" . shell)
-  ;   ("q"   . (lambda () (interactive) (quit-window 4)))))
+  (bind-keys :map dired-mode-map
+    ("SPC" . dired-view-other-window)
+    ("."   . hydra-dired-main/body)
+    ("t"   . dired-next-line)
+    ("s"   . dired-previous-line)
+    ("r"   . dired-find-file)
+    ("c"   . dired-up-directory)
+    ("'"   . eshell-here)
+    ("8"   . dired-mkdir-date)
+    ("9"   . dired-mkdir-date-rstyle)
+    ("C-'" . shell)
+    ("q"   . (lambda () (interactive) (quit-window 4)))))
 
 ;; -------------------------------------------------------
 ;; E
@@ -312,9 +322,6 @@
   :defer 2
   :init (global-evil-matchit-mode 1))
 
-
-
-;;(use-package esup)
 ;; -------------------------------------------------------
 ;; F
 ;; -------------------------------------------------------
@@ -343,51 +350,8 @@
 (use-package general
   :defer 2
   :config
-  (general-define-key
-   :states '(normal visual insert emacs)
-   :prefix "SPC"
-   :non-normal-prefix "C-SPC"
-
-    ;; simple command
-    "'"   '(iterm-focus :which-key "iterm")
-    "?"   '(iterm-goto-filedir-or-home :which-key "iterm - goto dir")
-    "/"   'counsel-ag
-    "TAB" '(switch-to-other-buffer :which-key "prev buffer")
-    "SPC" '(counsel-M-x)
-    "B" 'ivy-switch-buffer
-
-    ;; Applications
-    "a" '(:ignore t :which-key "Applications")
-    "ar" 'ranger
-    "ad" 'dired
-    "ao" 'org-agenda
-    "ac" 'org-capture
-
-    ;; Windows
-    "w" '(:ignore t :which-key "Window")
-    "wd" 'delete-window
-    "wc" 'cycle-my-theme
-    "wt" 'transpose-frame
-    "wg" 'golden-ratio-adjust
-    "w-" 'split-window-below
-    "w|" 'split-window-right
-
-    "b" '(:ignore t :which-key "Buffer")
-    "bi" 'ibuffer
-    "bb" 'helm-buffers-list
-    "bd" 'kill-buffer
-
-     ;; Tools
-    "t" '(:ignore t :which-key "Tools")
-    "tj" 'cider-jack-in
-    "tt" 'neotree-toggle
-
-     ;; Files
-    "f"   '(:ignore t :which-key "files")
-    "ff"  'counsel-find-file
-    "fr"  'counsel-recentf
-    "p"   '(:ignore t :which-key "project")
-    "pf"  '(counsel-git :which-key "find file in git dir")))
+  (load-file "~/.emacs.d/config/general.el")
+  )
 
 (use-package git-timemachine
   :defer t)
@@ -460,10 +424,6 @@
   :init
   (helm-projectile-on))
 
-(use-package helm-google
-  :defer t
-  :commands (helm-google))
-
 (use-package helm-gitignore
   :defer t
   :commands helm-gitignore)
@@ -478,13 +438,8 @@
 (use-package hydra
   :defer t
   :config
+  ;;(load-file "~/.emacs.d/config/hydra.el")
   (setq hydra-is-helpful t))
-
-(use-package hy-mode
-  :defer t
-  :mode (("\\.hy\\'" . hy-mode))
-  :init
-  (add-hook 'hy-mode-hook (lambda () (lispy-mode 1))))
 
 ;; -------------------------------------------------------
 ;; I
@@ -495,20 +450,6 @@
   :init
   (add-hook 'ibuffer-hook (lambda () (ibuffer-switch-to-saved-filter-groups "Default")))
   :config
-  (use-package ibuffer-vc :defer t
-    :config
-    (setq ibuffer-vc-set-filter-groups-by-vc-root t))
-
-  (general-define-key
-   :keymaps 'ibuffer-mode-map
-    "." 'hydra-ibuffer-main/body
-    "t" 'next-line
-    "s" 'previous-line
-    "r" 'ibuffer-visit-buffer
-    "c" 'ibuffer-backward-filter-group
-    "p" 'ibuffer-backward-filter-group
-    "n" 'ibuffer-forward-filter-group)
-
    (setq-default ibuffer-saved-filter-groups
                 `(("Default"
                    ("Org" (mode . org-mode))
@@ -620,7 +561,7 @@
   :commands (ivy-switch-buffer
              ivy-switch-buffer-other-window)
   :config
-  (ivy-mode 1)
+  ;;(ivy-mode 1)
 
   (setq ivy-use-virtual-buffers t)
   (setq ivy-height 10)
@@ -639,64 +580,20 @@
     (if (eq ivy--regex-function
             'ivy--regex-fuzzy)
         "fuzzy"
-      "ivy"))
+      "ivy")))
 
-  (defhydra hydra-ivy (:hint nil
-                       :color pink)
-    "
-^ ^ ^ ^ ^ ^ | ^Call^      ^ ^  | ^Cancel^ | ^Options^ | Action _b_/_é_/_p_: %-14s(ivy-action-name)
-^-^-^-^-^-^-+-^-^---------^-^--+-^-^------+-^-^-------+-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^---------------------------
-^ ^ _s_ ^ ^ | _f_ollow occ_u_r | _i_nsert | _C_: calling %-5s(if ivy-calling \"on\" \"off\") _C-c_ase-fold: %-10`ivy-case-fold-search
-_c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)^^^^^^^^^^^^ _T_runcate: %-11`truncate-lines
-^ ^ _t_ ^ ^ | _g_o        ^ ^  | ^ ^      | _<_/_>_: shrink/grow^^^^^^^^^^^^^^^^^^^^^^^^^^^^ _D_efinition of this menu
-"
-    ;; arrows
-    ("c" ivy-beginning-of-buffer)
-    ("t" ivy-next-line)
-    ("s" ivy-previous-line)
-    ("r" ivy-end-of-buffer)
-    ;; actions
-    ("o" keyboard-escape-quit :exit t)
-    ("C-g" keyboard-escape-quit :exit t)
-    ("i" nil)
-    ("C-o" nil)
-    ("f" ivy-alt-done :exit nil)
-    ("C-j" ivy-alt-done :exit nil)
-    ("d" ivy-done :exit t)
-    ("g" ivy-call)
-    ("C-m" ivy-done :exit t)
-    ("C" ivy-toggle-calling)
-    ("m" ivy-toggle-fuzzy)
-    (">" ivy-minibuffer-grow)
-    ("<" ivy-minibuffer-shrink)
-    ("b" ivy-prev-action)
-    ("é" ivy-next-action)
-    ("p" ivy-read-action)
-    ("T" (setq truncate-lines (not truncate-lines)))
-    ("C-c" ivy-toggle-case-fold)
-    ("u" ivy-occur :exit t)
-    ("D" (ivy-exit-with-action
-          (lambda (_) (find-function 'hydra-ivy/body)))
-     :exit t))
+;; -------------------------------------------------------
+;; K
+;; -------------------------------------------------------
 
-  (defun ivy-switch-project ()
-    (interactive)
-    (ivy-read
-     "Switch to project: "
-     (if (projectile-project-p)
-         (cons (abbreviate-file-name (projectile-project-root))
-               (projectile-relevant-known-projects))
-       projectile-known-projects)
-     :action #'projectile-switch-project-by-name))
+  ;; Key chords
+  (use-package key-chord
+    :defer t
+    :config
+    (setq key-chord-two-keys-delay 0.2)
+    )
 
-  (global-set-key (kbd "C-c m") 'ivy-switch-project)
-
-  (ivy-set-actions
-   'ivy-switch-project
-   '(("d" dired "Open Dired in project's directory")
-     ("v" counsel-projectile "Open project root in vc-dir or magit")
-     ("c" projectile-compile-project "Compile project")
-     ("r" projectile-remove-known-project "Remove project(s)"))))
+  (use-package key-seq :defer t)
 
 ;; -------------------------------------------------------
 ;; M
@@ -734,15 +631,6 @@ _c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)
   (use-package magit-popup :defer t)
   (use-package git-commit :defer t)
 
-  (use-package magit-gitflow :defer t
-    :commands
-    turn-on-magit-gitflow
-    :general
-    (:keymaps 'magit-mode-map
-     "%" 'magit-gitflow-popup)
-    :init
-    (add-hook 'magit-mode-hook 'turn-on-magit-gitflow))
-
   (setq magit-completing-read-function 'ivy-completing-read))
 
 ;; markdown mode
@@ -753,62 +641,6 @@ _c_ ^+^ _r_ | _d_one      ^ ^  | _o_ops   | _m_: matcher %-5s(ivy--matcher-desc)
          ("README\\'"   . markdown-mode))
   :config
   (add-hook 'markdown-mode-hook (lambda () (auto-fill-mode 0)))
-
-  (defhydra hydra-markdown (:hint nil)
-    "
-Formatting         _s_: bold          _e_: italic     _b_: blockquote   _p_: pre-formatted    _c_: code
-Headings           _h_: automatic     _1_: h1         _2_: h2           _3_: h3               _4_: h4
-Lists              _m_: insert item
-Demote/Promote     _l_: promote       _r_: demote     _U_: move up      _D_: move down
-Links, footnotes   _L_: link          _U_: uri        _F_: footnote     _W_: wiki-link      _R_: reference
-undo               _u_: undo
-"
-
-
-    ("s" markdown-insert-bold)
-    ("e" markdown-insert-italic)
-    ("b" markdown-insert-blockquote :color blue)
-    ("p" markdown-insert-pre :color blue)
-    ("c" markdown-insert-code)
-
-    ("h" markdown-insert-header-dwim)
-    ("1" markdown-insert-header-atx-1)
-    ("2" markdown-insert-header-atx-2)
-    ("3" markdown-insert-header-atx-3)
-    ("4" markdown-insert-header-atx-4)
-
-    ("m" markdown-insert-list-item)
-
-    ("l" markdown-promote)
-    ("r" markdown-demote)
-    ("D" markdown-move-down)
-    ("U" markdown-move-up)
-
-    ("L" markdown-insert-link :color blue)
-    ("U" markdown-insert-uri :color blue)
-    ("F" markdown-insert-footnote :color blue)
-    ("W" markdown-insert-wiki-link :color blue)
-    ("R" markdown-insert-reference-link-dwim :color blue)
-
-    ("u" undo :color teal)
-    )
-
-  (general-define-key
-   :keymaps 'markdown-mode-map
-   :prefix "C-,"
-    "," 'hydra-markdown/body
-    "=" 'markdown-promote
-    "°" 'markdown-promote-subtree
-    "-" 'markdown-demote
-    "8" 'markdown-demote-subtree
-    "o" 'markdown-follow-thing-at-point
-    "j" 'markdown-jump
-    "»" 'markdown-indent-region
-    "«" 'markdown-exdent-region
-    "gc" 'markdown-forward-same-level
-    "gr" 'markdown-backward-same-level
-    "gs" 'markdown-up-heading)
-
   (which-key-add-major-mode-key-based-replacements 'markdown-mode
     "C-c C-a" "insert"
     "C-c C-c" "export"
@@ -825,6 +657,7 @@ undo               _u_: undo
 (use-package neotree
   :defer t
   :config
+  (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
   (add-hook 'neotree-mode-hook
             (lambda ()
               (define-key evil-normal-state-local-map (kbd "TAB") 'neotree-enter)
@@ -863,42 +696,14 @@ undo               _u_: undo
   (setq wg-morph-on nil)                ; switch off animation ?
   (setq persp-autokill-buffer-on-remove 'kill-weak)
   (setq persp-nil-name "nil")
-
-  (defhydra hydra-persp (:hint nil :color blue)
-    "
-^Nav^        ^Buffer^      ^Window^     ^Manage^      ^Save/load^
-^---^        ^------^      ^------^     ^------^      ^---------^
-_n_: next    _a_: add      ^ ^          _r_: rename   _w_: save
-_p_: prev    _b_: → to     ^ ^          _c_: copy     _W_: save subset
-_s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
-^ ^          ^ ^           ^ ^          ^ ^           _L_: load subset
-"
-    ("n" persp-next :color red)
-    ("p" persp-prev :color red)
-    ("s" persp-switch)
-    ("S" persp-window-switch)
-    ("r" persp-rename)
-    ("c" persp-copy)
-    ("C" persp-kill)
-    ("a" persp-add-buffer)
-    ("b" persp-switch-to-buffer)
-    ("i" persp-import-buffers-from)
-    ("I" persp-import-win-conf)
-    ("o" persp-mode)
-    ("w" persp-save-state-to-file)
-    ("W" persp-save-to-file-by-names)
-    ("l" persp-load-state-from-file)
-    ("L" persp-load-from-file-by-names)
-    ("q" nil "quit"))
-
   (global-set-key (kbd "H-p") 'persp-prev)
   (global-set-key (kbd "H-n") 'persp-next))
 
 ;; popwin
 (use-package popwin
-  :defer t
-  :config
-  (popwin-mode 1))
+  :defer t)
+  ;;:config
+  ;;(popwin-mode 1))
 
 (use-package powerline-evil)
 
@@ -930,7 +735,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
          ("s-b" . projectile-switch-to-buffer))
   :config
   (projectile-global-mode 1)
-  (helm-projectile-on)
+  (helm-projectile-on))
 
   (use-package org-projectile
     :defer t
@@ -938,52 +743,11 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
     (org-projectile:per-repo)
     (setq org-projectile:per-repo-filename "project_todo.org")
     (setq org-agenda-files (append org-agenda-files (org-projectile:todo-files)))
-    (add-to-list 'org-capture-templates (org-projectile:project-todo-entry "p")))
+    (add-to-list 'org-capture-templates (org-projectile:project-todo-entry "p"))
+    (setq projectile-switch-project-action 'projectile-dired)
+    (setq projectile-completion-system 'ivy)
+    (add-to-list 'projectile-globally-ignored-files ".DS_Store"))
 
-  (setq projectile-switch-project-action 'projectile-dired)
-  (setq projectile-completion-system 'ivy)
-  (add-to-list 'projectile-globally-ignored-files ".DS_Store")
-  (defun hydra-projectile-if-projectile-p ()
-    (interactive)
-    (if (projectile-project-p)
-        (hydra-projectile/body)
-      (counsel-projectile)))
-
-  (defhydra hydra-projectile
-    (:color teal :hint nil
-     :pre (projectile-mode))
-    "
-     PROJECTILE: %(projectile-project-root)
-    ^FIND FILE^        ^SEARCH/TAGS^        ^BUFFERS^       ^CACHE^                    ^PROJECT^
-    _f_: file          _a_: ag              _i_: Ibuffer    _c_: cache clear           _p_: switch proj
-    _F_: file dwim     _g_: update gtags    _b_: switch to  _x_: remove known project
-  _C-f_: file pwd      _o_: multi-occur   _s-k_: Kill all   _X_: cleanup non-existing
-    _r_: recent file   ^ ^                  ^ ^             _z_: cache current
-    _d_: dir
-   ^SHELL^
-   _e_: eshell
-"
-    ("e"   projectile-run-eshell)
-    ("a"   projectile-ag)
-    ("b"   projectile-switch-to-buffer)
-    ("c"   projectile-invalidate-cache)
-    ("d"   projectile-find-dir)
-    ("f"   projectile-find-file)
-    ("F"   projectile-find-file-dwim)
-    ("C-f" projectile-find-file-in-directory)
-    ("g"   ggtags-update-tags)
-    ("s-g" ggtags-update-tags)
-    ("i"   projectile-ibuffer)
-    ("K"   projectile-kill-buffers)
-    ("s-k" projectile-kill-buffers)
-    ("m"   projectile-multi-occur)
-    ("o"   projectile-multi-occur)
-    ("p"   projectile-switch-project)
-    ("r"   projectile-recentf)
-    ("x"   projectile-remove-known-project)
-    ("X"   projectile-cleanup-known-projects)
-    ("z"   projectile-cache-current-file)
-    ("q"   nil "cancel" :color blue)))
 
 (use-package python
   :defer t
@@ -1076,27 +840,6 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
   :bind* (("C-c t" . hydra-tile/body)
           ("s-t" . tile))
   :config
-  (defhydra hydra-tile (:hint nil :color red :columns 4
-                        :body-pre (winner-mode 1))
-    "tile "
-    ("a" (tile :strategy tile-tall-3) "tall 3")
-    ("u" (tile :strategy (tile-split-n-tall 4)) "tall 4")
-    ("i" (tile :strategy (tile-split-n-wide 2)) "wide 2")
-    ("e" (tile :strategy (tile-split-n-wide 3)) "wide 3")
-    ("c" (tile :strategy tile-master-left-3) "left 3")
-    ("t" (tile :strategy tile-master-bottom-3) "bottom 3")
-    ("s" (tile :strategy tile-master-top-3) "top 3")
-    ("r" (tile :strategy tile-master-right-3) "right 3")
-
-    ("m" tile-select "chose")
-    ("w" (tile :strategy tile-one) "one")
-    ("n" tile "tile")
-    ("C-u" winner-undo "undo")
-    ("M-u" winner-redo "redo")
-    ("é" hydra-window/body "windows" :color blue)
-
-    ("q" nil :color blue "quit"))
-
   (setq tile-cycler
         (tile-strategies :strategies
           (list tile-tall-3
@@ -1128,7 +871,7 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; -------------------------------------------------------
 ;; Which-Key - displays available keybindings in popup
 ;; https://github.com/justbur/emacs-which-key
-(use-package which-key :defer t
+(use-package which-key
   :diminish which-key-mode
   :config
   (which-key-mode)
@@ -1139,7 +882,21 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
         which-key-side-window-max-height 0.5
         which-key-side-window-max-width 0.33
         which-key-idle-delay 0.5
-        which-key-min-display-lines 7))
+        which-key-min-display-lines 7)
+  ;; key description for C-x
+  (which-key-add-key-based-replacements
+  "C-x RET" "coding system -input"
+  "C-x 4"   "Other Window"
+  "C-x 5"   "Frame"
+  "C-x 6"   "2C"
+  "C-x @"   "event"
+  "C-x 8"   "special char"
+  "C-x a"   "abbrev"
+  "C-x n"   "narrow"
+  "C-x r"   "rectangle"
+  "C-x v"   "version control"
+  "C-c &"   "yas"
+  "C-c @"   "hide-show"))
 
 (use-package window-numbering :defer t
   :commands
@@ -1196,15 +953,15 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
 
 ;; OSX specific settings
-(when (eq system-type 'darwin)
-  (load "~/.emacs.d/config/osx"))
+;;(when (eq system-type 'darwin)
+;;  (load "~/.emacs.d/config/osx"))
 
 ;; date and time in status bar
 (setq display-time-day-and-date t
       display-time-24hr-format t)
 (display-time)
 
-(setq frame-title-format "Some days you eat the bear, some days the bear eats you.")
+
 (setq version-control t )   ; use version control
 (setq vc-make-backup-files t )    ; make backups file even when in version controlled dir
 (setq backup-directory-alist `(("." . "~/.emacs.d/backups")) ) ; which directory to put backups file
@@ -1241,24 +998,10 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (setq custom-safe-themes t)
 (set-frame-font "Ubuntu Mono-14")
 
-;;(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-
 (require 'color-theme-sanityinc-solarized)
 (color-theme-sanityinc-tomorrow-night)
 
-(setq dashboard-items '((recents  . 5)
-                        (bookmarks . 5)
-                        (projects . 5)))
-                       ;; (agenda . 5)))
-
-;; Set the title
-(setq dashboard-banner-logo-title "Welcome to BearMode")
-;; Set the banner
-(setq dashboard-startup-banner "~/.emacs.d/themes/bear.png")
-
 (message "***** Loading Additional Config Files: %s" (current-time-string))
-;;(load "~/.emacs.d/config/custom")
-(load "~/.emacs.d/config/keybindings")
 
 ;; go full screen
 (toggle-frame-maximized)
