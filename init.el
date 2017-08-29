@@ -201,6 +201,11 @@
   :config
   (setq my-color-themes (list 'gruvbox 'leuven)))
 
+(use-package color-theme-sanityinc-solarized :defer t)
+
+(use-package color-theme-sanityinc-tomorrow :defer t)
+
+
 ;; -------------------------------------------------------
 ;; D
 ;; -------------------------------------------------------
@@ -1002,49 +1007,50 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 ;; Rainbow Mode
 
 (use-package rainbow-mode
-  :defer t
+  :defer 6
   :diminish rainbow-mode
   :init (rainbow-mode))
 
 (use-package rainbow-delimiters
-  :defer t
+  :defer 6
   :commands rainbow-delimiters-mode
   :init
   (add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
 
 (use-package recentf
-  :defer t
+  :defer 4
   :commands (recentf-mode
              counsel-recentf)
   :config
   (setq recentf-max-saved-items 50))
 
 (use-package restart-emacs
-  :defer t
+  :defer 10
   :commands restart-emacs)
 
 ;; -------------------------------------------------------
 ;; S
 ;; -------------------------------------------------------
 
-(use-package smart-mode-line)
-
+(use-package smart-mode-line
+:config
 (setq sml/no-confirm-load-theme t)
 (setq sml/theme nil)
-(add-hook 'after-init-hook #'sml/setup)
+:init
+(add-hook 'after-init-hook #'sml/setup))
 
 (use-package smartparens
   :defer t
   :config
   (progn
     (require 'smartparens-config)
-    (smartparens-global-mode 1)))
-
-(define-key smartparens-mode-map (kbd "C-<right>") 'sp-forward-slurp-sexp)
-(define-key smartparens-mode-map (kbd "C-<left>") 'sp-forward-barf-sexp)
-(define-key smartparens-mode-map (kbd "C-M-<left>") 'sp-backward-slurp-sexp)
-(define-key smartparens-mode-map (kbd "C-M-<right>") 'sp-backward-barf-sexp)
+    (smartparens-global-mode 1))
+  :init
+  (define-key smartparens-mode-map (kbd "C-<right>") 'sp-forward-slurp-sexp)
+  (define-key smartparens-mode-map (kbd "C-<left>") 'sp-forward-barf-sexp)
+  (define-key smartparens-mode-map (kbd "C-M-<left>") 'sp-backward-slurp-sexp)
+  (define-key smartparens-mode-map (kbd "C-M-<right>") 'sp-backward-barf-sexp))
 
 ;; SMEX
 (use-package smex
@@ -1190,8 +1196,8 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
 
 ;; OSX specific settings
-;;(when (eq system-type 'darwin)
-;;  (load "~/.emacs.d/config/osx"))
+(when (eq system-type 'darwin)
+  (load "~/.emacs.d/config/osx"))
 
 ;; date and time in status bar
 (setq display-time-day-and-date t
@@ -1235,9 +1241,10 @@ _s_: → to    _i_: import   _S_: → to    _C_: kill     _l_: load
 (setq custom-safe-themes t)
 (set-frame-font "Ubuntu Mono-14")
 
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+;;(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 
-(color-theme-sanityinc-solarized-light)
+(require 'color-theme-sanityinc-solarized)
+(color-theme-sanityinc-tomorrow-night)
 
 (setq dashboard-items '((recents  . 5)
                         (bookmarks . 5)
