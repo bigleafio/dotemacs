@@ -209,3 +209,8 @@
     "c" 'ibuffer-backward-filter-group
     "p" 'ibuffer-backward-filter-group
     "n" 'ibuffer-forward-filter-group)
+
+    (general-define-key
+   :keymaps 'eshell-mode-map
+    "<tab>" (lambda () (interactive) (pcomplete-std-complete))
+    "C-'" (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window)))

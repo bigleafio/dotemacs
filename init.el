@@ -53,8 +53,8 @@
 ;; -------------------------------------------------------
 ;; A
 ;; -------------------------------------------------------
-(use-package avy
-  :defer 2)
+;;(use-package avy
+;;  :defer 2)
 
 ;; autocomplete editor
 (use-package auto-complete
@@ -62,13 +62,14 @@
   :diminish auto-complete-mode
   :config (ac-config-default))
 
-(use-package ag :defer t
-  :commands (ag)
-  :config
-  (progn
-    (setq ag-highlight-search t)
-    (setq ag-reuse-buffers t)
-    (add-to-list 'ag-arguments "--word-regexp")))
+; (use-package ag
+;   :defer 8
+;   :commands (ag)
+;   :config
+;   (progn
+;     (setq ag-highlight-search t)
+;     (setq ag-reuse-buffers t)
+;     (add-to-list 'ag-arguments "--word-regexp")))
 
 (use-package all-the-icons
   :defer t)
@@ -155,30 +156,30 @@
            company-keywords))))
 
 ;;Completion functions using Ivy
-(use-package counsel
-  :defer t
-  :bind*
-  (("M-x"     . counsel-M-x)
-   ("C-x C-f" . counsel-find-file)
-   ("C-c f"   . counsel-git)
-   ("C-c s"   . counsel-git-grep)
-   ("C-c /"   . counsel-ag)
-   ("C-c o"   . counsel-find-file-extern)
-   ("C-S-s"   . counsel-ag)
-   ("C-c l"   . counsel-locate))
-  :config
-  (setq counsel-find-file-at-point t)
-  (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
-  (setq counsel-find-file-ignore-regexp "\\.DS_Store\\|.git"))
+; (use-package counsel
+;   :defer t
+;   :bind*
+;   (("M-x"     . counsel-M-x)
+;    ("C-x C-f" . counsel-find-file)
+;    ("C-c f"   . counsel-git)
+;    ("C-c s"   . counsel-git-grep)
+;    ("C-c /"   . counsel-ag)
+;    ("C-c o"   . counsel-find-file-extern)
+;    ("C-S-s"   . counsel-ag)
+;    ("C-c l"   . counsel-locate))
+;   :config
+;   (setq counsel-find-file-at-point t)
+;   (setq counsel-locate-cmd 'counsel-locate-cmd-mdfind)
+;   (setq counsel-find-file-ignore-regexp "\\.DS_Store\\|.git"))
 
-(use-package counsel-projectile
-  :defer t
-  :bind* (("H-P" . counsel-projectile-switch-to-buffer)
-          ("H-p" . counsel-projectile))
-  :config
-  (counsel-projectile-on))
+; (use-package counsel-projectile
+;   :defer t
+;   :bind* (("H-P" . counsel-projectile-switch-to-buffer)
+;           ("H-p" . counsel-projectile))
+;   :config
+;   (counsel-projectile-on))
 
-(use-package counsel-gtags :defer t)
+;;(use-package counsel-gtags :defer t)
 
 (use-package clojure-mode
   :defer t
@@ -187,7 +188,7 @@
   (add-hook 'clojure-mode-hook #'smartparens-strict-mode)
   (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode))
 
-(use-package clojure-cheatsheet :defer 10)
+;;(use-package clojure-cheatsheet :defer 10)
 
 (use-package cider
   :defer t
@@ -199,18 +200,16 @@
 
 (use-package color-theme
   :config
-  (setq my-color-themes (list 'gruvbox 'leuven)))
-
-(use-package color-theme-sanityinc-solarized :defer t)
-
-(use-package color-theme-sanityinc-tomorrow :defer t)
+  (setq my-color-themes (list 'gruvbox 'leuven))
+  (use-package color-theme-sanityinc-solarized :defer t)
+  (use-package color-theme-sanityinc-tomorrow :defer t))
 
 
 ;; -------------------------------------------------------
 ;; D
 ;; -------------------------------------------------------
 
-(use-package page-break-lines
+(use-package page-break-lines :defer t
   :diminish "")
 
 (use-package dashboard
@@ -234,43 +233,43 @@
            (setq deft-directory "~/Dropbox/Documents/Organizer")
    :bind ("<f7>" . deft))
 
-(use-package dired
-  :defer t
-  :bind* (("C-x d" . dired-other-window)
-          ("C-x C-d" . dired))
-  :commands (dired)
-  :config
-  (setq dired-use-ls-dired nil)
-  (use-package dired-x
-    :bind* (("C-x C-'" . dired-jump))
-    :commands (dired-omit-mode)
-    :init
-    (add-hook 'dired-load-hook (lambda () (load "dired-x")))
-    (add-hook 'dired-mode-hook #'dired-omit-mode)
-    :config
-    (setq dired-omit-verbose nil)
-    (setq dired-omit-files
-          (concat dired-omit-files "\\|^\\..*$\\|^.DS_Store$\\|^.projectile$\\|^.git$")))
+; (use-package dired
+;   :defer t
+;   :bind* (("C-x d" . dired-other-window)
+;           ("C-x C-d" . dired))
+;   :commands (dired)
+;   :config
+;   (setq dired-use-ls-dired nil)
+;   (use-package dired-x
+;     :bind* (("C-x C-'" . dired-jump))
+;     :commands (dired-omit-mode)
+;     :init
+;     (add-hook 'dired-load-hook (lambda () (load "dired-x")))
+;     (add-hook 'dired-mode-hook #'dired-omit-mode)
+;     :config
+;     (setq dired-omit-verbose nil)
+;     (setq dired-omit-files
+;           (concat dired-omit-files "\\|^\\..*$\\|^.DS_Store$\\|^.projectile$\\|^.git$")))
 
-  (use-package dired-details+
-    :ensure t
-    :config
-    (dired-details-install)
-    (setq-default dired-details-hidden-string " --- "
-                  dired-details-hide-link-targets nil))
+;   (use-package dired-details+
+;     :ensure t
+;     :config
+;     (dired-details-install)
+;     (setq-default dired-details-hidden-string " --- "
+;                   dired-details-hide-link-targets nil))
 
-  (bind-keys :map dired-mode-map
-    ("SPC" . dired-view-other-window)
-    ("."   . hydra-dired-main/body)
-    ("t"   . dired-next-line)
-    ("s"   . dired-previous-line)
-    ("r"   . dired-find-file)
-    ("c"   . dired-up-directory)
-    ("'"   . eshell-here)
-    ("8"   . dired-mkdir-date)
-    ("9"   . dired-mkdir-date-rstyle)
-    ("C-'" . shell)
-    ("q"   . (lambda () (interactive) (quit-window 4)))))
+;   (bind-keys :map dired-mode-map
+;     ("SPC" . dired-view-other-window)
+;     ("."   . hydra-dired-main/body)
+;     ("t"   . dired-next-line)
+;     ("s"   . dired-previous-line)
+;     ("r"   . dired-find-file)
+;     ("c"   . dired-up-directory)
+;     ("'"   . eshell-here)
+;     ("8"   . dired-mkdir-date)
+;     ("9"   . dired-mkdir-date-rstyle)
+;     ("C-'" . shell)
+;     ("q"   . (lambda () (interactive) (quit-window 4)))))
 
 ;; -------------------------------------------------------
 ;; E
@@ -313,14 +312,17 @@
         eshell-list-files-after-cd t
         eshell-ls-initial-args "-alh")
 
-  (general-define-key
-   :keymaps 'eshell-mode-map
-    "<tab>" (lambda () (interactive) (pcomplete-std-complete))
-    "C-'" (lambda () (interactive) (insert "exit") (eshell-send-input) (delete-window))))
+)
 
 (use-package evil-matchit
   :defer 2
   :init (global-evil-matchit-mode 1))
+
+(use-package exec-path-from-shell
+  :if (memq window-system '(mac ns))
+  :ensure t
+  :config
+  (exec-path-from-shell-initialize))
 
 ;; -------------------------------------------------------
 ;; F
@@ -328,7 +330,7 @@
 
 ; flycheck
 (use-package flycheck
-  :defer 2
+  :defer t
   :commands flycheck-mode
   :diminish (flycheck-mode . "ⓕ")
   :config
@@ -338,47 +340,47 @@
 ;; G
 ;; -------------------------------------------------------
 
-(use-package ggtags
-  :defer t
-  :commands (ggtags-mode)
-  :config
-  (general-define-key :keymaps 'ggtags-mode-map
-    "M-s-," 'ggtags-navigation-mode-abort
-    "M-s-." 'ggtags-find-tag-dwim))
+; (use-package ggtags
+;   :defer t
+;   :commands (ggtags-mode)
+;   :config
+;   (general-define-key :keymaps 'ggtags-mode-map
+;     "M-s-," 'ggtags-navigation-mode-abort
+;     "M-s-." 'ggtags-find-tag-dwim))
 
 ;; General
 (use-package general
-  :defer 2
+  :ensure which-key
   :config
   (load-file "~/.emacs.d/config/general.el")
   )
 
-(use-package git-timemachine
-  :defer t)
+; (use-package git-timemachine
+;   :defer t)
 
-(use-package git-gutter
-  :defer t
-  :commands (global-git-gutter-mode)
-  :init
-  (global-git-gutter-mode +1)
-  (setq git-gutter:modified-sign "|")
-  (setq git-gutter:added-sign "|")
-  (setq git-gutter:deleted-sign "|")
-  :config
-  (setq git-gutter:update-interval 20)
-  (git-gutter:linum-setup))
+; (use-package git-gutter
+;   :defer t
+;   :commands (global-git-gutter-mode)
+;   :init
+;   (global-git-gutter-mode +1)
+;   (setq git-gutter:modified-sign "|")
+;   (setq git-gutter:added-sign "|")
+;   (setq git-gutter:deleted-sign "|")
+;   :config
+;   (setq git-gutter:update-interval 20)
+;   (git-gutter:linum-setup))
 
-;; git gutter
-(use-package git-gutter-fringe
-  :defer t
-  :if window-system
-  :diminish git-gutter-mode
-  :config (global-git-gutter-mode))
+; ;; git gutter
+; (use-package git-gutter-fringe
+;   :defer t
+;   :if window-system
+;   :diminish git-gutter-mode
+;   :config (global-git-gutter-mode))
 
-(use-package goto-chg
-  :defer t
-  :commands (goto-last-change
-             goto-last-change-reverse))
+; (use-package goto-chg
+;   :defer t
+;   :commands (goto-last-change
+;              goto-last-change-reverse))
 
 ;; -------------------------------------------------------
 ;; H
@@ -410,12 +412,12 @@
   (setq helm-autoresize-max-height 0)
   (setq helm-autoresize-min-height 20))
 
-(use-package helm-make
-  :defer t
-  :bind* (("C-c C" . helm-make)
-          ("C-c p c" . helm-make-projectile))
-  :config
-  (setq helm-make-completion-method 'ivy))
+; (use-package helm-make
+;   :defer t
+;   :bind* (("C-c C" . helm-make)
+;           ("C-c p c" . helm-make-projectile))
+;   :config
+;   (setq helm-make-completion-method 'ivy))
 
 (use-package helm-projectile
   :defer t
@@ -435,11 +437,11 @@
   :init
   (add-hook 'prog-mode-hook 'hs-minor-mode))
 
-(use-package hydra
-  :defer t
-  :config
-  ;;(load-file "~/.emacs.d/config/hydra.el")
-  (setq hydra-is-helpful t))
+; (use-package hydra
+;   :defer t
+;   :config
+;   ;;(load-file "~/.emacs.d/config/hydra.el")
+;   (setq hydra-is-helpful t))
 
 ;; -------------------------------------------------------
 ;; I
@@ -471,15 +473,15 @@
   (setq ibuffer-show-empty-filter-groups nil)
   (setq ibuffer-display-summary t))
 
-(use-package ibuffer-vc
-  :requires ibuffer
-  :defer t
-  :config
-  (add-hook 'ibuffer-hook
-      (lambda ()
-        (ibuffer-vc-set-filter-groups-by-vc-root)
-        (unless (eq ibuffer-sorting-mode 'alphabetic)
-    (ibuffer-do-sort-by-alphabetic)))))
+; (use-package ibuffer-vc
+;   :requires ibuffer
+;   :defer t
+;   :config
+;   (add-hook 'ibuffer-hook
+;       (lambda ()
+;         (ibuffer-vc-set-filter-groups-by-vc-root)
+;         (unless (eq ibuffer-sorting-mode 'alphabetic)
+;     (ibuffer-do-sort-by-alphabetic)))))
 
 
 ; (use-package info
@@ -555,32 +557,32 @@
                   (not (file-exists-p (concat (file-name-as-directory fdir) "dir"))))
         (add-to-list 'Info-directory-list fdir)))))
 
-(use-package ivy
-  :defer 2
-  :diminish (ivy-mode . "")
-  :commands (ivy-switch-buffer
-             ivy-switch-buffer-other-window)
-  :config
-  ;;(ivy-mode 1)
+; (use-package ivy
+;   :defer 2
+;   :diminish (ivy-mode . "")
+;   :commands (ivy-switch-buffer
+;              ivy-switch-buffer-other-window)
+;   :config
+;   ;;(ivy-mode 1)
 
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-height 10)
-  (setq ivy-count-format "(%d/%d) ")
-  (setq ivy-initial-inputs-alist nil)
-  ;; from https://github.com/company-mode/company-statistics
-  ;; ignore buffers in the ignore buffer list.
-  (setq ivy-use-ignore-default 'always)
-  (setq ivy-ignore-buffers '("company-statistics-cache.el" "company-statistics-autoload.el"))
-  ;; if ivy-flip is t, presents results on top of query.
-  (setq ivy-flip t)
-  (setq ivy-overlay-at nil)
-  (setq ivy-re-builders-alist '((t      . ivy--regex-ignore-order)))
+;   (setq ivy-use-virtual-buffers t)
+;   (setq ivy-height 10)
+;   (setq ivy-count-format "(%d/%d) ")
+;   (setq ivy-initial-inputs-alist nil)
+;   ;; from https://github.com/company-mode/company-statistics
+;   ;; ignore buffers in the ignore buffer list.
+;   (setq ivy-use-ignore-default 'always)
+;   (setq ivy-ignore-buffers '("company-statistics-cache.el" "company-statistics-autoload.el"))
+;   ;; if ivy-flip is t, presents results on top of query.
+;   (setq ivy-flip t)
+;   (setq ivy-overlay-at nil)
+;   (setq ivy-re-builders-alist '((t      . ivy--regex-ignore-order)))
 
-  (defun ivy--matcher-desc ()
-    (if (eq ivy--regex-function
-            'ivy--regex-fuzzy)
-        "fuzzy"
-      "ivy")))
+;   (defun ivy--matcher-desc ()
+;     (if (eq ivy--regex-function
+;             'ivy--regex-fuzzy)
+;         "fuzzy"
+;       "ivy")))
 
 ;; -------------------------------------------------------
 ;; K
@@ -588,7 +590,6 @@
 
   ;; Key chords
   (use-package key-chord
-    :defer t
     :config
     (setq key-chord-two-keys-delay 0.2)
     )
@@ -600,38 +601,38 @@
 ;; -------------------------------------------------------
 
 ;; magit
-(use-package magit
-  :defer t
-  :commands (magit-blame
-             magit-commit
-             magit-commit-popup
-             magit-diff-popup
-             magit-diff-unstaged
-             magit-fetch-popup
-             magit-init
-             magit-log-popup
-             magit-pull-popup
-             magit-push-popup
-             magit-revert
-             magit-stage-file
-             magit-status
-             magit-unstage-file
-             magit-blame-mode)
-  :bind (("s-v" . magit-status))
+; (use-package magit
+;   :defer t
+;   :commands (magit-blame
+;              magit-commit
+;              magit-commit-popup
+;              magit-diff-popup
+;              magit-diff-unstaged
+;              magit-fetch-popup
+;              magit-init
+;              magit-log-popup
+;              magit-pull-popup
+;              magit-push-popup
+;              magit-revert
+;              magit-stage-file
+;              magit-status
+;              magit-unstage-file
+;              magit-blame-mode)
+;   :bind (("s-v" . magit-status))
 
-  :config
-  (use-package git-modes :defer t)
+;   :config
+;   (use-package git-modes :defer t)
 
-  (global-git-commit-mode)
+;   (global-git-commit-mode)
 
-  (general-define-key
-   :keymaps 'magit-mode-map
-    "'" #'eshell-here)
+;   (general-define-key
+;    :keymaps 'magit-mode-map
+;     "'" #'eshell-here)
 
-  (use-package magit-popup :defer t)
-  (use-package git-commit :defer t)
+;   (use-package magit-popup :defer t)
+;   (use-package git-commit :defer t)
 
-  (setq magit-completing-read-function 'ivy-completing-read))
+;   (setq magit-completing-read-function 'ivy-completing-read))
 
 ;; markdown mode
 
@@ -679,9 +680,9 @@
 ;; P
 ;; -------------------------------------------------------
 
-(use-package paradox :defer 2
-  :commands (paradox-list-packages
-             package-list-packages))
+; (use-package paradox :defer 2
+;   :commands (paradox-list-packages
+;              package-list-packages))
 
 ;;(global-prettify-symbols-mode +1)
 
@@ -737,16 +738,16 @@
   (projectile-global-mode 1)
   (helm-projectile-on))
 
-  (use-package org-projectile
-    :defer t
-    :config
-    (org-projectile:per-repo)
-    (setq org-projectile:per-repo-filename "project_todo.org")
-    (setq org-agenda-files (append org-agenda-files (org-projectile:todo-files)))
-    (add-to-list 'org-capture-templates (org-projectile:project-todo-entry "p"))
-    (setq projectile-switch-project-action 'projectile-dired)
-    (setq projectile-completion-system 'ivy)
-    (add-to-list 'projectile-globally-ignored-files ".DS_Store"))
+  ; (use-package org-projectile
+  ;   :defer t
+  ;   :config
+  ;   (org-projectile:per-repo)
+  ;   (setq org-projectile:per-repo-filename "project_todo.org")
+  ;   (setq org-agenda-files (append org-agenda-files (org-projectile:todo-files)))
+  ;   (add-to-list 'org-capture-templates (org-projectile:project-todo-entry "p"))
+  ;   (setq projectile-switch-project-action 'projectile-dired)
+  ;   (setq projectile-completion-system 'ivy)
+  ;   (add-to-list 'projectile-globally-ignored-files ".DS_Store"))
 
 
 (use-package python
@@ -824,12 +825,12 @@
   ("M-X" . smex-major-mode-commands)
   ("C-c M-x" . execute-extended-command))
 
- (use-package swiper :defer t
-   :bind* (("M-s" . swiper)
-           ("M-S" . swiper-all)
-           :map swiper-map
-           ("C-s" . ivy-previous-history-element)
-           ("C-t" . ivy-yank-word)))
+ ; (use-package swiper :defer t
+ ;   :bind* (("M-s" . swiper)
+ ;           ("M-S" . swiper-all)
+ ;           :map swiper-map
+ ;           ("C-s" . ivy-previous-history-element)
+ ;           ("C-t" . ivy-yank-word)))
 
 ;; -------------------------------------------------------
 ;; T
@@ -871,7 +872,7 @@
 ;; -------------------------------------------------------
 ;; Which-Key - displays available keybindings in popup
 ;; https://github.com/justbur/emacs-which-key
-(use-package which-key
+(use-package which-key :ensure t
   :diminish which-key-mode
   :config
   (which-key-mode)
@@ -962,8 +963,8 @@
 (display-time)
 
 
-(setq version-control t )   ; use version control
-(setq vc-make-backup-files t )    ; make backups file even when in version controlled dir
+;;(setq version-control t )   ; use version control
+;;(setq vc-make-backup-files t )    ; make backups file even when in version controlled dir
 (setq backup-directory-alist `(("." . "~/.emacs.d/backups")) ) ; which directory to put backups file
 (setq delete-old-versions t)
 (setq vc-follow-symlinks t )               ; don't ask for confirmation when opening symlinked file
