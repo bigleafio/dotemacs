@@ -28,7 +28,7 @@ config/custom.el
 ac-comphist.dat
 
 ac-comphist.dat
-
+elps/
 emms/cache
 
 emms/history

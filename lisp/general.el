@@ -25,7 +25,7 @@
     "wt" 'transpose-frame
     "wg" 'golden-ratio-adjust
     "w-" 'split-window-below
-    "w|" 'split-window-right
+    "w|" 'split-window-rightƒ
 
     "b" '(:ignore t :which-key "Buffer")
     "bi" 'ibuffer
