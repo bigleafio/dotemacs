@@ -11,7 +11,7 @@
 
 To load this, run =(org-babel-load-file "~/emacs.org")=.
 
-* About me
+** About me
   
 ** Personal information
 #+BEGIN_SRC emacs-lisp
@@ -43,8 +43,8 @@ Set up packages
 (menu-bar-mode   1)
 
 (add-to-list 'default-frame-alist '(font . "PragmataPro"))
-(add-to-list 'default-frame-alist '(height . 24))
-(add-to-list 'default-frame-alist '(width . 80))
+;;(add-to-list 'default-frame-alist '(height . 24))
+;;(add-to-list 'default-frame-alist '(width . 80))
 
 #+END_SRC
 
@@ -192,7 +192,29 @@ Set up Neotree
  )
 #+END_SRC
 
+** Disable Backups 
+#+BEGIN_SRC emacs-lisp
+;; Disable backup files
+(setq make-backup-files nil) ; stop creating backup~ files
+(setq auto-save-default nil) ; stop creating #autosave# files
+#+END_SRC
+
+
 * Org Mode
+** Rebuild on save
+
+#+BEGIN_SRC emacs-lisp
+;; NeoTree
+
+(defun my/tangle-dotfiles ()
+  "If the current file is in '~/.emacs.d', the code blocks are tangled"
+  (when (equal (file-name-directory (directory-file-name buffer-file-name))
+               (concat (getenv "HOME") "/.emacs.d/"))
+    (org-babel-tangle)
+    (message "%s tangled" buffer-file-name)))
+
+(add-hook 'after-save-hook #'my/tangle-dotfiles)
+#+END_SRC 
 
 ** Set up org-capture
 
