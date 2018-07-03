@@ -7,6 +7,11 @@
 #+PROPERTY: tangle yes
 #+EXCLUDE_TAGS: noexport
 
+* Todo 
+[-] Move custom to separate file
+[-] Additional ORG setup
+[-] Fix startup frame size
+
 * Configuration
 
 To load this, run =(org-babel-load-file "~/emacs.org")=.
@@ -19,7 +24,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
       user-mail-address "jgraham20@gmail.com")
 #+END_SRC
 
-Set up packages
+** Set up use-package
 #+BEGIN_SRC emacs-lisp
 
 ;; Package configs
@@ -36,7 +41,11 @@ Set up packages
   (package-install 'use-package))
 (require 'use-package)
 
-;; Minimal UI
+#+END_SRC
+
+** Minimal UI
+   
+#+BEGIN_SRC emacs-lisp
 (scroll-bar-mode -1)
 (tool-bar-mode   -1)
 (tooltip-mode    -1)
@@ -48,7 +57,7 @@ Set up packages
 
 #+END_SRC
 
-Set up Evil Mode
+** Set up Evil Mode
 #+BEGIN_SRC emacs-lisp
 
 ;; Vim mode
@@ -66,7 +75,7 @@ Set up Evil Mode
 
 #+END_SRC
 
-Set up the theme
+** Set up the theme
 #+BEGIN_SRC emacs-lisp
 ;; Theme
 (use-package doom-themes
@@ -76,10 +85,8 @@ Set up the theme
 
 #+END_SRC
 
-Set up Helm
+** Set up Helm
 #+BEGIN_SRC emacs-lisp
-;;Set up the Helm
-;; Helm
 (use-package helm
   :ensure t
   :init
@@ -103,7 +110,8 @@ Set up Helm
 
 #+END_SRC
 
-Set up Keys
+** Set up Keybindings
+   
 #+BEGIN_SRC emacs-lisp
 ;; Which Key
 (use-package which-key
@@ -151,7 +159,7 @@ Set up Keys
 
 #+END_SRC
 
-Set up Projectile
+** Set up Projectile
 #+BEGIN_SRC emacs-lisp
 ;; Projectile
 (use-package projectile
@@ -165,7 +173,7 @@ Set up Projectile
 
 #+END_SRC
 
-Set up Neotree
+** Set up Neotree
 #+BEGIN_SRC emacs-lisp
 ;; NeoTree
 (use-package neotree
