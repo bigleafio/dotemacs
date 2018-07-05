@@ -1,32 +1,6 @@
-# Created 2018-07-02
-#+OPTIONS: toc:4 h:4
-#+OPTIONS: tags:nil
-#+TITLE: Jason Graham's Emacs configuration
-#+AUTHOR: Jason Graham
-#+STARTUP: overview
-#+PROPERTY: tangle yes
-#+EXCLUDE_TAGS: noexport
-
-* Todo 
-[-] Move custom to separate file
-[-] Additional ORG setup
-[-] Fix startup frame size
-
-* Configuration
-
-To load this, run =(org-babel-load-file "~/emacs.org")=.
-
-** About me
-  
-** Personal information
-#+BEGIN_SRC emacs-lisp
 (setq user-full-name "Jason Graham"
       user-mail-address "jgraham20@gmail.com")
-#+END_SRC
 
-** Intialize
-
-#+BEGIN_SRC emacs-lisp
 ;;----------------------------------------------------------------------------
 ;; Adjust garbage collection thresholds during startup, and thereafter
 ;;----------------------------------------------------------------------------
@@ -36,10 +10,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   ;;(setq gc-cons-threshold init-gc-cons-threshold)
   ;;(add-hook 'after-init-hook
   ;;          (lambda () (setq gc-cons-threshold normal-gc-cons-threshold))))
-#+END_SRC
-
-** Set up use-package
-#+BEGIN_SRC emacs-lisp
 
 ;; Package configs
 (require 'package)
@@ -55,11 +25,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (package-install 'use-package))
 (require 'use-package)
 
-#+END_SRC
-
-** Minimal UI
-   
-#+BEGIN_SRC emacs-lisp
 (scroll-bar-mode -1)
 (tool-bar-mode   -1)
 (tooltip-mode    -1)
@@ -84,11 +49,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
  :config (shackle-mode)
 )
 
-#+END_SRC
-
-** Set up Evil Mode
-#+BEGIN_SRC emacs-lisp
-
 ;; Vim mode
 (use-package evil
   :ensure t
@@ -102,20 +62,12 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   :config
   (evil-escape-mode 1))
 
-#+END_SRC
-
-** Set up the theme
-#+BEGIN_SRC emacs-lisp
 ;; Theme
 (use-package doom-themes
   :ensure t
   :config
   (load-theme 'doom-one t))
 
-#+END_SRC
-
-** Set up Helm
-#+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
   :init
@@ -136,12 +88,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   :config
   (helm-mode 1))
 
-
-#+END_SRC
-
-** Set up Dired
-
-#+BEGIN_SRC emacs-lisp
 (use-package dired
    :defer t
    :bind* (("C-x d" . dired-other-window)
@@ -160,11 +106,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
      (setq dired-omit-files
            (concat dired-omit-files "\\|^\\..*$\\|^.DS_Store$\\|^.projectile$\\|^.git$"))))
 
-#+END_SRC
-
-** Set up Ranger
-
-#+BEGIN_SRC emacs-lisp
 ;;; Ranger:
 (use-package ranger
   :ensure t
@@ -173,11 +114,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (setq ranger-cleanup-on-disable t
         ranger-show-dotfiles nil
         ranger-show-literal nil))
-#+END_SRC
 
-** Set up Keybindings
-   
-#+BEGIN_SRC emacs-lisp
 ;; Which Key
 (use-package which-key
   :ensure t
@@ -227,10 +164,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 (setq ns-use-proxy-icon  nil)
 (setq frame-title-format nil)
 
-#+END_SRC
-
-** Set up Projectile
-#+BEGIN_SRC emacs-lisp
 ;; Projectile
 (use-package projectile
   :ensure t
@@ -241,10 +174,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ;; All The Icons
 (use-package all-the-icons :ensure t)
 
-#+END_SRC
-
-** Set up Neotree
-#+BEGIN_SRC emacs-lisp
 ;; NeoTree
 (use-package neotree
   :ensure t
@@ -268,20 +197,11 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-#+END_SRC
 
-** Disable Backups 
-#+BEGIN_SRC emacs-lisp
 ;; Disable backup files
 (setq make-backup-files nil) ; stop creating backup~ files
 (setq auto-save-default nil) ; stop creating #autosave# files
-#+END_SRC
 
-
-* Org Mode
-** Rebuild on save
-
-#+BEGIN_SRC emacs-lisp
 ;; NeoTree
 
 (defun my/tangle-dotfiles ()
@@ -292,17 +212,9 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     (message "%s tangled" buffer-file-name)))
 
 (add-hook 'after-save-hook #'my/tangle-dotfiles)
-#+END_SRC 
 
-** Set up Hugo
-#+BEGIN_SRC emacs-lisp
 (use-package ox-hugo
   :after ox)
-#+END_SRC 
-
-** Set up org-capture
-
-#+BEGIN_SRC emacs-lisp
 
 (defun jsg/org-captures() 
 (setq org-capture-templates
@@ -348,11 +260,6 @@ see %a\n")
          "**** <title>\n%U\n\n%?\n")
         )
 ))
-#+END_SRC
-
-** Set up org-todo
-
-#+BEGIN_SRC emacs-lisp
 
 (setq org-enforce-todo-dependencies t)
 (setq org-log-done 'time)
@@ -397,9 +304,7 @@ see %a\n")
 (add-hook 'org-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c 6") 'jsg/org-sort-todos)))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp
 (use-package org
   :demand
   :mode ("\\.org\\'" . org-mode)
@@ -453,5 +358,3 @@ see %a\n")
 (jsg/org-captures)
 (menu-bar-mode 1)
 (display-time-mode 1)
-#+END_SRC
-
