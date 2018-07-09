@@ -8,9 +8,9 @@
 #+EXCLUDE_TAGS: noexport
 
 * Todo 
-[-] Move custom to separate file
-[-] Additional ORG setup
-[-] Fix startup frame size
+  [-] Move custom to separate file
+  [-] Additional ORG setup
+  [-] Fix startup frame size
 
 * Configuration
 
@@ -26,37 +26,55 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 ** Intialize
 
-#+BEGIN_SRC emacs-lisp
-;;----------------------------------------------------------------------------
-;; Adjust garbage collection thresholds during startup, and thereafter
-;;----------------------------------------------------------------------------
-(setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
+ #+BEGIN_SRC emacs-lisp
+ ;;----------------------------------------------------------------------------
+ ;; Adjust garbage collection thresholds during startup, and thereafter
+ ;;----------------------------------------------------------------------------
+ (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
 
-(let ((normal-gc-cons-threshold (* 20 1024 1024))
-      (init-gc-cons-threshold (* 128 1024 1024)))
-  (setq gc-cons-threshold init-gc-cons-threshold)
-  (add-hook 'after-init-hook
-            (lambda () (setq gc-cons-threshold normal-gc-cons-threshold))))
-#+END_SRC
+ (eval-and-compile
+  (setq gc-cons-threshold 402653184
+        gc-cons-percentage 0.6))
+
+ #+END_SRC
 
 ** Set up use-package
-#+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp
 
-;; Package configs
-(require 'package)
-(setq package-enable-at-startup nil)
-(setq package-archives '(("org"   . "http://orgmode.org/elpa/")
-			 ("gnu"   . "http://elpa.gnu.org/packages/")
-			 ("melpa" . "https://melpa.org/packages/")))
-(package-initialize)
+  (eval-and-compile
+    (setq load-prefer-newer t
+        package-user-dir "~/.emacs.d/elpa"
+        package--init-file-ensured t
+        package-enable-at-startup nil)
 
-;; Bootstrap `use-package`
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-(require 'use-package)
+  (unless (file-directory-p package-user-dir)
+    (make-directory package-user-dir t)))
 
-#+END_SRC
+  (setq use-package-verbose t)
+
+  (eval-and-compile
+    (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
+
+  (eval-when-compile
+    (require 'package)
+
+   (unless (assoc-default "melpa" package-archives)
+    (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t))
+   (unless (assoc-default "melpa" package-archives)
+   (add-to-list 'package-archives '("gnu"   . "http://elpa.gnu.org/packages/") t))
+  (unless (assoc-default "org" package-archives)
+    (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t))
+
+
+    (when (< emacs-major-version 27)
+      (package-initialize))
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+  (require 'use-package)
+  (setq use-package-always-ensure t))
+
+ #+END_SRC
 
 ** Minimal UI
    
@@ -121,6 +139,11 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (setq-default evil-escape-key-sequence "jk")
   :config
   (evil-escape-mode 1))
+  
+ (use-package evil-anzu
+    :demand t
+    :after (evil))
+ 
 
 #+END_SRC
 
@@ -132,19 +155,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     :ensure t
     :init 
       (load-theme 'challenger-deep t))
-  ;(use-package doom-themes
-  ;  :ensure t
-  ;  :init
-  ;    ;; Global settings (defaults)
-  ;    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-	;     doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  ;  :config
-  ;    (load-theme 'doom-tomorrow-night t)
-  ;    (doom-themes-neotree-config)  ; all-the-icons fonts must be installed!
-  ;    (doom-themes-org-config)) 
-
-   ;(use-package smart-mode-line-powerline-theme
-   ;  :ensure t) 
 
    (use-package smart-mode-line
     :ensure t
@@ -161,7 +171,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 #+END_SRC
 
 ** Set up ivy
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
   (use-package ivy
     :ensure t
     :demand t
@@ -214,7 +224,8 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 	(avy-goto-line)
 	(move-to-column col)))
     )
-#+END_SRC
+  #+END_SRC
+
 ** Set up Helm
 #+BEGIN_SRC emacs-lisp
 (use-package helm
@@ -244,6 +255,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 #+BEGIN_SRC emacs-lisp
 (use-package dired
+   :ensure nil
    :defer t
    :bind* (("C-x d" . dired-other-window)
            ("C-x C-d" . dired))
@@ -251,6 +263,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
    :config
    (setq dired-use-ls-dired nil)
    (use-package dired-x
+     :ensure nil
      :bind* (("C-x C-'" . dired-jump))
      :commands (dired-omit-mode)
      :init
@@ -276,16 +289,81 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
         ranger-show-literal nil))
 #+END_SRC
    
+** Set up ag
+#+BEGIN_SRC emacs-lisp
+(use-package ag
+ :ensure t
+ :defer t)
+#+END_SRC
+
+* Set up Source Code Stuff
+** Aggressive indent
+  #+BEGIN_SRC emacs-lisp
+  (use-package aggressive-indent
+    :ensure t
+    :config)
+  #+END_SRC
+
+** Company Mode
+  #+BEGIN_SRC emacs-lisp
+(use-package company
+:demand t
+ :init
+  (progn
+    (setq company-idle-delay 0.2
+          company-minimum-prefix-length 2
+          company-require-match nil
+          company-selection-wrap-around t
+          company-dabbrev-ignore-case nil
+          company-dabbrev-downcase nil))
+ :config
+ (global-company-mode)
+
+ (define-key company-active-map [tab] 'company-complete)
+ (define-key company-active-map (kbd "C-n") 'company-select-next)
+ (define-key company-active-map (kbd "C-p") 'company-select-previous))
+     
+ #+END_SRC
+
+** Set up undo-tree
+#+BEGIN_SRC emacs-lisp
+ (use-package exec-path-from-shell
+  :ensure t
+  :init (exec-path-from-shell-initialize))
+ 
+ (use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
+#+END_SRC
+
 ** Set up Git
 #+BEGIN_SRC emacs-lisp
 ;;; Magit
 (use-package magit
-  :ensure t)
+  :config
+  (require 'evil-magit))
+
+(use-package evil-magit
+  :after (magit))
 
 (use-package diff-hl
   :ensure t
   :config
     (diff-hl-mode))
+
+(use-package git-timemachine
+  :ensure t)
+
+#+END_SRC
+
+** Set up YASnippet
+#+BEGIN_SRC emacs-lisp
+  (use-package yasnippet
+  :demand t
+  :config
+  (yas-global-mode 1))
+  
 #+END_SRC
 
 ** Set up Keybindings
@@ -369,10 +447,57 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 #+BEGIN_SRC emacs-lisp
 (use-package ibuffer :ensure t)
 #+END_SRC
+
 ** Set up undo-tree
 #+BEGIN_SRC emacs-lisp
 (use-package undo-tree :ensure t)
 #+END_SRC
+
+** Set up smart-parens
+#+BEGIN_SRC emacs-lisp
+(use-package smartparens
+  :demand t
+  :init
+  (add-hook 'clojure-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'cide-clojure-interaction-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'lisp-interaction-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'cider-repl-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'emacs-lisp-mode-hook 'turn-on-smartparens-strict-mode)
+  :config
+  (setq sp-navigate-interactive-always-progress-point t)
+
+  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+  (sp-local-pair 'clojure-mode "'" nil :actions nil)
+  (sp-local-pair 'lisp-interaction-mode "'" nil :actions nil)
+  (sp-local-pair 'clojure-interaction-mode "'" nil :actions nil)
+  (sp-local-pair 'cider-repl-mode "'" nil :actions nil)
+
+
+  (smartparens-global-mode 1)
+  )
+
+(use-package evil-smartparens
+  :demand t
+  :config)
+
+(general-def 'normal
+  ">" (general-key-dispatch 'evil-shift-right
+        ")" 'sp-forward-slurp-sexp
+        "(" 'sp-backward-barf-sexp)
+  "<" (general-key-dispatch 'evil-shift-left
+        ")" 'sp-forward-barf-sexp
+        "(" 'sp-backward-slurp-sexp))
+#+END_SRC
+
+** Set up highlight-indent
+#+BEGIN_SRC emacs-lisp
+(use-package highlight-indent-guides
+  :config
+  (setq highlight-indent-guides-auto-character-face-perc 25)
+  (setq highlight-indent-guides-method 'character)
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
+#+END_SRC
+
 ** Set up Neotree
 #+BEGIN_SRC emacs-lisp
 ;; NeoTree
@@ -585,3 +710,8 @@ see %a\n")
 (display-time-mode 1)
 #+END_SRC
 
+* Post init
+ #+BEGIN_SRC emacs-lisp
+ (setq gc-cons-threshold 16777216
+      gc-cons-percentage 0.1)
+ #+END_SRC
