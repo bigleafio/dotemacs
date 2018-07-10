@@ -3,4 +3,6 @@
 projectile-bookmarks.eld
 elpa/
 auto-save-list/
-/emacs.el
+emacs.el
+.emacs.desktop
+.emacs.desktop.lock

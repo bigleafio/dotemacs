@@ -6,25 +6,46 @@
 ;;----------------------------------------------------------------------------
 (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
 
-(let ((normal-gc-cons-threshold (* 20 1024 1024))
-      (init-gc-cons-threshold (* 128 1024 1024)))
-  (setq gc-cons-threshold init-gc-cons-threshold)
-  (add-hook 'after-init-hook
-            (lambda () (setq gc-cons-threshold normal-gc-cons-threshold))))
+(eval-and-compile
+ (setq gc-cons-threshold 402653184
+       gc-cons-percentage 0.6))
 
-;; Package configs
-(require 'package)
-(setq package-enable-at-startup nil)
-(setq package-archives '(("org"   . "http://orgmode.org/elpa/")
-			 ("gnu"   . "http://elpa.gnu.org/packages/")
-			 ("melpa" . "https://melpa.org/packages/")))
-(package-initialize)
+(setq mac-option-modifier 'meta)
+(setq mac-command-modifier 'super)
+(setq mac-pass-command-to-system nil)
 
-;; Bootstrap `use-package`
+(eval-and-compile
+  (setq load-prefer-newer t
+      package-user-dir "~/.emacs.d/elpa"
+      package--init-file-ensured t
+      package-enable-at-startup nil)
+
+(unless (file-directory-p package-user-dir)
+  (make-directory package-user-dir t)))
+
+(setq use-package-verbose t)
+
+(eval-and-compile
+  (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
+
+(eval-when-compile
+  (require 'package)
+
+ (unless (assoc-default "melpa" package-archives)
+  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t))
+ (unless (assoc-default "melpa" package-archives)
+ (add-to-list 'package-archives '("gnu"   . "http://elpa.gnu.org/packages/") t))
+(unless (assoc-default "org" package-archives)
+  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t))
+
+
+  (when (< emacs-major-version 27)
+    (package-initialize))
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
 (require 'use-package)
+(setq use-package-always-ensure t))
 
 (scroll-bar-mode -1)
  (tool-bar-mode   -1)
@@ -82,6 +103,10 @@
   (setq-default evil-escape-key-sequence "jk")
   :config
   (evil-escape-mode 1))
+  
+ (use-package evil-anzu
+    :demand t
+    :after (evil))
 
 ;; Theme
 
@@ -89,19 +114,6 @@
   :ensure t
   :init 
     (load-theme 'challenger-deep t))
-;(use-package doom-themes
-;  :ensure t
-;  :init
-;    ;; Global settings (defaults)
-;    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-      ;     doom-themes-enable-italic t) ; if nil, italics is universally disabled
-;  :config
-;    (load-theme 'doom-tomorrow-night t)
-;    (doom-themes-neotree-config)  ; all-the-icons fonts must be installed!
-;    (doom-themes-org-config)) 
-
- ;(use-package smart-mode-line-powerline-theme
- ;  :ensure t) 
 
  (use-package smart-mode-line
   :ensure t
@@ -189,6 +201,7 @@
   (helm-mode 1))
 
 (use-package dired
+   :ensure nil
    :defer t
    :bind* (("C-x d" . dired-other-window)
            ("C-x C-d" . dired))
@@ -196,6 +209,7 @@
    :config
    (setq dired-use-ls-dired nil)
    (use-package dired-x
+     :ensure nil
      :bind* (("C-x C-'" . dired-jump))
      :commands (dired-omit-mode)
      :init
@@ -215,14 +229,71 @@
         ranger-show-dotfiles nil
         ranger-show-literal nil))
 
+(use-package ag
+ :ensure t
+ :defer t)
+
+(use-package restart-emacs
+  :ensure t
+  :defer t
+  :config (setq restart-emacs-restore-frames t))
+
+(use-package aggressive-indent
+  :ensure t
+  :config)
+
+(use-package company
+:demand t
+ :init
+  (progn
+    (setq company-idle-delay 0.2
+          company-minimum-prefix-length 2
+          company-require-match nil
+          company-selection-wrap-around t
+          company-dabbrev-ignore-case nil
+          company-dabbrev-downcase nil))
+ :config
+ (global-company-mode)
+
+ (define-key company-active-map [tab] 'company-complete)
+ (define-key company-active-map (kbd "C-n") 'company-select-next)
+ (define-key company-active-map (kbd "C-p") 'company-select-previous))
+
+(use-package exec-path-from-shell
+ :ensure t
+ :init 
+  (when (memq window-system '(mac ns x))
+        (exec-path-from-shell-initialize)))
+
+(use-package flycheck
+ :ensure t
+ :init (global-flycheck-mode))
+
 ;;; Magit
 (use-package magit
-  :ensure t)
+  :config
+  (require 'evil-magit))
+
+(use-package evil-magit
+  :after (magit))
 
 (use-package diff-hl
   :ensure t
   :config
     (diff-hl-mode))
+
+(use-package git-timemachine
+  :ensure t)
+
+(use-package yasnippet
+:demand t
+:config
+(yas-global-mode 1))
+
+(use-package simpleclip
+ :ensure t
+ :config 
+  (simpleclip-mode 1))
 
 ;; Which Key
 (use-package which-key
@@ -274,7 +345,9 @@
   "a" '(:ignore t :which-key "Applications")
   "at"  '(ansi-term :which-key "open terminal")
   "ao"  '(org-mode :which-key "org-mode")
-))
+  ;; Quit
+  "q" '(:ignore t :which-key "Quit")
+  "qq"  (general-simulate-key "C-u" :state 'restart-emacs) :which-key "restart -Q"))
 
 ;; Fancy titlebar for MacOS
 ;(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
@@ -295,6 +368,45 @@
 (use-package ibuffer :ensure t)
 
 (use-package undo-tree :ensure t)
+
+(use-package smartparens
+  :demand t
+  :init
+  (add-hook 'clojure-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'cide-clojure-interaction-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'lisp-interaction-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'cider-repl-mode-hook 'turn-on-smartparens-strict-mode)
+  (add-hook 'emacs-lisp-mode-hook 'turn-on-smartparens-strict-mode)
+  :config
+  (setq sp-navigate-interactive-always-progress-point t)
+
+  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+  (sp-local-pair 'clojure-mode "'" nil :actions nil)
+  (sp-local-pair 'lisp-interaction-mode "'" nil :actions nil)
+  (sp-local-pair 'clojure-interaction-mode "'" nil :actions nil)
+  (sp-local-pair 'cider-repl-mode "'" nil :actions nil)
+
+
+  (smartparens-global-mode 1)
+  )
+
+(use-package evil-smartparens
+  :demand t
+  :config)
+
+(general-def 'normal
+  ">" (general-key-dispatch 'evil-shift-right
+        ")" 'sp-forward-slurp-sexp
+        "(" 'sp-backward-barf-sexp)
+  "<" (general-key-dispatch 'evil-shift-left
+        ")" 'sp-forward-barf-sexp
+        "(" 'sp-backward-slurp-sexp))
+
+(use-package highlight-indent-guides
+  :config
+  (setq highlight-indent-guides-auto-character-face-perc 25)
+  (setq highlight-indent-guides-method 'character)
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 
 ;; NeoTree
 (use-package neotree
@@ -480,3 +592,6 @@ see %a\n")
 (jsg/org-captures)
 (menu-bar-mode 1)
 (display-time-mode 1)
+
+(setq gc-cons-threshold 16777216
+     gc-cons-percentage 0.1)
