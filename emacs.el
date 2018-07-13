@@ -13,6 +13,7 @@
 (setq mac-option-modifier 'meta)
 (setq mac-command-modifier 'super)
 (setq mac-pass-command-to-system nil)
+;;(setq server-socket-dir (expand-file-name "server" user-emacs-directory))
 
 (eval-and-compile
   (setq load-prefer-newer t
@@ -46,6 +47,19 @@
   (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t))
+
+(use-package delight
+ :ensure t)
+
+(use-package diminish)
+
+(defun load-directory (dir)
+  (let ((load-it (lambda (f)
+         (load-file (concat (file-name-as-directory dir) f)))
+       ))
+  (mapc load-it (directory-files dir nil "\\.el$"))))
+
+(load-directory "~/.emacs.d/lisp")
 
 (scroll-bar-mode -1)
  (tool-bar-mode   -1)
@@ -357,8 +371,9 @@
 
 ;; Projectile
 (use-package projectile
-  :ensure t
-  :init
+ :ensure t
+ :delight '(:eval (concat "(P)" (projectile-project-name))) 
+ :init
   (setq projectile-require-project-root nil)
   :config
   (projectile-mode 1))
@@ -436,7 +451,12 @@
 (setq make-backup-files nil) ; stop creating backup~ files
 (setq auto-save-default nil) ; stop creating #autosave# files
 
-;; NeoTree
+(setq org-id-link-to-org-use-id 'use-existing)
+(setq org-startup-indented t)
+(setq org-directory "~/Dropbox/Notes/")
+(setq org-default-notes-file (concat org-directory "organizer.org"))
+(setq org-imenu-depth 5)
+(setq org-list-allow-alphabetical t)
 
 (defun my/tangle-dotfiles ()
   "If the current file is in '~/.emacs.d', the code blocks are tangled"
@@ -450,50 +470,82 @@
 (use-package ox-hugo
   :after ox)
 
-(defun jsg/org-captures() 
-(setq org-capture-templates
-      '(("t" "Todo"
-         entry (file+headline (lambda () (concat org-directory "organizer.org")) "Task List")
-         "* TODO %?
-DEADLINE: %t
-:LOGBOOK:
-- State \"TODO\"       from \"\"           %U
-:END:
-see: %a\n")
-        ("n" "Note"
-         entry (file+headline (lambda () (concat org-directory "organizer.org")) "Notes")
-         "* %?
-%U\n%a\n")
-        ("b" "Book" entry (file+headline (lambda () (concat org-directory "organizer.org")) "Books")
-         "* %?
-(C-c C-w to refile to fiction/non-fiction)
-see %a
-entered on %U\n")
-        ("q" "Clock (quick)" plain (clock)
-         "%a%?\n")
-        ("s" "Emacs tool sharpening"
-         entry (file+olp (lambda () (concat org-directory "programming_notes.org"))
-                         "Emacs"
-                         "Sharpening list")
-         "* %?
-see %a
-entered on %U\n")
-        ("S" "General tool sharpening"
-         entry (file+olp (lambda () (concat org-directory "programming_notes.org"))
-                         "General sharpening")
-         "* %?
-see %a
-entered on %U\n")
-        ("d" "Date"
-         entry (file+datetree+prompt (lambda () (concat org-directory "dates.org")))
-         "* %?
-%t
-see %a\n")
-        ("j" "Journal"
-         plain (file+datetree (lambda () (concat org-directory "journal.org")))
-         "**** <title>\n%U\n\n%?\n")
-        )
-))
+(require 'org-protocol)
+  (use-package s
+   :ensure t)
+
+  (defun make-capture-frame (&optional capture-url)
+  "Create a new frame and run org-capture."
+  (interactive)
+  (make-frame '((name . "capture")
+                (width . 120)
+                (height . 15)))
+  (select-frame-by-name "capture")
+  (setq word-wrap 1)
+  (setq truncate-lines nil)
+  (if capture-url (org-protocol-capture capture-url) (org-capture)))
+
+  (require 'org-protocol-capture-html)
+
+  (defun jsg/org-captures() 
+  (setq org-capture-templates
+        '(("t" "Todo"
+           entry (file+headline (lambda () (concat org-directory "organizer.org")) "Task List")
+           "* TODO %?
+  DEADLINE: %t
+  :LOGBOOK:
+  - State \"TODO\"       from \"\"           %U
+  :END:
+  see: %a\n")
+          ("w" "Web site" 
+          entry (file+headline "~/Notes/notes.org" "Links")
+    "* %a :website:\n\n%U %?\n\n%:initial")
+("W" "Web site"
+ entry
+ (file+olp "~/inbox.org" "Web")
+ "* %c :website:\n%U %?%:initial")
+("l" "A link, for reading later." entry
+       (file+headline "notes.org" "Reading List")
+       "* %:link\n%u\n\n%c\n\n%i"
+       :empty-lines 1)
+          ("n" "Note"
+           entry (file+headline (lambda () (concat org-directory "organizer.org")) "Notes")
+           "* %?
+  %U\n%a\n")
+          ("b" "Book" entry (file+headline (lambda () (concat org-directory "organizer.org")) "Books")
+           "* %?
+  (C-c C-w to refile to fiction/non-fiction)
+  see %a
+  entered on %U\n")
+          ("q" "Clock (quick)" plain (clock)
+           "%a%?\n")
+          ("s" "Emacs tool sharpening"
+           entry (file+olp (lambda () (concat org-directory "programming_notes.org"))
+                           "Emacs"
+                           "Sharpening list")
+           "* %?
+  see %a
+  entered on %U\n")
+          ("S" "General tool sharpening"
+           entry (file+olp (lambda () (concat org-directory "programming_notes.org"))
+                           "General sharpening")
+           "* %?
+  see %a
+  entered on %U\n")
+          ("d" "Date"
+           entry (file+datetree+prompt (lambda () (concat org-directory "dates.org")))
+           "* %?
+  %t
+  see %a\n")
+          ("j" "Journal"
+           plain (file+datetree (lambda () (concat org-directory "journal.org")))
+           "**** <title>\n%U\n\n%?\n")
+      ("p" "Protocol" entry (file+headline ,(concat org-directory "notes.org") "Inbox")
+        "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
+          ("L" "Protocol Link" entry (file+headline ,(concat org-directory "notes.org") "Inbox")
+        "* %? [[%:link][%:description]] \nCaptured On: %U")
+          )
+  ))
 
 (setq org-enforce-todo-dependencies t)
 (setq org-log-done 'time)
@@ -560,7 +612,7 @@ see %a\n")
                       org-gnus
                       org-drill
                       org-info
-					  org-id
+		      org-id
                       org-jsinfo
                       org-habit
                       org-irc
@@ -593,5 +645,9 @@ see %a\n")
 (menu-bar-mode 1)
 (display-time-mode 1)
 
+(diminish 'auto-revert-mode)
+(diminish 'evil-escape-mode)
+
 (setq gc-cons-threshold 16777216
      gc-cons-percentage 0.1)
+(server-start)
