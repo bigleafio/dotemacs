@@ -2,7 +2,12 @@
 ;;; This format is meant to be slightly human-readable;
 ;;; nevertheless, you probably don't want to edit it.
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
-(("org-capture-last-stored"
+(("org-refile-last-stored"
+ (filename . "~/.emacs.d/emacs.org")
+ (front-context-string . "** Set up Keybin")
+ (rear-context-string . "))\n\n#+END_SRC\n\n\n")
+ (position . 8794))
+("org-capture-last-stored"
  (filename . "~/Notes/notes.org")
  (front-context-string . "** [[https://www")
  (rear-context-string . "16:35] \n* Links\n")

@@ -2,6 +2,7 @@
 .DS_Store
 projectile-bookmarks.eld
 elpa/
+.cask/
 auto-save-list/
 emacs.el
 .emacs.desktop

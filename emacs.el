@@ -69,8 +69,25 @@
 
  (set-default-font "PragmataPro 14")
  (add-to-list 'default-frame-alist '(font . "PragmataPro-14:spacing=100")) 
- (add-to-list 'default-frame-alist '(height . 48))
- (add-to-list 'default-frame-alist '(width . 160))
+ (defun set-frame-size-according-to-resolution ()
+  (interactive)
+  (if window-system
+  (progn
+  ;; use 120 char wide window for largeish displays
+  ;; and smaller 80 column windows for smaller displays
+  ;; pick whatever numbers make sense for you
+  (if (> (x-display-pixel-width) 1280)
+         (add-to-list 'default-frame-alist (cons 'width 120))
+         (add-to-list 'default-frame-alist (cons 'width 80)))
+  ;; for the height, subtract a couple hundred pixels
+  ;; from the screen height (for panels, menubars and
+  ;; whatnot), then divide by the height of a char to
+  ;; get the height we want
+  (add-to-list 'default-frame-alist 
+       (cons 'height (/ (- (x-display-pixel-height) 200)
+                           (frame-char-height)))))))
+
+   (set-frame-size-according-to-resolution)
 
  ;Set up the Fringe
  (define-fringe-bitmap 'tilde [64 168 16] nil nil 'center)
@@ -85,7 +102,7 @@
   :ensure t 
   :init
     (setq shackle-rules '((compilation-mode :noselect t))
-	  shackle-default-rule '(:select t))
+          shackle-default-rule '(:select t))
     (setq helm-display-function 'pop-to-buffer) ; make helm play nice
     (setq shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.4)))
   :config (shackle-mode)
@@ -142,60 +159,78 @@
     (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":DB:")))
 
 (use-package ivy
-  :ensure t
-  :demand t
-  :config
-  ;; regex order
-  (setq ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
-  (define-key ivy-mode-map [escape] 'minibuffer-keyboard-quit)
-  (define-key ivy-minibuffer-map (kbd "C-i") 'ivy-call)
-  (define-key ivy-minibuffer-map (kbd "C-o") 'ivy-occur)
-(general-define-key :keymaps '(ivy-occur-grep-mode-map)
-		    :states '(normal)
-		    "q" 'evil-delete-buffer)
-  (defvar pop-target-window)
-  (make-variable-buffer-local 'pop-target-window)
-  (advice-add 'compilation-goto-locus :around #'my-around-compilation-goto-locus)
-  (defun my-around-compilation-goto-locus (orig-func &rest args)
-    (advice-add 'pop-to-buffer :override #'my-pop-to-buffer)
-    (apply orig-func args))
-  (defun my-pop-to-buffer (buffer &optional action norecord)
-    (advice-remove 'pop-to-buffer #'my-pop-to-buffer)
-    (let ((from-buffer (current-buffer))
-	  (reused-window (display-buffer-reuse-window buffer nil)))
-      (cond (reused-window
-	     (select-window reused-window norecord))
-	    ((and (bound-and-true-p pop-target-window)
-		  (window-live-p pop-target-window))
-	     (window--display-buffer buffer pop-target-window 'reuse)
-	     (select-window pop-target-window norecord))
-	    (t
-	     (pop-to-buffer buffer action norecord)
-	     (with-current-buffer from-buffer
-	       (setq-local pop-target-window (selected-window)))))))
-  (ivy-mode t))
-(use-package counsel
-  :ensure t
-  :demand t
-  :config)
-(use-package swiper
-  :ensure t
-  :demand t
-  :config
-  (ivy-mode t))
-(use-package avy
-  :ensure t
-  :demand t
-  :config
-  (defun avy-line-saving-column ()
-    (interactive)
-    (let ((col (current-column)))
-      (avy-goto-line)
-      (move-to-column col)))
-  )
+         :ensure t
+         :demand t
+         :config
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;         (setq ivy-re-builders-alist '((t . ivy--regex-ignore-order)))		    ;;
+ ;;         (define-key ivy-mode-map [escape] 'minibuffer-keyboard-quit)		    ;;
+ ;;         (define-key ivy-minibuffer-map (kbd "C-i") 'ivy-call)			    ;;
+ ;;         (define-key ivy-minibuffer-map (kbd "C-o") 'ivy-occur)			    ;;
+ ;;       (general-define-key :keymaps '(ivy-occur-grep-mode-map)			    ;;
+ ;;                           :states '(normal)						    ;;
+ ;;                           "q" 'evil-delete-buffer)					    ;;
+ ;;         (defvar pop-target-window)							    ;;
+ ;;         (make-variable-buffer-local 'pop-target-window)				    ;;
+ ;;         (advice-add 'compilation-goto-locus :around #'my-around-compilation-goto-locus) ;;
+ ;;         (defun my-around-compilation-goto-locus (orig-func &rest args)		    ;;
+ ;;           (advice-add 'pop-to-buffer :override #'my-pop-to-buffer)			    ;;
+ ;;           (apply orig-func args))							    ;;
+ ;;         (defun my-pop-to-buffer (buffer &optional action norecord)			    ;;
+ ;;           (advice-remove 'pop-to-buffer #'my-pop-to-buffer)				    ;;
+ ;;           (let ((from-buffer (current-buffer))					    ;;
+ ;;                 (reused-window (display-buffer-reuse-window buffer nil)))		    ;;
+ ;;             (cond (reused-window							    ;;
+ ;;                    (select-window reused-window norecord))				    ;;
+ ;;                   ((and (bound-and-true-p pop-target-window)			    ;;
+ ;;                         (window-live-p pop-target-window))				    ;;
+ ;;                    (window--display-buffer buffer pop-target-window 'reuse)		    ;;
+ ;;                    (select-window pop-target-window norecord))			    ;;
+ ;;                   (t								    ;;
+ ;;                    (pop-to-buffer buffer action norecord)				    ;;
+ ;;                    (with-current-buffer from-buffer					    ;;
+ ;;                      (setq-local pop-target-window (selected-window)))))))		    ;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ (setq ivy-use-virtual-buffers t)							    
+ (setq enable-recursive-minibuffers t)
+ (setq ivy-count-format "(%d/%d) ")
+ ;; Create and delete a view
+ (global-set-key (kbd "C-c v") 'ivy-push-view)
+ (global-set-key (kbd "C-c V") 'ivy-pop-view)
+         (ivy-mode t))
+
+ (use-package counsel
+         :ensure t
+         :demand t
+         :config)
+
+ (use-package swiper
+         :ensure t
+         :demand t
+         :config
+         (ivy-mode t))
+
+ (use-package avy
+         :ensure t
+         :demand t
+         :config
+         (defun avy-line-saving-column ()
+           (interactive)
+           (let ((col (current-column)))
+             (avy-goto-line)
+             (move-to-column col)))
+         )
+
+(use-package all-the-icons-ivy
+      :config
+      (all-the-icons-ivy-setup))
+
+     (use-package eyebrowse
+      :ensure t)
 
 (use-package helm
-  :ensure t
+  :defer t
   :init
   (setq helm-M-x-fuzzy-match t
 	helm-mode-fuzzy-match t
@@ -210,9 +245,7 @@
 	helm-move-to-line-cycle-in-source t
 	helm-echo-input-in-header-line t
 	helm-autoresize-max-height 0
-	helm-autoresize-min-height 20)
-  :config
-  (helm-mode 1))
+	helm-autoresize-min-height 20))
 
 (use-package dired
    :ensure nil
@@ -251,6 +284,77 @@
   :ensure t
   :defer t
   :config (setq restart-emacs-restore-frames t))
+
+(use-package simpleclip
+ :ensure t
+ :config 
+  (simpleclip-mode 1))
+
+;; Which Key
+(use-package which-key
+  :ensure t
+  :init
+  (setq which-key-separator " ")
+  (setq which-key-prefix-prefix "+")
+  :config
+  (which-key-mode 1))
+
+;; Custom keybinding
+(use-package general
+  :ensure t
+  :config (general-define-key
+  :states '(normal visual insert emacs)
+  :prefix "SPC"
+  :non-normal-prefix "M-SPC"
+  "TAB" '(switch-to-prev-buffer :which-key "previous buffer")
+  "/" '(swiper :which-key "Swiper")
+  "SPC" '(counsel-M-x :which-key "M-x")
+  ;;"pf"  '(helm-find-files :which-key "find files")
+  ;; Magit
+  "g" '(:ignore t :which-key "Git - Magit")
+  "gs"  '(magit-status :which-key "magit status")
+  ;; Buffers
+  "b" '(:ignore t :which-key "Buffers")
+  "bb"  '(ivy-switch-buffer :which-key "buffers list")
+  "bd"  '(kill-this-buffer :which-key "kill buffer")
+  ;; Counsel
+  "c" '(:ignore t :which-key "Counsel")
+  "cf" '(counsel-find-file :which-key "Counsel Find File")
+  "cg" '(counsel-git :which-key "Counsel git")
+  "cj" '(counsel-git-grep :which-key "Counsel git grep")
+  "ck" '(counsel-ag :which-key "Counsel ag")
+  "cl" '(counsel-locate :which-key "Counsel locate")
+  "ch" '(counsel-minibuffer-history :which-key "Counsel History")
+  "cv" '(counsel-push-view :which-key "Counsel Push View")
+  "cV" '(counsel-pop-view :which-key "Counsel Pop View")
+  ;; Undo
+  "u" '(:ignore t :which-key "Undo")
+  "uu" '(undo-tree-visualize :which-key "Undo Tree")
+  ;; File
+  "f" '(:ignore t :which-key "File")
+  "fr"  '(ranger :which-key "open ranger")
+  "fd"  '(dired :which-key "open dired")
+  "ff"  '(counsel-find-file :which-key "find files")
+  ;; Window
+   "w" '(:ignore t :which-key "Windows")
+  "wl"  '(windmove-right :which-key "move right")
+  "wh"  '(windmove-left :which-key "move left")
+  "wk"  '(windmove-up :which-key "move up")
+  "wj"  '(windmove-down :which-key "move bottom")
+  "w/"  '(split-window-right :which-key "split right")
+  "w-"  '(split-window-below :which-key "split bottom")
+  "wx"  '(delete-window :which-key "delete window")
+  "wd"  '(delete-window :which-key "delete window")
+  ;; Others
+  "a" '(:ignore t :which-key "Applications")
+  "at"  '(ansi-term :which-key "open terminal")
+  "ao"  '(org-mode :which-key "org-mode")
+  ;; Quit
+  "q" '(:ignore t :which-key "Quit")
+  "qq"  (general-simulate-key "C-u" :state 'restart-emacs) :which-key "restart -Q"))
+
+(setq ns-use-proxy-icon  nil)
+(setq frame-title-format nil)
 
 (use-package aggressive-indent
   :ensure t
@@ -304,71 +408,6 @@
 :config
 (yas-global-mode 1))
 
-(use-package simpleclip
- :ensure t
- :config 
-  (simpleclip-mode 1))
-
-;; Which Key
-(use-package which-key
-  :ensure t
-  :init
-  (setq which-key-separator " ")
-  (setq which-key-prefix-prefix "+")
-  :config
-  (which-key-mode 1))
-
-;; Custom keybinding
-(use-package general
-  :ensure t
-  :config (general-define-key
-  :states '(normal visual insert emacs)
-  :prefix "SPC"
-  :non-normal-prefix "M-SPC"
-  ;; "/"   '(counsel-rg :which-key "ripgrep") ; You'll need counsel package for this
-  "TAB" '(switch-to-prev-buffer :which-key "previous buffer")
-  "SPC" '(helm-M-x :which-key "M-x")
-  ;;"pf"  '(helm-find-files :which-key "find files")
-  ;; Magit
-  "g" '(:ignore t :which-key "Git - Magit")
-  "gs"  '(helm-buffers-list :which-key "magit status")
-  ;; Buffers
-  "b" '(:ignore t :which-key "Buffers")
-  "bb"  '(helm-buffers-list :which-key "buffers list")
-  "bi"  '(ibuffer :which-key "ibuffer")
-  "bd"  '(kill-this-buffer :which-key "kill buffer")
-  "bs"  '(ivy-switch-buffer :which-key "switch buffer")
-  "u" '(:ignore t :which-key "Undo")
-  "uu" '(undo-tree-visualize :which-key "Undo Tree")
-   ;; Buffers
-  "f" '(:ignore t :which-key "File")
-  "fr"  '(ranger :which-key "open ranger")
-  "fd"  '(dired :which-key "open dired")
-  "ff"  '(counsel-find-file :which-key "find files")
-  ;; Window
-   "w" '(:ignore t :which-key "Windows")
-  "wl"  '(windmove-right :which-key "move right")
-  "wh"  '(windmove-left :which-key "move left")
-  "wk"  '(windmove-up :which-key "move up")
-  "wj"  '(windmove-down :which-key "move bottom")
-  "w/"  '(split-window-right :which-key "split right")
-  "w-"  '(split-window-below :which-key "split bottom")
-  "wx"  '(delete-window :which-key "delete window")
-  "wd"  '(delete-window :which-key "delete window")
-  ;; Others
-  "a" '(:ignore t :which-key "Applications")
-  "at"  '(ansi-term :which-key "open terminal")
-  "ao"  '(org-mode :which-key "org-mode")
-  ;; Quit
-  "q" '(:ignore t :which-key "Quit")
-  "qq"  (general-simulate-key "C-u" :state 'restart-emacs) :which-key "restart -Q"))
-
-;; Fancy titlebar for MacOS
-;(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-;(add-to-list 'default-frame-alist '(ns-appearance . dark))
-(setq ns-use-proxy-icon  nil)
-(setq frame-title-format nil)
-
 ;; Projectile
 (use-package projectile
  :ensure t
@@ -380,7 +419,7 @@
 ;; All The Icons
 (use-package all-the-icons :ensure t)
 
-(use-package ibuffer :ensure t)
+(use-package ibuffer :demand t)
 
 (use-package undo-tree :ensure t)
 
@@ -547,6 +586,9 @@
           )
   ))
 
+(use-package interleave
+ :ensure t)
+
 (setq org-enforce-todo-dependencies t)
 (setq org-log-done 'time)
 (setq org-log-note-clock-out nil)
@@ -650,4 +692,5 @@
 
 (setq gc-cons-threshold 16777216
      gc-cons-percentage 0.1)
+(toggle-frame-maximized)
 (server-start)
