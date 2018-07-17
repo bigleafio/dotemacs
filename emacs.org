@@ -79,10 +79,12 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (require 'use-package)
   (setq use-package-always-ensure t))
 
-  (use-package delight
-   :ensure t)
+  (use-package delight)
 
   (use-package diminish)
+  
+  (setq org-directory "~/Dropbox/Notes/")
+  (setq org-default-notes-file (concat org-directory "organizer.org"))
 
   (defun load-directory (dir)
     (let ((load-it (lambda (f)
@@ -90,7 +92,13 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
          ))
     (mapc load-it (directory-files dir nil "\\.el$"))))
 
+  (add-to-list 'load-path "~/.emacs.d/lisp/")
+
   (load-directory "~/.emacs.d/lisp")
+  (byte-recompile-directory (expand-file-name "~/.emacs.d/lisp") 0)
+  (setq pop-up-frames t)
+  (frames-only-mode)
+
  #+END_SRC
 
 ** Minimal UI
@@ -203,7 +211,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
       (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":DB:")))
     
 #+END_SRC
-
+ 
 ** Set up Ivy
   #+BEGIN_SRC emacs-lisp
            (use-package ivy
@@ -357,7 +365,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 #+END_SRC
 
-** Set up Keybindings
+** Set up keybindings
    
 #+BEGIN_SRC emacs-lisp
   (use-package simpleclip
@@ -587,20 +595,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ;; Show matching parens
 (setq show-paren-delay 0)
 (show-paren-mode 1)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (neotree projectile general which-key helm doom-themes evil-escape evil use-package))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
 #+END_SRC
 
 ** Disable Backups 
@@ -616,8 +610,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 #+BEGIN_SRC emacs-lisp
 (setq org-id-link-to-org-use-id 'use-existing)
 (setq org-startup-indented t)
-(setq org-directory "~/Dropbox/Notes/")
-(setq org-default-notes-file (concat org-directory "organizer.org"))
 (setq org-imenu-depth 5)
 (setq org-list-allow-alphabetical t)
 #+END_SRC 
@@ -845,5 +837,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
    (setq gc-cons-threshold 16777216
         gc-cons-percentage 0.1)
    (toggle-frame-maximized)
+   (load-file "~/.emacs.d/custom.el")
    (server-start)
  #+END_SRC
