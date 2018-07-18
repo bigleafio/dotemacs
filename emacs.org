@@ -636,7 +636,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (setq org-ditaa-jar-path "/usr/local/Cellar/ditaa/0.11.0/libexec/ditaa-0.11.0-standalone.jar")
 )
 
-(if (eq system-type 'darwin)
+(if (eq system-type 'windows-nt)
   (setq org-ditaa-jar-path "C:/Users/JG186074/Apps/ditaa/ditaa-0.11.0-standalone.jar")
 )
 
