@@ -79,9 +79,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (require 'use-package)
   (setq use-package-always-ensure t))
 
-  (use-package delight)
 
-  (use-package diminish)
   
   (setq org-directory "~/Dropbox/Notes/")
   (setq org-default-notes-file (concat org-directory "organizer.org"))

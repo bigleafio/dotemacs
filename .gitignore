@@ -7,7 +7,12 @@ auto-save-list/
 .emacs.desktop
 .emacs.desktop.lock
 NOLOAD/
+<<<<<<< HEAD
 emacs.el
 
 recentf
 eshell/history
+=======
+server/
+emacs.el
+>>>>>>> afd3b16f63356a6d6bf75ae62d9c9ed67cc05ef2
