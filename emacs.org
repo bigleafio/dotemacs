@@ -40,7 +40,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
  (setq mac-option-modifier 'meta)
  (setq mac-command-modifier 'super)
  (setq mac-pass-command-to-system nil)
- ;;(setq server-socket-dir (expand-file-name "server" user-emacs-directory)) 
 #+END_SRC
 
 ** Set up use-package
@@ -65,11 +64,12 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
    (unless (assoc-default "melpa" package-archives)
     (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t))
-   (unless (assoc-default "melpa" package-archives)
+   (unless (assoc-default "gnu" package-archives)
    (add-to-list 'package-archives '("gnu"   . "http://elpa.gnu.org/packages/") t))
   (unless (assoc-default "org" package-archives)
     (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t))
-
+  (unless (assoc-default "marmalade" package-archives)
+    (add-to-list 'package-archives '("marmalade" . "https://marmalade-repo.org/packages/") t))
 
     (when (< emacs-major-version 27)
       (package-initialize))
@@ -95,6 +95,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     (mapc load-it (directory-files dir nil "\\.el$"))))
 
   (add-to-list 'load-path "~/.emacs.d/lisp/")
+  (add-to-list 'load-path "~/.emacs.d/lisp/icicles")
 
   (load-directory "~/.emacs.d/lisp")
   (byte-recompile-directory (expand-file-name "~/.emacs.d/lisp") 0)
@@ -166,6 +167,17 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
                        "q" 'imenu-list-quit-window)
 
    )
+
+  (use-package dashboard
+   :ensure t
+   :config
+    (dashboard-setup-startup-hook))
+
+  (setq initial-buffer-choice (lambda () (switch-to-buffer "*dashboard*")))
+
+  (require 'icicles)
+  (icy-mode 1)
+   
 #+END_SRC
 
 ** Set up Evil Mode
@@ -197,7 +209,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (use-package base16-theme
     :ensure t
     :init
-      (load-theme 'base16-gruvbox-dark-pale t))
+      (load-theme 'base16-tomorrow-night t))
 
    (use-package smart-mode-line
     :ensure t
@@ -614,6 +626,16 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 (setq auto-save-default nil) ; stop creating #autosave# files
 #+END_SRC
 
+
+** Set up Python
+#+BEGIN_SRC emacs-lisp
+(use-package pipenv
+  :hook (python-mode . pipenv-mode)
+  :init
+  (setq
+   pipenv-projectile-after-switch-function
+   #'pipenv-projectile-after-switch-extended))
+#+END_SRC
 
 * Org Mode
   ** Initialize Org
