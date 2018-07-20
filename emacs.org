@@ -8,9 +8,9 @@
 #+EXCLUDE_TAGS: noexport
 
 * Todo 
-  [-] Move custom to separate file
-  [-] Additional ORG setup
-  [-] Fix startup frame size
+ - [X] Move custom to separate file
+ - [ ] Additional ORG setup
+ - [ ] Fix startup frame size
 
   
 * Configuration
@@ -64,6 +64,8 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
    (unless (assoc-default "melpa" package-archives)
     (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t))
+   (unless (assoc-default "melpa-stable" package-archives)
+    (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t))
    (unless (assoc-default "gnu" package-archives)
    (add-to-list 'package-archives '("gnu"   . "http://elpa.gnu.org/packages/") t))
   (unless (assoc-default "org" package-archives)
@@ -103,6 +105,9 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (frames-only-mode)
 
  #+END_SRC
+
+ #+RESULTS:
+ : t
 
 ** Minimal UI
    
@@ -390,6 +395,14 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ** Set up keybindings
    
 #+BEGIN_SRC emacs-lisp
+
+  (use-package smex
+   :ensure t
+   :config 
+     (smex-initialize)
+     (global-set-key (kbd "M-x") 'smex)
+     (global-set-key (kbd "M-X") 'smex-major-mode-commands))
+
   (use-package simpleclip
    :ensure t
    :config 
@@ -463,6 +476,27 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 #+END_SRC
 
+** Set up iBuffer
+#+BEGIN_SRC emacs-lisp
+(use-package ibuffer :demand t)
+#+END_SRC
+** Set up Neotree
+#+BEGIN_SRC emacs-lisp
+;; NeoTree
+(use-package neotree
+  :ensure t
+  :init
+  (setq neo-theme (if (display-graphic-p) 'icons 'arrow)))
+
+;; Show matching parens
+(setq show-paren-delay 0)
+(show-paren-mode 1)
+#+END_SRC
+
+** Set up undo-tree
+#+BEGIN_SRC emacs-lisp
+(use-package undo-tree :ensure t)
+#+END_SRC
 
 * Set up Source Code Stuff
 ** Aggressive indent
@@ -493,7 +527,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
      
  #+END_SRC
 
-** Set up undo-tree
+** Set up flycheck
 #+BEGIN_SRC emacs-lisp
  (use-package exec-path-from-shell
   :ensure t
@@ -551,16 +585,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 #+END_SRC
 
-** Set up iBuffer
-#+BEGIN_SRC emacs-lisp
-(use-package ibuffer :demand t)
-#+END_SRC
-
-** Set up undo-tree
-#+BEGIN_SRC emacs-lisp
-(use-package undo-tree :ensure t)
-#+END_SRC
-
 ** Set up smart-parens
 #+BEGIN_SRC emacs-lisp
 (use-package smartparens
@@ -606,19 +630,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 #+END_SRC
 
-** Set up Neotree
-#+BEGIN_SRC emacs-lisp
-;; NeoTree
-(use-package neotree
-  :ensure t
-  :init
-  (setq neo-theme (if (display-graphic-p) 'icons 'arrow)))
-
-;; Show matching parens
-(setq show-paren-delay 0)
-(show-paren-mode 1)
-#+END_SRC
-
 ** Disable Backups 
 #+BEGIN_SRC emacs-lisp
 ;; Disable backup files
@@ -626,9 +637,13 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 (setq auto-save-default nil) ; stop creating #autosave# files
 #+END_SRC
 
-
-** Set up Python
+** Python
 #+BEGIN_SRC emacs-lisp
+
+(use-package elpy
+ :ensure t
+ :defer t)
+
 (use-package pipenv
   :hook (python-mode . pipenv-mode)
   :init
