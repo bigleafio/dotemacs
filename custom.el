@@ -5,7 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (pipenv elpygen icicles yasnippet which-key use-package ujelly-theme smart-mode-line simpleclip shackle restart-emacs ranger projectile pdf-tools ox-hugo neotree interleave imenu-list highlight-indent-guides helm git-timemachine general flycheck eyebrowse exec-path-from-shell evil-smartparens evil-magit evil-escape evil-anzu diminish diff-hl delight dashboard counsel company challenger-deep-theme base16-theme avy all-the-icons-ivy alect-themes aggressive-indent ag))))
+    (treemacs which-key use-package ujelly-theme treemacs-projectile treemacs-evil smex smart-mode-line simpleclip shackle restart-emacs ranger pipenv pdf-tools ox-hugo nyan-mode neotree markdown-mode interleave imenu-list highlight-indent-guides helm git-timemachine git-gutter general flycheck eyebrowse exec-path-from-shell evil-smartparens evil-magit evil-escape evil-anzu elpygen elpy diminish diff-hl delight dashboard counsel-projectile challenger-deep-theme base16-theme all-the-icons-ivy alect-themes aggressive-indent ag))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

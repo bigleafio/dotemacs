@@ -9,7 +9,7 @@
  (position . 8794))
 ("org-capture-last-stored"
  (filename . "~/Notes/notes.org")
- (front-context-string . "** [[https://med")
- (rear-context-string . "-13 Fri 16:39] \n")
- (position . 139))
+ (front-context-string . "** [[https://www")
+ (rear-context-string . "-22 Sun 18:37] \n")
+ (position . 1138))
 )

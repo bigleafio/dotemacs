@@ -1,16 +1,26 @@
 
 ;; ----- smex-history -----
 (
- a
- ag
- cd
- 5x5
- any
- arp
- dbx
+ package-install-file
+ ibuffer
+ package-install
+ package-refresh-contents
+ neotree-toggle
+ elpy-mode
+ eval-buffer
 )
 
 ;; ----- smex-data -----
 (
- 
+ (eval-buffer . 2)
+ (package-refresh-contents . 3)
+ (package-install . 5)
+ (elpy-enable . 1)
+ (elpy-mode . 4)
+ (ibuffer . 3)
+ (projectile-mode . 2)
+ (neotree-toggle . 4)
+ (treemacs . 4)
+ (treemacs-RET-action . 1)
+ (package-install-file . 1)
 )
