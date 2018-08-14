@@ -118,8 +118,8 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
    (menu-bar-mode   1)
    ;;(desktop-save-mode 1)
 
-   (set-default-font "PragmataPro 14")
-   (add-to-list 'default-frame-alist '(font . "PragmataPro-14:spacing=100"))
+   (set-default-font "Hack 14")
+   (add-to-list 'default-frame-alist '(font . "Hack-14:spacing=100"))
    (defun set-frame-size-according-to-resolution ()
     (interactive)
     (if window-system
