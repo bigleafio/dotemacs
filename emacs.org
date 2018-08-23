@@ -349,6 +349,21 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
  :defer t)
 #+END_SRC
 
+** Set up pdf-tools
+#+BEGIN_SRC emacs-lisp
+(use-package pdf-tools
+ :pin manual ;; manually update
+ :config
+ ;; initialise
+ (pdf-tools-install)
+ ;; open pdfs scaled to fit page
+ (setq-default pdf-view-display-size 'fit-page)
+ ;; automatically annotate highlights
+ (setq pdf-annot-activate-created-annotations t)
+ ;; use normal isearch
+ (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward))
+#+END_SRC
+
 ** Set up eshell
 #+BEGIN_SRC emacs-lisp
 (require 'eshell)
@@ -735,6 +750,7 @@ This is the default setup from the treemacs page on Github.
 (setq org-startup-indented t)
 (setq org-imenu-depth 5)
 (setq org-list-allow-alphabetical t)
+(add-hook 'org-mode-hook #'toggle-word-wrap)
 #+END_SRC
 ** Tangle/Rebuild on save
 
@@ -853,11 +869,11 @@ This is the default setup from the treemacs page on Github.
     :END:
     see: %a\n")
             ("w" "Web site"
-            entry (file+headline "~/Notes/notes.org" "Links")
+            entry (file+headline(lambda () (concat org-directory "organizer.org") "Links")
       "* %a :website:\n\n%U %?\n\n%:initial")
   ("W" "Web site"
    entry
-   (file+olp "~/inbox.org" "Web")
+   (file+olp (lambda () (concat org-directory "organizer.org") "Web")
    "* %c :website:\n%U %?%:initial")
   ("l" "A link, for reading later." entry
          (file+headline "notes.org" "Reading List")
@@ -875,14 +891,14 @@ This is the default setup from the treemacs page on Github.
             ("q" "Clock (quick)" plain (clock)
              "%a%?\n")
             ("s" "Emacs tool sharpening"
-             entry (file+olp (lambda () (concat org-directory "programming_notes.org"))
+             entry (file+olp (lambda () (concat org-directory "organizer.org"))
                              "Emacs"
                              "Sharpening list")
              "* %?
     see %a
     entered on %U\n")
             ("S" "General tool sharpening"
-             entry (file+olp (lambda () (concat org-directory "programming_notes.org"))
+             entry (file+olp (lambda () (concat org-directory "organizer.org"))
                              "General sharpening")
              "* %?
     see %a
@@ -893,11 +909,11 @@ This is the default setup from the treemacs page on Github.
     %t
     see %a\n")
             ("j" "Journal"
-             plain (file+datetree (lambda () (concat org-directory "journal.org")))
+             plain (file+datetree (lambda () (concat org-directory "organizer.org")))
              "**** <title>\n%U\n\n%?\n")
-        ("p" "Protocol" entry (file+headline ,(concat org-directory "notes.org") "Inbox")
+        ("p" "Protocol" entry (file+headline ,(concat org-directory "organizer.org") "Inbox")
           "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
-            ("L" "Protocol Link" entry (file+headline ,(concat org-directory "notes.org") "Inbox")
+            ("L" "Protocol Link" entry (file+headline ,(concat org-directory "organizer.org") "Inbox")
           "* %? [[%:link][%:description]] \nCaptured On: %U")
             )
     ))
