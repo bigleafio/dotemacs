@@ -20,3 +20,8 @@ emacs.el
 recentf~
 recentf
 recentf
+/recentf
+/bookmarks
+/.cache/treemacs-persist
+*.el#
+/smex-items

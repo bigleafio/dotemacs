@@ -81,6 +81,10 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (require 'use-package)
   (setq use-package-always-ensure t))
 
+  (use-package org-plus-contrib
+    :ensure t
+    )
+  
   (use-package delight
     :defer t)
 
@@ -97,7 +101,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     (mapc load-it (directory-files dir nil "\\.el$"))))
 
   (add-to-list 'load-path "~/.emacs.d/lisp/")
-  (add-to-list 'load-path "~/.emacs.d/lisp/icicles")
+  ;;(add-to-list 'load-path "~/.emacs.d/lisp/icicles")
 
   (load-directory "~/.emacs.d/lisp")
   (byte-recompile-directory (expand-file-name "~/.emacs.d/lisp") 0)
@@ -106,8 +110,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
  #+END_SRC
 
- #+RESULTS:
- : t
+ #+RESULTS
 
 ** Minimal UI
 
@@ -118,7 +121,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
    (menu-bar-mode   1)
    ;;(desktop-save-mode 1)
 
-   (set-default-font "Hack 14")
+   ;;(set-default-font "Hack 14")
    (add-to-list 'default-frame-alist '(font . "Hack-14:spacing=100"))
    (defun set-frame-size-according-to-resolution ()
     (interactive)
@@ -148,7 +151,11 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     :ensure t
     :config
      (eyebrowse-mode t))
-
+  
+   (use-package vscode-icon
+    :ensure t
+    :commands (vscode-icon-for-file))
+  
    (use-package shackle
     :ensure t
     :init
@@ -180,8 +187,8 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
   (setq initial-buffer-choice (lambda () (switch-to-buffer "*dashboard*")))
 
-  (require 'icicles)
-  (icy-mode 1)
+ ;; (require 'icicles)
+ ;; (icy-mode 1)
 
 #+END_SRC
 
@@ -325,10 +332,42 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
      :config
      (setq dired-omit-verbose nil)
      (setq dired-omit-files
-           (concat dired-omit-files "\\|^\\..*$\\|^.DS_Store$\\|^.projectile$\\|^.git$"))))
+           (concat dired-omit-files "|^.DS_Store$\\|^.projectile$\\|^.git$"))))
+
+(use-package dired-sidebar
+  :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
+  :ensure t
+  :commands (dired-sidebar-toggle-sidebar)
+  :init
+  (add-hook 'dired-sidebar-mode-hook
+            (lambda ()
+              (unless (file-remote-p default-directory)
+                (auto-revert-mode))))
+  :config
+  (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+  (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+
+  (setq dired-sidebar-subtree-line-prefix "__")
+  (setq dired-sidebar-theme 'vscode)
+  (setq dired-sidebar-use-term-integration t)
+  (setq dired-sidebar-use-custom-font t))
 
 #+END_SRC
 
+** Set up iBuffer
+#+BEGIN_SRC emacs-lisp
+(use-package ibuffer :demand t)
+
+(use-package ibuffer-sidebar
+  :load-path "~/.emacs.d/lisp/ibuffer-sidebar"
+  :ensure nil
+  :commands (ibuffer-sidebar-toggle-sidebar)
+  :config
+  (setq ibuffer-sidebar-use-custom-font t)
+  (setq ibuffer-sidebar-face `(:family "Helvetica" :height 140)))
+
+
+#+END_SRC
 ** Set up Ranger
 
 ;;#+BEGIN_SRC emacs-lisp
@@ -386,7 +425,19 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ** Set up keybindings
 
 #+BEGIN_SRC emacs-lisp
+  ;;Toggle Dired-Sidebar and ibuffer-sidebar together.
+  (defun sidebar-toggle ()
+  "Toggle both `dired-sidebar' and `ibuffer-sidebar'."
+  (interactive)
+  (dired-sidebar-toggle-sidebar)
+  (ibuffer-sidebar-toggle-sidebar))
 
+  (defun treemacs-sidebar-toggle ()
+  "Toggle both `treemacs' and `ibuffer-sidebar'."
+  (interactive)
+  (treemacs)
+  (ibuffer-sidebar-toggle-sidebar))
+  
   (use-package smex
    :ensure t
    :config
@@ -460,7 +511,9 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     ;; Tools
     "t" '(:ignore t :which-key "Tools")
     "tt"  '(treemacs :which-key "treemacs")
-    "tp"  '(treemacs :which-key "treemacs-projectile")
+    "tb"  '(treemacs-sidebar-toggle :which-key "treemacs-sidebar")
+    "td"  '(dired-sidebar-toggle-sidebar :which-key "dired-sidebar")
+    "ts"  '(sidebar-toggle :which-key "toggle-sidebar")
     ;; Quit
     "q" '(:ignore t :which-key "Quit")
     "qq"  (general-simulate-key "C-u" :state 'restart-emacs) :which-key "restart -Q"))
@@ -470,10 +523,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 #+END_SRC
 
-** Set up iBuffer
-#+BEGIN_SRC emacs-lisp
-(use-package ibuffer :demand t)
-#+END_SRC
 ** Set up Neotree
 ;;#+BEGIN_SRC emacs-lisp
 ;; NeoTree
@@ -744,8 +793,17 @@ This is the default setup from the treemacs page on Github.
 #+END_SRC
 
 * Org Mode
-  ** Initialize Org
+** Initialize Org
 #+BEGIN_SRC emacs-lisp
+
+(require 'org-mouse)
+(require 'org-checklist)
+(require 'org-contacts)
+(require 'org-panel)
+(require 'org-toc)
+(require 'org-notify)
+(require 'org-depend)
+
 (setq org-id-link-to-org-use-id 'use-existing)
 (setq org-startup-indented t)
 (setq org-imenu-depth 5)
@@ -929,6 +987,10 @@ This is the default setup from the treemacs page on Github.
 ** Set up org-todo
 
 #+BEGIN_SRC emacs-lisp
+(require 'org-mouse)
+
+(require 'org-bullets)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
 (setq org-enforce-todo-dependencies t)
 (setq org-log-done 'time)
@@ -1039,7 +1101,7 @@ This is the default setup from the treemacs page on Github.
    (add-hook 'before-save-hook 'delete-trailing-whitespace)
    (diminish 'auto-revert-mode)
    (diminish 'evil-escape-mode)
-
+   
    (setq gc-cons-threshold 16777216
         gc-cons-percentage 0.1)
    (toggle-frame-maximized)
