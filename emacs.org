@@ -790,6 +790,18 @@ This is the default setup from the treemacs page on Github.
          ("\\.markdown\\'" . markdown-mode))
   :init (setq markdown-command "multimarkdown"))
 
+(use-package imenu-list
+  :ensure t
+  :bind (("C-'" . imenu-list-smart-toggle))
+  :config
+  (setq imenu-list-focus-after-activation t
+        imenu-list-auto-resize nil))
+
+ ;; Use visual-line-mode in gfm-mode
+(defun my-gfm-mode-hook ()
+  (visual-line-mode 1))
+(add-hook 'gfm-mode-hook 'my-gfm-mode-hook)
+
 #+END_SRC
 
 * Org Mode
@@ -817,7 +829,11 @@ This is the default setup from the treemacs page on Github.
 
 (org-babel-do-load-languages
      'org-babel-load-languages
-     '((ditaa . t)))
+     '((ditaa . t)
+       (plantuml . t)))
+
+;; Don't prompt before running code in org
+(setq org-confirm-babel-evaluate nil)
 
 (if (eq system-type 'darwin)
   (setq org-ditaa-jar-path "/usr/local/Cellar/ditaa/0.11.0/libexec/ditaa-0.11.0-standalone.jar")
@@ -827,6 +843,8 @@ This is the default setup from the treemacs page on Github.
   (setq org-ditaa-jar-path "C:/Users/JG186074/Apps/ditaa/ditaa-0.11.0-standalone.jar")
 )
 
+(setq org-plantuml-jar-path
+      (expand-file-name "~/bin/plantuml.jar"))
 
 (defun my/tangle-dotfiles ()
   "If the current file is in '~/.emacs.d', the code blocks are tangled"
