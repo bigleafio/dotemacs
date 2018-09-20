@@ -12,7 +12,6 @@
  - [ ] Additional ORG setup
  - [ ] Fix startup frame size
 
-
 * Configuration
 
 To load this, run =(org-babel-load-file "~/emacs.org")=.
@@ -20,6 +19,18 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ** About me
 
 ** Personal information
+
+#+begin_src emacs-lisp
+  (message "
+  ███████╗███╗   ███╗ █████╗  ██████╗███████╗██╗
+  ██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝██║
+  █████╗  ██╔████╔██║███████║██║     ███████╗██║
+  ██╔══╝  ██║╚██╔╝██║██╔══██║██║     ╚════██║╚═╝
+  ███████╗██║ ╚═╝ ██║██║  ██║╚██████╗███████║██╗
+  ╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝
+  ")
+#+END_SRC
+
 #+BEGIN_SRC emacs-lisp
 (setq user-full-name "Jason Graham"
       user-mail-address "jgraham20@gmail.com")
@@ -28,85 +39,93 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ** Intialize
 
  #+BEGIN_SRC emacs-lisp
- ;;----------------------------------------------------------------------------
- ;; Adjust garbage collection thresholds during startup, and thereafter
- ;;----------------------------------------------------------------------------
- (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
+    ;;----------------------------------------------------------------------------
+    ;; Adjust garbage collection thresholds during startup, and thereafter
+    ;;----------------------------------------------------------------------------
+    (setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
 
- (eval-and-compile
-  (setq gc-cons-threshold 402653184
-        gc-cons-percentage 0.6))
+    (eval-and-compile
+     (setq gc-cons-threshold 402653184
+           gc-cons-percentage 0.6))
 
- (setq mac-option-modifier 'meta)
- (setq mac-command-modifier 'super)
- (setq mac-pass-command-to-system nil)
+    (setq mac-option-modifier 'meta)
+    (setq mac-command-modifier 'super)
+    (setq mac-pass-command-to-system nil)
+
+   (setq-default
+    cursor-type '(bar . 5)
+    enable-recursive-minibuffers t
+    inhibit-startup-screen t
+    use-dialog-box nil
+    vc-follow-symlinks t
+
+    truncate-lines t
+
+    disabled-command-function nil)
+    (fset 'yes-or-no-p 'y-or-n-p)
+
+    (setq warning-minimum-level :error)
+
 #+END_SRC
 
 ** Set up use-package
  #+BEGIN_SRC emacs-lisp
 
-  (eval-and-compile
-    (setq load-prefer-newer t
-        package-user-dir "~/.emacs.d/elpa"
-        package--init-file-ensured t
-        package-enable-at-startup nil)
+   (eval-and-compile
+     (setq load-prefer-newer t
+         package-user-dir "~/.emacs.d/elpa"
+         package--init-file-ensured t
+         package-enable-at-startup nil)
 
-  (unless (file-directory-p package-user-dir)
-    (make-directory package-user-dir t)))
+   (unless (file-directory-p package-user-dir)
+     (make-directory package-user-dir t)))
 
-  (setq use-package-verbose t)
+   (setq use-package-verbose t)
 
-  (eval-and-compile
-    (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
+   (eval-and-compile
+     (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
 
-  (eval-when-compile
-    (require 'package)
+   (eval-when-compile
+     (require 'package)
 
-   (unless (assoc-default "melpa-stable" package-archives)
-    (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t))
-   (unless (assoc-default "melpa" package-archives)
-    (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t))
-   (unless (assoc-default "gnu" package-archives)
-   (add-to-list 'package-archives '("gnu"   . "http://elpa.gnu.org/packages/") t))
-  (unless (assoc-default "org" package-archives)
-    (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t))
-  (unless (assoc-default "marmalade" package-archives)
-    (add-to-list 'package-archives '("marmalade" . "https://marmalade-repo.org/packages/") t))
+    (unless (assoc-default "melpa-stable" package-archives)
+     (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t))
+    (unless (assoc-default "melpa" package-archives)
+     (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t))
+    (unless (assoc-default "gnu" package-archives)
+    (add-to-list 'package-archives '("gnu"   . "http://elpa.gnu.org/packages/") t))
+   (unless (assoc-default "org" package-archives)
+     (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t))
+   (unless (assoc-default "marmalade" package-archives)
+     (add-to-list 'package-archives '("marmalade" . "https://marmalade-repo.org/packages/") t))
+   (unless package--initialized (package-initialize t))
+   (unless (package-installed-p 'use-package)
+     (package-refresh-contents)
+     (package-install 'use-package))
+   (require 'use-package)
+   (setq use-package-always-ensure t))
 
-    (when (< emacs-major-version 27)
-      (package-initialize))
-  (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package))
-  (require 'use-package)
-  (setq use-package-always-ensure t))
+   (use-package delight
+     :defer t)
 
-  (use-package org-plus-contrib
-    :ensure t
-    )
-  
-  (use-package delight
-    :defer t)
+   (use-package diminish
+     :defer t)
 
-  (use-package diminish
-    :defer t)
+   (setq org-directory "~/Dropbox/Notes/")
+   (setq org-default-notes-file (concat org-directory "organizer.org"))
 
-  (setq org-directory "~/Dropbox/Notes/")
-  (setq org-default-notes-file (concat org-directory "organizer.org"))
+   (defun load-directory (dir)
+     (let ((load-it (lambda (f)
+            (load-file (concat (file-name-as-directory dir) f)))
+          ))
+     (mapc load-it (directory-files dir nil "\\.el$"))))
 
-  (defun load-directory (dir)
-    (let ((load-it (lambda (f)
-           (load-file (concat (file-name-as-directory dir) f)))
-         ))
-    (mapc load-it (directory-files dir nil "\\.el$"))))
+   (add-to-list 'load-path "~/.emacs.d/lisp/")
 
-  (add-to-list 'load-path "~/.emacs.d/lisp/")
-  ;;(add-to-list 'load-path "~/.emacs.d/lisp/icicles")
-
-  (load-directory "~/.emacs.d/lisp")
-  (byte-recompile-directory (expand-file-name "~/.emacs.d/lisp") 0)
-  ;;(setq pop-up-frames t)
-  ;;(frames-only-mode)
+   (load-directory "~/.emacs.d/lisp")
+   (byte-recompile-directory (expand-file-name "~/.emacs.d/lisp") 0)
+   ;;(setq pop-up-frames t)
+   ;;(frames-only-mode)
 
  #+END_SRC
 
@@ -119,7 +138,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
    (tool-bar-mode   -1)
    (tooltip-mode    -1)
    (menu-bar-mode   1)
-   ;;(desktop-save-mode 1)
+   (desktop-save-mode 1)
 
    ;;(set-default-font "Hack 14")
    (add-to-list 'default-frame-alist '(font . "Hack-14:spacing=100"))
@@ -151,11 +170,11 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     :ensure t
     :config
      (eyebrowse-mode t))
-  
+
    (use-package vscode-icon
     :ensure t
     :commands (vscode-icon-for-file))
-  
+
    (use-package shackle
     :ensure t
     :init
@@ -179,13 +198,17 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
                        "q" 'imenu-list-quit-window)
 
    )
+;;(use-package dashboard
+;;   :ensure t
+;;   :config
+;;    (dashboard-setup-startup-hook))
 
-  (use-package dashboard
-   :ensure t
-   :config
-    (dashboard-setup-startup-hook))
+;(use-package perspective
+;   :ensure t
+;   :config
+;    (persp-mode))
 
-  (setq initial-buffer-choice (lambda () (switch-to-buffer "*dashboard*")))
+;;  (setq initial-buffer-choice (lambda () (switch-to-buffer "*dashboard*")))
 
  ;; (require 'icicles)
  ;; (icy-mode 1)
@@ -388,21 +411,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
  :defer t)
 #+END_SRC
 
-** Set up pdf-tools
-#+BEGIN_SRC emacs-lisp
-(use-package pdf-tools
- :pin manual ;; manually update
- :config
- ;; initialise
- (pdf-tools-install)
- ;; open pdfs scaled to fit page
- (setq-default pdf-view-display-size 'fit-page)
- ;; automatically annotate highlights
- (setq pdf-annot-activate-created-annotations t)
- ;; use normal isearch
- (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward))
-#+END_SRC
-
 ** Set up eshell
 #+BEGIN_SRC emacs-lisp
 (require 'eshell)
@@ -427,17 +435,17 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 #+BEGIN_SRC emacs-lisp
   ;;Toggle Dired-Sidebar and ibuffer-sidebar together.
   (defun sidebar-toggle ()
-  "Toggle both `dired-sidebar' and `ibuffer-sidebar'."
+  ;;"Toggle both `dired-sidebar' and `ibuffer-sidebar'."
   (interactive)
   (dired-sidebar-toggle-sidebar)
   (ibuffer-sidebar-toggle-sidebar))
 
   (defun treemacs-sidebar-toggle ()
-  "Toggle both `treemacs' and `ibuffer-sidebar'."
+  ;;"Toggle both `treemacs' and `ibuffer-sidebar'."
   (interactive)
   (treemacs)
   (ibuffer-sidebar-toggle-sidebar))
-  
+
   (use-package smex
    :ensure t
    :config
@@ -524,18 +532,33 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 #+END_SRC
 
 ** Set up Neotree
-;;#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 ;; NeoTree
-;;(use-package neotree
-;;  :ensure t
-;;  :init
-;;  (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
-;;  (global-set-key [f8] 'neotree-toggle))
+(use-package neotree
+  :ensure t
+  :init
+  (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+  (global-set-key [f8] 'neotree-toggle))
 
 ;; Show matching parens
 (setq show-paren-delay 0)
 (show-paren-mode 1)
-;;#+END_SRC
+#+END_SRC
+
+** Set up Ace Window
+#+BEGIN_SRC emacs-lisp
+(use-package ace-window
+  :ensure t
+  :defer t
+  :init
+  (progn
+    (global-set-key (kbd "<f9>") 'ace-window)
+    (global-set-key (kbd "M-[") 'ace-window)
+    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+    ;;more info at https://github.com/abo-abo/ace-window
+    )
+  )
+#+END_SRC
 
 ** Set up Treemacs
 
@@ -643,16 +666,18 @@ This is the default setup from the treemacs page on Github.
 
 ** Set up flycheck
 #+BEGIN_SRC emacs-lisp
- (use-package exec-path-from-shell
-  :ensure t
-  :init
-   (when (memq window-system '(mac ns x))
-         (exec-path-from-shell-initialize)))
-
- (use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode))
-
+  (use-package exec-path-from-shell
+   :ensure t
+   :init
+    (when (memq window-system '(mac ns x))
+          (exec-path-from-shell-initialize)))
+  (setq ispell-program-name "aspell")
+  (setq ispell-silently-savep t)
+  (use-package flycheck
+   :ensure t
+   :init (global-flycheck-mode))
+  (diminish 'flyspell-mode "Fly")
+(setq flyspell-duplicate-distance 0)
 #+END_SRC
 
 ** Set up Git
@@ -714,38 +739,52 @@ This is the default setup from the treemacs page on Github.
 
 ** Set up smart-parens
 #+BEGIN_SRC emacs-lisp
-(use-package smartparens
-  :demand t
-  :init
-  (add-hook 'clojure-mode-hook 'turn-on-smartparens-strict-mode)
-  (add-hook 'cide-clojure-interaction-mode-hook 'turn-on-smartparens-strict-mode)
-  (add-hook 'lisp-interaction-mode-hook 'turn-on-smartparens-strict-mode)
-  (add-hook 'cider-repl-mode-hook 'turn-on-smartparens-strict-mode)
-  (add-hook 'emacs-lisp-mode-hook 'turn-on-smartparens-strict-mode)
-  :config
-  (setq sp-navigate-interactive-always-progress-point t)
 
-  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
-  (sp-local-pair 'clojure-mode "'" nil :actions nil)
-  (sp-local-pair 'lisp-interaction-mode "'" nil :actions nil)
-  (sp-local-pair 'clojure-interaction-mode "'" nil :actions nil)
-  (sp-local-pair 'cider-repl-mode "'" nil :actions nil)
+    (use-package lispy
+     :ensure t
+     :init
+     (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1))))
+
+    (use-package smartparens
+      :demand t
+      :init
+      (add-hook 'clojure-mode-hook 'turn-on-smartparens-strict-mode)
+      (add-hook 'cide-clojure-interaction-mode-hook 'turn-on-smartparens-strict-mode)
+      (add-hook 'lisp-interaction-mode-hook 'turn-on-smartparens-strict-mode)
+      (add-hook 'cider-repl-mode-hook 'turn-on-smartparens-strict-mode)
+      (add-hook 'emacs-lisp-mode-hook 'turn-on-smartparens-strict-mode)
+      :config
+      (setq sp-navigate-interactive-always-progress-point t)
+
+      (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+      (sp-local-pair 'clojure-mode "'" nil :actions nil)
+      (sp-local-pair 'lisp-interaction-mode "'" nil :actions nil)
+      (sp-local-pair 'clojure-interaction-mode "'" nil :actions nil)
+      (sp-local-pair 'cider-repl-mode "'" nil :actions nil)
 
 
-  (smartparens-global-mode 1)
-  )
+      (smartparens-global-mode 1)
+      )
 
-(use-package evil-smartparens
-  :demand t
-  :config)
+    (use-package evil-smartparens
+      :demand t
+      :config)
 
-(general-def 'normal
-  ">" (general-key-dispatch 'evil-shift-right
-        ")" 'sp-forward-slurp-sexp
-        "(" 'sp-backward-barf-sexp)
-  "<" (general-key-dispatch 'evil-shift-left
-        ")" 'sp-forward-barf-sexp
-        "(" 'sp-backward-slurp-sexp))
+    (general-def 'normal
+      ">" (general-key-dispatch 'evil-shift-right
+            ")" 'sp-forward-slurp-sexp
+            "(" 'sp-backward-barf-sexp)
+      "<" (general-key-dispatch 'evil-shift-left
+            ")" 'sp-forward-barf-sexp
+            "(" 'sp-backward-slurp-sexp))
+
+  (use-package rainbow-mode
+   :ensure t
+   :init 
+  (add-hook 'prog-mode-hook (rainbow-mode))
+  (add-hook 'css-mode-hook 'rainbow-mode)
+  (add-hook 'scss-mode-hook 'rainbow-mode))
+
 #+END_SRC
 
 ** Set up highlight-indent
@@ -763,7 +802,6 @@ This is the default setup from the treemacs page on Github.
 (setq make-backup-files nil) ; stop creating backup~ files
 (setq auto-save-default nil) ; stop creating #autosave# files
 #+END_SRC
-
 ** Python
 #+BEGIN_SRC emacs-lisp
 
@@ -808,6 +846,98 @@ This is the default setup from the treemacs page on Github.
 ** Initialize Org
 #+BEGIN_SRC emacs-lisp
 
+
+      (use-package org
+        :ensure org-bullets
+        :demand
+        :mode ("\\.org\\'" . org-mode)
+        :diminish org-indent-mode
+        :init
+        (require 'org-indent)
+        :config
+        (setq org-completion-use-ido t
+              org-src-fontify-natively t
+              org-src-tab-acts-natively t
+              org-log-done t
+              org-log-done-with-time t
+              org-log-refile t
+              org-support-shift-select t)
+
+        (add-hook 'org-mode-hook 'auto-fill-mode))
+
+      (setq org-modules '(org-bbdb
+                            org-gnus
+                            org-drill
+                            org-info
+                                org-id
+                            org-jsinfo
+                            org-habit
+                            org-irc
+                            org-mouse
+                            org-bullets
+                            org-protocol
+                            org-annotate-file
+                            org-eval
+                            org-expiry
+                            org-interactive-query
+                            org-man
+                            org-collector
+                            org-panel
+                            org-screen
+                            org-toc))
+      (eval-after-load 'org
+       '(org-load-modules-maybe t))
+
+       ;; Prepare stuff for org-export-backends
+      (setq org-export-backends '(org latex icalendar html ascii))
+
+      (bind-key "C-c c" 'org-capture)
+      (bind-key "C-c a" 'org-agenda)
+      (bind-key "C-c l" 'org-store-link)
+      (bind-key "C-c L" 'org-insert-link-global)
+      (bind-key "C-c O" 'org-open-at-point-global)
+      (bind-key "<f9> <f9>" 'org-agenda-list)
+      (bind-key "<f9> <f8>" (lambda () (interactive) (org-capture nil "r")))
+
+      (use-package toc-org
+       :ensure t
+       :init 
+      (add-hook 'org-mode-hook 'toc-org-enable))
+
+      (defun jasong/org-where-am-i ()
+      "Return a string of headers indicating where point is in the current tree."
+      (interactive)
+      (let (headers)
+        (save-excursion
+    (while (condition-case nil
+         (progn
+           (push (nth 4 (org-heading-components)) headers)
+           (outline-up-heading 1))
+       (error nil))))
+    (message (mapconcat #'identity headers " > "))))
+
+    (general-define-key :keymaps 'org-mode-map
+                        "<f1> <f1>" 'jasong/org-where-am-i)
+
+    (setq org-agenda-files (list "~/Notes/LOG.org")
+          org-default-notes-file "~/Notes/LOG.org")
+
+    (use-package helm-bibtex)
+    (use-package biblio)
+     
+  (use-package org-ref
+              :ensure helm-bibtex biblio
+              :initialize
+  (add-hook 'org-mode-hook (lambda () (require 'org-ref))))
+
+  (setq org-ref-completion-library 'org-ref-ivy-cite
+        bibtex-dialect 'biblatex)
+  (use-package rainbow-delimiters)
+
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+
 (require 'org-mouse)
 (require 'org-checklist)
 (require 'org-contacts)
@@ -847,7 +977,7 @@ This is the default setup from the treemacs page on Github.
       (expand-file-name "~/bin/plantuml.jar"))
 
 (defun my/tangle-dotfiles ()
-  "If the current file is in '~/.emacs.d', the code blocks are tangled"
+  ;;"If the current file is in '~/.emacs.d', the code blocks are tangled"
   (when (equal (file-name-directory (directory-file-name buffer-file-name))
                (concat (getenv "HOME") "/.emacs.d/"))
     (org-babel-tangle)
@@ -860,6 +990,10 @@ This is the default setup from the treemacs page on Github.
 #+BEGIN_SRC emacs-lisp
 (use-package ox-hugo
   :after ox)
+
+(use-package adaptive-wrap
+  :ensure t)
+
 #+END_SRC
 
 ** Set up artist-mode
@@ -881,7 +1015,7 @@ This is the default setup from the treemacs page on Github.
 
     ;;; integrate ido with artist-mode
    (defun artist-ido-select-operation (type)
-     "Use ido to select a drawing operation in artist-mode"
+     ;;"Use ido to select a drawing operation in artist-mode"
      (interactive (list (ido-completing-read "Drawing operation: "
                                              (list "Pen" "Pen Line" "line" "straight line" "rectangle"
                                                    "square" "poly-line" "straight poly-line" "ellipse"
@@ -893,7 +1027,7 @@ This is the default setup from the treemacs page on Github.
 
 
    (defun artist-ido-select-settings (type)
-     "Use ido to select a setting to change in artist-mode"
+     ;;"Use ido to select a setting to change in artist-mode"
      (interactive (list (ido-completing-read "Setting: "
                                              (list "Set Fill" "Set Line" "Set Erase" "Spray-size" "Spray-chars"
                                                    "Rubber-banding" "Trimming" "Borders"))))
@@ -917,90 +1051,89 @@ This is the default setup from the treemacs page on Github.
 ** Set up org-capture
 
 #+BEGIN_SRC emacs-lisp
-    (require 'org-protocol)
-    (use-package s
-     :ensure t)
 
-    (defun make-capture-frame (&optional capture-url)
-    "Create a new frame and run org-capture."
-    (interactive)
-    (make-frame '((name . "capture")
-                  (width . 120)
-                  (height . 15)))
-    (select-frame-by-name "capture")
-    (setq word-wrap 1)
-    (setq truncate-lines nil)
-    (if capture-url (org-protocol-capture capture-url) (org-capture)))
+        (require 'org-protocol)
 
-    (require 'org-protocol-capture-html)
+        (use-package s
+         :ensure t)
+        (use-package org-download
+          :defer t
+          )
+        (defun make-capture-frame (&optional capture-url)
+        "Create a new frame and run org-capture."
+        (interactive)
+        (make-frame '((name . "capture")
+                      (width . 120)
+                      (height . 15)))
+        (select-frame-by-name "capture")
+        (setq word-wrap 1)
+        (setq truncate-lines nil)
+        (if capture-url (org-protocol-capture capture-url) (org-capture)))
 
-    (defun jsg/org-captures()
-    (setq org-capture-templates
-          '(("t" "Todo"
-             entry (file+headline (lambda () (concat org-directory "organizer.org")) "Task List")
-             "* TODO %?
-    DEADLINE: %t
-    :LOGBOOK:
-    - State \"TODO\"       from \"\"           %U
-    :END:
-    see: %a\n")
-            ("w" "Web site"
-            entry (file+headline(lambda () (concat org-directory "organizer.org") "Links")
-      "* %a :website:\n\n%U %?\n\n%:initial")
-  ("W" "Web site"
-   entry
-   (file+olp (lambda () (concat org-directory "organizer.org") "Web")
-   "* %c :website:\n%U %?%:initial")
-  ("l" "A link, for reading later." entry
-         (file+headline "notes.org" "Reading List")
-         "* %:link\n%u\n\n%c\n\n%i"
-         :empty-lines 1)
-            ("n" "Note"
-             entry (file+headline (lambda () (concat org-directory "organizer.org")) "Notes")
-             "* %?
-    %U\n%a\n")
-            ("b" "Book" entry (file+headline (lambda () (concat org-directory "organizer.org")) "Books")
-             "* %?
-    (C-c C-w to refile to fiction/non-fiction)
-    see %a
-    entered on %U\n")
-            ("q" "Clock (quick)" plain (clock)
-             "%a%?\n")
-            ("s" "Emacs tool sharpening"
-             entry (file+olp (lambda () (concat org-directory "organizer.org"))
-                             "Emacs"
-                             "Sharpening list")
-             "* %?
-    see %a
-    entered on %U\n")
-            ("S" "General tool sharpening"
-             entry (file+olp (lambda () (concat org-directory "organizer.org"))
-                             "General sharpening")
-             "* %?
-    see %a
-    entered on %U\n")
-            ("d" "Date"
-             entry (file+datetree+prompt (lambda () (concat org-directory "dates.org")))
-             "* %?
-    %t
-    see %a\n")
-            ("j" "Journal"
-             plain (file+datetree (lambda () (concat org-directory "organizer.org")))
-             "**** <title>\n%U\n\n%?\n")
-        ("p" "Protocol" entry (file+headline ,(concat org-directory "organizer.org") "Inbox")
-          "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
-            ("L" "Protocol Link" entry (file+headline ,(concat org-directory "organizer.org") "Inbox")
-          "* %? [[%:link][%:description]] \nCaptured On: %U")
-            )
-    ))
+        (require 'org-protocol-capture-html)
+
+        (defun jsg/org-captures()
+        (setq org-capture-templates
+              '(("t" "Todo"
+                 entry (file+headline (lambda () (concat org-directory "organizer.org")) "Task List")
+                 "* TODO %?
+        DEADLINE: %t
+        :LOGBOOK:
+        - State \"TODO\"       from \"\"           %U
+        :END:
+        see: %a\n")
+                ("w" "Web site"
+                entry (file+headline(lambda () (concat org-directory "organizer.org") "Links")
+          "* %a :website:\n\n%U %?\n\n%:initial")
+      ("W" "Web site"
+       entry
+       (file+olp (lambda () (concat org-directory "organizer.org") "Web")
+       "* %c :website:\n%U %?%:initial")
+      ("l" "A link, for reading later." entry
+             (file+headline "notes.org" "Reading List")
+             "* %:link\n%u\n\n%c\n\n%i"
+             :empty-lines 1)
+                ("n" "Note"
+                 entry (file+headline (lambda () (concat org-directory "organizer.org")) "Notes")
+                 "* %?
+        %U\n%a\n")
+                ("b" "Book" entry (file+headline (lambda () (concat org-directory "organizer.org")) "Books")
+                 "* %?
+        (C-c C-w to refile to fiction/non-fiction)
+        see %a
+        entered on %U\n")
+                ("q" "Clock (quick)" plain (clock)
+                 "%a%?\n")
+                ("s" "Emacs tool sharpening"
+                 entry (file+olp (lambda () (concat org-directory "organizer.org"))
+                                 "Emacs"
+                                 "Sharpening list")
+                 "* %?
+        see %a
+        entered on %U\n")
+                ("S" "General tool sharpening"
+                 entry (file+olp (lambda () (concat org-directory "organizer.org"))
+                                 "General sharpening")
+                 "* %?
+        see %a
+        entered on %U\n")
+                ("d" "Date"
+                 entry (file+datetree+prompt (lambda () (concat org-directory "dates.org")))
+                 "* %?
+        %t
+        see %a\n")
+                ("j" "Journal"
+                 plain (file+datetree (lambda () (concat org-directory "organizer.org")))
+                 "**** <title>\n%U\n\n%?\n")
+            ("p" "Protocol" entry (file+headline ,(concat org-directory "organizer.org") "Inbox")
+              "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
+                ("L" "Protocol Link" entry (file+headline ,(concat org-directory "organizer.org") "Inbox")
+              "* %? [[%:link][%:description]] \nCaptured On: %U")
+                )
+        )))
+      )
 #+END_SRC
 
-** Set up org-extras
-
-#+BEGIN_SRC emacs-lisp
-(use-package interleave
- :ensure t)
-#+END_SRC
 
 ** Set up org-todo
 
@@ -1019,13 +1152,13 @@ This is the default setup from the treemacs page on Github.
 (setq org-log-into-drawer "LOGBOOK")
 
 (defun org-summary-todo (n-done n-not-done)
-  "Switch entry to DONE when all subentries are done, to TODO otherwise."
+  ;;"Switch entry to DONE when all subentries are done, to TODO otherwise."
   (let (org-log-done org-log-states)   ; turn off logging
     (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
 
 ;; from https://lists.gnu.org/archive/html/emacs-orgmode/2012-02/msg00515.html
 (defun org-summary-checkboxes ()
-  "Switch entry to DONE when all sub-checkboxes are done, to TODO otherwise."
+  ;;"Switch entry to DONE when all sub-checkboxes are done, to TODO otherwise."
   (save-excursion
     (org-back-to-heading t)
     (let ((beg (point)) end)
@@ -1046,7 +1179,7 @@ This is the default setup from the treemacs page on Github.
 (add-hook 'org-checkbox-statistics-hook 'org-summary-checkboxes)
 
 (defun jsg/org-sort-todos ()
-  "Sort entries by TODO status"
+  ;;"Sort entries by TODO status"
   (interactive)
   (org-sort-entries nil ?o)
   (outline-hide-leaves))
@@ -1055,74 +1188,52 @@ This is the default setup from the treemacs page on Github.
             (local-set-key (kbd "C-c 6") 'jsg/org-sort-todos)))
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
-(use-package org
-  :demand
-  :mode ("\\.org\\'" . org-mode)
-  :diminish org-indent-mode
-  :init
-  (require 'org-indent)
-  :config
-  (setq org-completion-use-ido t
-        org-src-fontify-natively t
-        org-src-tab-acts-natively t
-        org-log-done t
-        org-log-done-with-time t
-        org-log-refile t
-        org-support-shift-select t)
-
-  (add-hook 'org-mode-hook 'auto-fill-mode))
-
-(setq org-modules '(org-bbdb
-                      org-gnus
-                      org-drill
-                      org-info
-		      org-id
-                      org-jsinfo
-                      org-habit
-                      org-irc
-                      org-mouse
-                      org-protocol
-                      org-annotate-file
-                      org-eval
-                      org-expiry
-                      org-interactive-query
-                      org-man
-                      org-collector
-                      org-panel
-                      org-screen
-                      org-toc))
-(eval-after-load 'org
- '(org-load-modules-maybe t))
-
- ;; Prepare stuff for org-export-backends
-(setq org-export-backends '(org latex icalendar html ascii))
-
-(bind-key "C-c c" 'org-capture)
-(bind-key "C-c a" 'org-agenda)
-(bind-key "C-c l" 'org-store-link)
-(bind-key "C-c L" 'org-insert-link-global)
-(bind-key "C-c O" 'org-open-at-point-global)
-(bind-key "<f9> <f9>" 'org-agenda-list)
-(bind-key "<f9> <f8>" (lambda () (interactive) (org-capture nil "r")))
-
-(jsg/org-captures)
-(menu-bar-mode 1)
-(display-time-mode 1)
-#+END_SRC
 
 
 * Post init
  #+BEGIN_SRC emacs-lisp
 
-   (global-hl-line-mode 1)
+      (use-package calfw
+       :ensure t
+       :config
+      (setq cfw:display-calendar-holidays nil
+      ;; Grid characters
+      cfw:fchar-vertical-line ?│
+      cfw:fchar-horizontal-line ?─
+      cfw:fchar-junction ?┼
+      cfw:fchar-top-junction ?┬
+      cfw:fchar-top-left-corner ?╭
+      cfw:fchar-top-right-corner ?╮
+      cfw:fchar-left-junction ?├
+      cfw:fchar-right-junction ?┤)i
+      )
+
+      (jsg/org-captures)
+      (menu-bar-mode 1)
+      (display-time-mode 1)
+      (setq org-startup-indented t)
+
+      (global-hl-line-mode 1)
+      (projectile-mode +1)
+      (add-hook 'before-save-hook 'delete-trailing-whitespace)
+      (diminish 'auto-revert-mode)
+      (diminish 'evil-escape-mode)
+
+      (setq gc-cons-threshold 16777216
+           gc-cons-percentage 0.1)
+      (toggle-frame-maximized)
+      (load-file "~/.emacs.d/custom.el")
+
+   ;; Makes *scratch* empty.
+   (setq initial-scratch-message "")
+
+   (when (fboundp 'winner-mode)
+         (winner-mode 1))
    (add-hook 'before-save-hook 'delete-trailing-whitespace)
-   (diminish 'auto-revert-mode)
-   (diminish 'evil-escape-mode)
-   
-   (setq gc-cons-threshold 16777216
-        gc-cons-percentage 0.1)
-   (toggle-frame-maximized)
-   (load-file "~/.emacs.d/custom.el")
-   (server-start)
+   ;; Removes *messages* from the buffer.
+   (setq-default message-log-max nil)
+   (kill-buffer "*Warnings*")
+
+      ;;(server-start)
+   (setq initial-scratch-message ";; ╔═╗┌─┐┬─┐┌─┐┌┬┐┌─┐┬ ┬\n;; ╚═╗│  ├┬┘├─┤ │ │  ├─┤\n;; ╚═╝└─┘┴└─┴ ┴ ┴ └─┘┴ ┴\n\n")
  #+END_SRC

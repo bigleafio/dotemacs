@@ -25,3 +25,5 @@ recentf
 /.cache/treemacs-persist
 *.el#
 /smex-items
+/history
+/custom.el
