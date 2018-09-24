@@ -129,8 +129,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
  #+END_SRC
 
- #+RESULTS
-
 ** Minimal UI
 
 #+BEGIN_SRC emacs-lisp
@@ -244,10 +242,8 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (use-package base16-theme
     :ensure t
     :init
-      (load-theme 'base16-tomorrow-night t))
+      (load-theme 'base16-default-light t))
 
-  (use-package nyan-mode
-      :ensure t)
 
    (use-package smart-mode-line
     :ensure t
@@ -262,6 +258,16 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
       (add-to-list 'sml/replacer-regexp-list '("^~/blog/" ":blog:"))
       (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":DB:")))
 
+;; Hide minor modes from modeline
+(use-package rich-minority
+  :config
+  (rich-minority-mode 1)
+  (setf rm-blacklist ""))
+
+;; Set colors to distinguish between active and inactive windows
+(set-face-attribute 'mode-line nil :background "SlateGray1")
+(set-face-attribute 'mode-line-inactive nil :background "grey93")
+
 #+END_SRC
 
 ** Set up Ivy
@@ -270,7 +276,14 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
              :ensure t
              :demand t
              :config
-     (setq ivy-use-virtual-buffers t)
+     (setq ivy-use-virtual-buffers t
+           ivy-height 5
+           ivy-display-style 'fancy
+           ivy-initial-inputs-alist nil ; remove initial ^ input.
+           ivy-extra-directories nil ; remove . and .. directory.
+           ivy-wrap nil
+     )
+
      (setq ivy-initial-inputs-alist nil)
 
      (setq enable-recursive-minibuffers t)
@@ -308,6 +321,13 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
          (use-package eyebrowse
           :ensure t)
+     (ivy-mode 1)
+    (global-set-key [remap switch-to-buffer] 'ivy-switch-buffer)
+
+    (use-package ivy-rich
+     :config
+      (ivy-rich-mode 1)
+      (setq ivy-rich-path-style 'abbrev)) ;; Abbreviate paths using abbreviate-file-name (e.g. replace “/home/username” with “~”)
 
   #+END_SRC
 
@@ -391,19 +411,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 
 #+END_SRC
-** Set up Ranger
-
-;;#+BEGIN_SRC emacs-lisp
-;;; Ranger:
-;;(use-package ranger
- ;; :ensure t
- ;; :config
-;;  (ranger-override-dired-mode t)
- ;; (setq ranger-cleanup-on-disable t
- ;;       ranger-show-dotfiles nil
- ;;       ranger-show-literal nil))
-;;#+END_SRC
-
 ** Set up ag
 #+BEGIN_SRC emacs-lisp
 (use-package ag
@@ -418,6 +425,13 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 (setq eshell-where-to-jump 'begin)
 (setq eshell-review-quick-commands nil)
 (setq eshell-smart-space-goes-to-end t)
+
+(use-package shell-pop
+  :config
+  (custom-set-variables
+   '(shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
+   '(shell-pop-universal-key "s-=")))
+
 #+END_SRC
 
 ** Set up restarter
@@ -476,6 +490,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     :non-normal-prefix "M-SPC"
     "TAB" '(switch-to-prev-buffer :which-key "previous buffer")
     "/" '(swiper :which-key "Swiper")
+    ;;"r" '(recentf-open-files :which-key "RecentF Open Files")
     "SPC" '(counsel-M-x :which-key "M-x")
     ;;"pf"  '(helm-find-files :which-key "find files")
     ;; Magit
@@ -500,6 +515,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     "uu" '(undo-tree-visualize :which-key "Undo Tree")
     ;; File
     "f" '(:ignore t :which-key "File")
+    "fe" '((lambda () (interactive) (find-file "~/.emacs.d/emacs.org")) :which-key "Edit Configuration")
     "fd"  '(dired :which-key "open dired")
     "ff"  '(counsel-find-file :which-key "find files")
     ;; Window
@@ -534,15 +550,30 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ** Set up Neotree
 #+BEGIN_SRC emacs-lisp
 ;; NeoTree
+;; File tree
 (use-package neotree
-  :ensure t
-  :init
-  (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
-  (global-set-key [f8] 'neotree-toggle))
+  :config
+  (setq neo-window-width 32
+        neo-create-file-auto-open t
+        neo-banner-message nil
+        neo-show-updir-line t
+        neo-window-fixed-size nil
+        neo-vc-integration nil
+        neo-mode-line-type 'neotree
+        neo-smart-open t
+        neo-show-hidden-files t
+        neo-mode-line-type 'none
+        neo-auto-indent-point t)
+  (setq neo-theme (if (display-graphic-p) 'nerd 'arrow))
+  (setq neo-hidden-regexp-list '("venv" "\\.pyc$" "~$" "\\.git" "__pycache__" ".DS_Store"))
+  (global-set-key (kbd "s-B") 'neotree-toggle))           ;; Cmd+Shift+b toggle tree
 
-;; Show matching parens
-(setq show-paren-delay 0)
-(show-paren-mode 1)
+
+;; Show vi-like tilde in the fringe on empty lines.
+(use-package vi-tilde-fringe
+  :config
+  (global-vi-tilde-fringe-mode 1))
+
 #+END_SRC
 
 ** Set up Ace Window
@@ -699,6 +730,10 @@ This is the default setup from the treemacs page on Github.
     :ensure t
     :config
     (global-git-gutter-mode 't)
+  (global-git-gutter-mode 't)
+  (set-face-background 'git-gutter:modified 'nil)   ;; background color
+  (set-face-foreground 'git-gutter:added "green4")
+  (set-face-foreground 'git-gutter:deleted "red")
     :diminish git-gutter-mode)
 
 (use-package git-timemachine
@@ -780,7 +815,7 @@ This is the default setup from the treemacs page on Github.
 
   (use-package rainbow-mode
    :ensure t
-   :init 
+   :init
   (add-hook 'prog-mode-hook (rainbow-mode))
   (add-hook 'css-mode-hook 'rainbow-mode)
   (add-hook 'scss-mode-hook 'rainbow-mode))
@@ -801,6 +836,16 @@ This is the default setup from the treemacs page on Github.
 ;; Disable backup files
 (setq make-backup-files nil) ; stop creating backup~ files
 (setq auto-save-default nil) ; stop creating #autosave# files
+#+END_SRC
+** Multiple cursors
+#+BEGIN_SRC emacs-lisp
+(use-package multiple-cursors
+  :config
+  (setq mc/always-run-for-all 1)
+  (global-set-key (kbd "s-d") 'mc/mark-next-like-this)        ;; Cmd+d select next occurrence of region
+  (global-set-key (kbd "s-D") 'mc/mark-all-dwim)              ;; Cmd+Shift+d select all occurrences
+  (global-set-key (kbd "M-s-d") 'mc/edit-beginnings-of-lines) ;; Alt+Cmd+d add cursor to each line in region
+  (define-key mc/keymap (kbd "<return>") nil))
 #+END_SRC
 ** Python
 #+BEGIN_SRC emacs-lisp
@@ -848,12 +893,13 @@ This is the default setup from the treemacs page on Github.
 
 
       (use-package org
-        :ensure org-bullets
+        :ensure t
         :demand
         :mode ("\\.org\\'" . org-mode)
         :diminish org-indent-mode
         :init
         (require 'org-indent)
+        (require 'org-bullets)
         :config
         (setq org-completion-use-ido t
               org-src-fontify-natively t
@@ -863,13 +909,20 @@ This is the default setup from the treemacs page on Github.
               org-log-refile t
               org-support-shift-select t)
 
+  (setq org-startup-indented t)         ;; Visually indent sections. This looks better for smaller files.
+  (setq org-src-tab-acts-natively t)    ;; Tab in source blocks should act like in major mode
+  (setq org-src-preserve-indentation t)
+  (setq org-log-into-drawer t)          ;; State changes for todos and also notes should go into a Logbook drawer
+  (setq org-src-fontify-natively t)     ;; Code highlighting in code blocks
+  (setq org-log-done 'time)             ;; Add closed date when todo goes to DONE state
+  (setq org-support-shift-select t)    ;; Allow shift selection with arrows.
         (add-hook 'org-mode-hook 'auto-fill-mode))
 
       (setq org-modules '(org-bbdb
                             org-gnus
                             org-drill
                             org-info
-                                org-id
+                            org-id
                             org-jsinfo
                             org-habit
                             org-irc
@@ -896,12 +949,11 @@ This is the default setup from the treemacs page on Github.
       (bind-key "C-c l" 'org-store-link)
       (bind-key "C-c L" 'org-insert-link-global)
       (bind-key "C-c O" 'org-open-at-point-global)
-      (bind-key "<f9> <f9>" 'org-agenda-list)
-      (bind-key "<f9> <f8>" (lambda () (interactive) (org-capture nil "r")))
-
+      ;;(bind-key "<f9> <f9>" 'org-agenda-list)
+      ;;(bind-key "<f9> <f8>" (lambda () (interactive) (org-capture nil "r")))
       (use-package toc-org
        :ensure t
-       :init 
+       :init
       (add-hook 'org-mode-hook 'toc-org-enable))
 
       (defun jasong/org-where-am-i ()
@@ -924,10 +976,10 @@ This is the default setup from the treemacs page on Github.
 
     (use-package helm-bibtex)
     (use-package biblio)
-     
+
   (use-package org-ref
-              :ensure helm-bibtex biblio
-              :initialize
+              :ensure t
+              :init
   (add-hook 'org-mode-hook (lambda () (require 'org-ref))))
 
   (setq org-ref-completion-library 'org-ref-ivy-cite
@@ -979,7 +1031,7 @@ This is the default setup from the treemacs page on Github.
 (defun my/tangle-dotfiles ()
   ;;"If the current file is in '~/.emacs.d', the code blocks are tangled"
   (when (equal (file-name-directory (directory-file-name buffer-file-name))
-               (concat (getenv "HOME") "/.emacs.d/"))
+              user-emacs-directory)
     (org-babel-tangle)
     (message "%s tangled" buffer-file-name)))
 
@@ -1188,52 +1240,96 @@ This is the default setup from the treemacs page on Github.
             (local-set-key (kbd "C-c 6") 'jsg/org-sort-todos)))
 #+END_SRC
 
-
-
 * Post init
  #+BEGIN_SRC emacs-lisp
 
-      (use-package calfw
-       :ensure t
-       :config
-      (setq cfw:display-calendar-holidays nil
-      ;; Grid characters
-      cfw:fchar-vertical-line ?│
-      cfw:fchar-horizontal-line ?─
-      cfw:fchar-junction ?┼
-      cfw:fchar-top-junction ?┬
-      cfw:fchar-top-left-corner ?╭
-      cfw:fchar-top-right-corner ?╮
-      cfw:fchar-left-junction ?├
-      cfw:fchar-right-junction ?┤)i
-      )
+         (use-package calfw
+          :ensure t
+          :config
+         (setq cfw:display-calendar-holidays nil
+         ;; Grid characters
+         cfw:fchar-vertical-line ?│
+         cfw:fchar-horizontal-line ?─
+         cfw:fchar-junction ?┼
+         cfw:fchar-top-junction ?┬
+         cfw:fchar-top-left-corner ?╭
+         cfw:fchar-top-right-corner ?╮
+         cfw:fchar-left-junction ?├
+         cfw:fchar-right-junction ?┤)
+         )
 
-      (jsg/org-captures)
-      (menu-bar-mode 1)
-      (display-time-mode 1)
-      (setq org-startup-indented t)
+         (jsg/org-captures)
+         (menu-bar-mode 1)
+         (display-time-mode 1)
+         (setq org-startup-indented t)
 
-      (global-hl-line-mode 1)
-      (projectile-mode +1)
+         (global-hl-line-mode 1)
+         (projectile-mode +1)
+         (add-hook 'before-save-hook 'delete-trailing-whitespace)
+         (diminish 'auto-revert-mode)
+         (diminish 'evil-escape-mode)
+
+         (setq gc-cons-threshold 16777216
+              gc-cons-percentage 0.1)
+         (toggle-frame-maximized)
+         (load-file "~/.emacs.d/custom.el")
+
+        (recentf-mode 1)
+      (setq recentf-max-menu-items 25)
+      (run-at-time nil (* 5 60) 'recentf-save-list)
+      (setq show-paren-mode 1)
+      (require 'bookmark)
+
+      ;; load bookmarks from file.
+      (with-eval-after-load 'bookmark
+      (setq-default bookmark-default-file
+                (expand-file-name "bookmarks.el" user-emacs-directory))
+      (bookmark-maybe-load-default-file))
+
+      (global-set-key "\C-x\ \C-r" 'recentf-open-files)
+      (when (fboundp 'winner-mode)
+            (winner-mode 1))
+
       (add-hook 'before-save-hook 'delete-trailing-whitespace)
-      (diminish 'auto-revert-mode)
-      (diminish 'evil-escape-mode)
+      (setq-default message-log-max nil)
+      ;; Always wrap lines
+      (global-visual-line-mode 1)
 
-      (setq gc-cons-threshold 16777216
-           gc-cons-percentage 0.1)
-      (toggle-frame-maximized)
-      (load-file "~/.emacs.d/custom.el")
+      (setq split-height-threshold 0)
+      (setq split-width-threshold nil)
 
-   ;; Makes *scratch* empty.
-   (setq initial-scratch-message "")
+      ;; Highlight current line
+      (global-hl-line-mode 1)
 
-   (when (fboundp 'winner-mode)
-         (winner-mode 1))
-   (add-hook 'before-save-hook 'delete-trailing-whitespace)
-   ;; Removes *messages* from the buffer.
-   (setq-default message-log-max nil)
-   (kill-buffer "*Warnings*")
+   ;; Store all my org files in ~/org.
+(setq org-directory "~/Notes")
+
+
+;; And all of those files should be in included agenda.
+(setq org-agenda-files '("~/Notes"))
+
+
+;; Open config file by pressing C-x and then c
+(global-set-key (kbd "C-x c") (lambda () (interactive) (find-file "~/.emacs.d/emacs.org")))
+
+ (defun jasong/reload-emacs ()
+     "Reload Emacs configuration."
+     (interactive)
+     (load (expand-file-name "init.el" user-emacs-directory)))
+
+   (defun jasong/reload-all-emacsen ()
+     ;;"Execute `jasong/reload-emacs' on all servers."
+     (interactive)
+     (dolist (instance (directory-files server-socket-dir nil (rx bol (not (any ".")))))
+       (unless (equal instance server-name)
+         (async-shell-command (format "emacsclient -s %s --eval \"(jasong/reload-emacs)\"" instance)))))
+
+   (defun jasong/server-start (name)
+     ;;"Prompt for NAME, then start the Emacs server under that name."
+     (interactive "sDaemon name? ")
+     (setq server-name name)
+     (server-start))
 
       ;;(server-start)
-   (setq initial-scratch-message ";; ╔═╗┌─┐┬─┐┌─┐┌┬┐┌─┐┬ ┬\n;; ╚═╗│  ├┬┘├─┤ │ │  ├─┤\n;; ╚═╝└─┘┴└─┴ ┴ ┴ └─┘┴ ┴\n\n")
+      (setq initial-scratch-message ";; ╔═╗┌─┐┬─┐┌─┐┌┬┐┌─┐┬ ┬\n;; ╚═╗│  ├┬┘├─┤ │ │  ├─┤\n;; ╚═╝└─┘┴└─┴ ┴ ┴ └─┘┴ ┴\n\n")
  #+END_SRC
