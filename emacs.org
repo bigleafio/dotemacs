@@ -239,10 +239,8 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ** Set up the theme and mode line
 #+BEGIN_SRC emacs-lisp
   ;; Theme
-  (use-package base16-theme
-    :ensure t
-    :init
-      (load-theme 'base16-default-light t))
+
+  (load-theme 'moe-dark t)
 
 
    (use-package smart-mode-line
@@ -254,19 +252,21 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     :config
       (setq sml/shorten-directory t
             sml/shorten-modes t)
+      (rich-minority-mode 1)
+      (setf rm-blacklist "")
       (add-to-list 'sml/replacer-regexp-list '("^~/Notes/" ":org:"))
       (add-to-list 'sml/replacer-regexp-list '("^~/blog/" ":blog:"))
       (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":DB:")))
 
 ;; Hide minor modes from modeline
-(use-package rich-minority
-  :config
-  (rich-minority-mode 1)
-  (setf rm-blacklist ""))
+;(use-package rich-minority
+;  :config
+;  (rich-minority-mode 1)
+;  (setf rm-blacklist ""))
 
 ;; Set colors to distinguish between active and inactive windows
-(set-face-attribute 'mode-line nil :background "SlateGray1")
-(set-face-attribute 'mode-line-inactive nil :background "grey93")
+;;(set-face-attribute 'mode-line nil :background "SlateGray1")
+;;(set-face-attribute 'mode-line-inactive nil :background "grey93")
 
 #+END_SRC
 
@@ -449,13 +449,13 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 #+BEGIN_SRC emacs-lisp
   ;;Toggle Dired-Sidebar and ibuffer-sidebar together.
   (defun sidebar-toggle ()
-  ;;"Toggle both `dired-sidebar' and `ibuffer-sidebar'."
+  "Toggle both `dired-sidebar' and `ibuffer-sidebar'."
   (interactive)
   (dired-sidebar-toggle-sidebar)
   (ibuffer-sidebar-toggle-sidebar))
 
   (defun treemacs-sidebar-toggle ()
-  ;;"Toggle both `treemacs' and `ibuffer-sidebar'."
+  "Toggle both `treemacs' and `ibuffer-sidebar'."
   (interactive)
   (treemacs)
   (ibuffer-sidebar-toggle-sidebar))
@@ -490,9 +490,9 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     :non-normal-prefix "M-SPC"
     "TAB" '(switch-to-prev-buffer :which-key "previous buffer")
     "/" '(swiper :which-key "Swiper")
-    ;;"r" '(recentf-open-files :which-key "RecentF Open Files")
+    "r" '(recentf-open-files :which-key "RecentF Open Files")
     "SPC" '(counsel-M-x :which-key "M-x")
-    ;;"pf"  '(helm-find-files :which-key "find files")
+    "pf"  '(helm-find-files :which-key "find files")
     ;; Magit
     "g" '(:ignore t :which-key "Git - Magit")
     "gs"  '(magit-status :which-key "magit status")
@@ -923,7 +923,7 @@ This is the default setup from the treemacs page on Github.
                             org-drill
                             org-info
                             org-id
-                            org-jsinfo
+                            ;;org-jsinfo
                             org-habit
                             org-irc
                             org-mouse
@@ -1028,14 +1028,60 @@ This is the default setup from the treemacs page on Github.
 (setq org-plantuml-jar-path
       (expand-file-name "~/bin/plantuml.jar"))
 
-(defun my/tangle-dotfiles ()
-  ;;"If the current file is in '~/.emacs.d', the code blocks are tangled"
+;; NeoTree
+ (defun my/tangle-dotfiles ()
+  "If the current file is in '~/.emacs.d', the code blocks are tangled"
   (when (equal (file-name-directory (directory-file-name buffer-file-name))
-              user-emacs-directory)
+               (concat (getenv "HOME") "/.emacs.d/"))
     (org-babel-tangle)
     (message "%s tangled" buffer-file-name)))
+ (add-hook 'after-save-hook #'my/tangle-dotfiles)
 
 (add-hook 'after-save-hook #'my/tangle-dotfiles)
+
+
+(defun my/call-logging-hooks (command &optional verbose)
+  "Call COMMAND, reporting every hook run in the process.
+Interactively, prompt for a command to execute.
+
+Return a list of the hooks run, in the order they were run.
+Interactively, or with optional argument VERBOSE, also print a
+message listing the hooks."
+  (interactive "CCommand to log hooks: \np")
+  (let* ((log     nil)
+         (logger (lambda (&rest hooks)
+                   (setq log (append log hooks nil)))))
+    (my/with-advice
+        ((#'run-hooks :before logger))
+      (call-interactively command))
+    (when verbose
+      (message
+       (if log "Hooks run during execution of %s:"
+         "No hooks run during execution of %s.")
+       command)
+      (dolist (hook log)
+        (message "> %s" hook)))
+    log))
+
+(defmacro my/with-advice (adlist &rest body)
+  "Execute BODY with temporary advice in ADLIST.
+
+Each element of ADLIST should be a list of the form
+  (SYMBOL WHERE FUNCTION [PROPS])
+suitable for passing to `advice-add'.  The BODY is wrapped in an
+`unwind-protect' form, so the advice will be removed even in the
+event of an error or nonlocal exit."
+  (declare (debug ((&rest (&rest form)) body))
+           (indent 1))
+  `(progn
+     ,@(mapcar (lambda (adform)
+                 (cons 'advice-add adform))
+               adlist)
+     (unwind-protect (progn ,@body)
+       ,@(mapcar (lambda (adform)
+                   `(advice-remove ,(car adform) ,(nth 2 adform)))
+                 adlist))))
+
 #+END_SRC
 
 ** Set up Hugo
@@ -1067,7 +1113,7 @@ This is the default setup from the treemacs page on Github.
 
     ;;; integrate ido with artist-mode
    (defun artist-ido-select-operation (type)
-     ;;"Use ido to select a drawing operation in artist-mode"
+     "Use ido to select a drawing operation in artist-mode"
      (interactive (list (ido-completing-read "Drawing operation: "
                                              (list "Pen" "Pen Line" "line" "straight line" "rectangle"
                                                    "square" "poly-line" "straight poly-line" "ellipse"
@@ -1079,7 +1125,7 @@ This is the default setup from the treemacs page on Github.
 
 
    (defun artist-ido-select-settings (type)
-     ;;"Use ido to select a setting to change in artist-mode"
+     "Use ido to select a setting to change in artist-mode"
      (interactive (list (ido-completing-read "Setting: "
                                              (list "Set Fill" "Set Line" "Set Erase" "Spray-size" "Spray-chars"
                                                    "Rubber-banding" "Trimming" "Borders"))))
@@ -1122,7 +1168,7 @@ This is the default setup from the treemacs page on Github.
         (setq truncate-lines nil)
         (if capture-url (org-protocol-capture capture-url) (org-capture)))
 
-        (require 'org-protocol-capture-html)
+       ;; (require 'org-protocol-capture-html)
 
         (defun jsg/org-captures()
         (setq org-capture-templates
@@ -1204,13 +1250,13 @@ This is the default setup from the treemacs page on Github.
 (setq org-log-into-drawer "LOGBOOK")
 
 (defun org-summary-todo (n-done n-not-done)
-  ;;"Switch entry to DONE when all subentries are done, to TODO otherwise."
+  "Switch entry to DONE when all subentries are done, to TODO otherwise."
   (let (org-log-done org-log-states)   ; turn off logging
     (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
 
 ;; from https://lists.gnu.org/archive/html/emacs-orgmode/2012-02/msg00515.html
 (defun org-summary-checkboxes ()
-  ;;"Switch entry to DONE when all sub-checkboxes are done, to TODO otherwise."
+  "Switch entry to DONE when all sub-checkboxes are done, to TODO otherwise."
   (save-excursion
     (org-back-to-heading t)
     (let ((beg (point)) end)
@@ -1231,7 +1277,7 @@ This is the default setup from the treemacs page on Github.
 (add-hook 'org-checkbox-statistics-hook 'org-summary-checkboxes)
 
 (defun jsg/org-sort-todos ()
-  ;;"Sort entries by TODO status"
+  "Sort entries by TODO status"
   (interactive)
   (org-sort-entries nil ?o)
   (outline-hide-leaves))
@@ -1257,6 +1303,7 @@ This is the default setup from the treemacs page on Github.
          cfw:fchar-left-junction ?├
          cfw:fchar-right-junction ?┤)
          )
+         (require 'calfw-org)
 
          (jsg/org-captures)
          (menu-bar-mode 1)
@@ -1277,7 +1324,7 @@ This is the default setup from the treemacs page on Github.
         (recentf-mode 1)
       (setq recentf-max-menu-items 25)
       (run-at-time nil (* 5 60) 'recentf-save-list)
-      (setq show-paren-mode 1)
+
       (require 'bookmark)
 
       ;; load bookmarks from file.
@@ -1318,18 +1365,20 @@ This is the default setup from the treemacs page on Github.
      (load (expand-file-name "init.el" user-emacs-directory)))
 
    (defun jasong/reload-all-emacsen ()
-     ;;"Execute `jasong/reload-emacs' on all servers."
+     "Execute `jasong/reload-emacs' on all servers."
      (interactive)
      (dolist (instance (directory-files server-socket-dir nil (rx bol (not (any ".")))))
        (unless (equal instance server-name)
          (async-shell-command (format "emacsclient -s %s --eval \"(jasong/reload-emacs)\"" instance)))))
 
    (defun jasong/server-start (name)
-     ;;"Prompt for NAME, then start the Emacs server under that name."
+     "Prompt for NAME, then start the Emacs server under that name."
      (interactive "sDaemon name? ")
      (setq server-name name)
      (server-start))
 
       ;;(server-start)
       (setq initial-scratch-message ";; ╔═╗┌─┐┬─┐┌─┐┌┬┐┌─┐┬ ┬\n;; ╚═╗│  ├┬┘├─┤ │ │  ├─┤\n;; ╚═╝└─┘┴└─┴ ┴ ┴ └─┘┴ ┴\n\n")
+
+
  #+END_SRC
