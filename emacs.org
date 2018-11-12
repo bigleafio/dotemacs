@@ -65,6 +65,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     (fset 'yes-or-no-p 'y-or-n-p)
 
     (setq warning-minimum-level :error)
+    (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 #+END_SRC
 
@@ -140,25 +141,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
    ;;(set-default-font "Hack 14")
    (add-to-list 'default-frame-alist '(font . "Hack-14:spacing=100"))
-   (defun set-frame-size-according-to-resolution ()
-    (interactive)
-    (if window-system
-    (progn
-    ;; use 120 char wide window for largeish displays
-    ;; and smaller 80 column windows for smaller displays
-    ;; pick whatever numbers make sense for you
-    (if (> (x-display-pixel-width) 1280)
-           (add-to-list 'default-frame-alist (cons 'width 120))
-           (add-to-list 'default-frame-alist (cons 'width 80)))
-    ;; for the height, subtract a couple hundred pixels
-    ;; from the screen height (for panels, menubars and
-    ;; whatnot), then divide by the height of a char to
-    ;; get the height we want
-    (add-to-list 'default-frame-alist
-         (cons 'height (/ (- (x-display-pixel-height) 200)
-                             (frame-char-height)))))))
-
-     (set-frame-size-according-to-resolution)
 
    ;Set up the Fringe
    (define-fringe-bitmap 'tilde [64 168 16] nil nil 'center)
@@ -196,20 +178,17 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
                        "q" 'imenu-list-quit-window)
 
    )
-;;(use-package dashboard
-;;   :ensure t
-;;   :config
-;;    (dashboard-setup-startup-hook))
 
-;(use-package perspective
-;   :ensure t
-;   :config
-;    (persp-mode))
+#+END_SRC
 
-;;  (setq initial-buffer-choice (lambda () (switch-to-buffer "*dashboard*")))
+** Set up Tabbar
 
- ;; (require 'icicles)
- ;; (icy-mode 1)
+#+BEGIN_SRC emacs-lisp
+   (use-package tabbar
+    :ensure t
+    :config
+     (tabbar-mode)
+     (tabbar-local-mode t))
 
 #+END_SRC
 
@@ -492,6 +471,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     "/" '(swiper :which-key "Swiper")
     "r" '(recentf-open-files :which-key "RecentF Open Files")
     "SPC" '(counsel-M-x :which-key "M-x")
+    "j" '(cider-jack-in :which-key "Cider Jack In")
     "pf"  '(helm-find-files :which-key "find files")
     ;; Magit
     "g" '(:ignore t :which-key "Git - Magit")
@@ -520,10 +500,10 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     "ff"  '(counsel-find-file :which-key "find files")
     ;; Window
      "w" '(:ignore t :which-key "Windows")
-    "wl"  '(windmove-right :which-key "move right")
-    "wh"  '(windmove-left :which-key "move left")
-    "wk"  '(windmove-up :which-key "move up")
-    "wj"  '(windmove-down :which-key "move bottom")
+    "wr"  '(evil-window-move-far-right :which-key "move right")
+    "wl"  '(evil-window-move-far-left :which-key "move left")
+    "wt"  '(evil-window-move-very-top :which-key "move up")
+    "wb"  '(evil-window-move-very-bottom :which-key "move bottom")
     "w/"  '(split-window-right :which-key "split right")
     "w-"  '(split-window-below :which-key "split bottom")
     "wx"  '(delete-window :which-key "delete window")
@@ -544,35 +524,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
   (setq ns-use-proxy-icon  nil)
   (setq frame-title-format nil)
-
-#+END_SRC
-
-** Set up Neotree
-#+BEGIN_SRC emacs-lisp
-;; NeoTree
-;; File tree
-(use-package neotree
-  :config
-  (setq neo-window-width 32
-        neo-create-file-auto-open t
-        neo-banner-message nil
-        neo-show-updir-line t
-        neo-window-fixed-size nil
-        neo-vc-integration nil
-        neo-mode-line-type 'neotree
-        neo-smart-open t
-        neo-show-hidden-files t
-        neo-mode-line-type 'none
-        neo-auto-indent-point t)
-  (setq neo-theme (if (display-graphic-p) 'nerd 'arrow))
-  (setq neo-hidden-regexp-list '("venv" "\\.pyc$" "~$" "\\.git" "__pycache__" ".DS_Store"))
-  (global-set-key (kbd "s-B") 'neotree-toggle))           ;; Cmd+Shift+b toggle tree
-
-
-;; Show vi-like tilde in the fringe on empty lines.
-(use-package vi-tilde-fringe
-  :config
-  (global-vi-tilde-fringe-mode 1))
 
 #+END_SRC
 
@@ -616,7 +567,6 @@ This is the default setup from the treemacs page on Github.
           treemacs-is-never-other-window      nil
           treemacs-no-png-images              nil
           treemacs-project-follow-cleanup     nil
-          treemacs-persist-file               (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
           treemacs-recenter-after-file-follow nil
           treemacs-recenter-after-tag-follow  nil
           treemacs-show-hidden-files          t
@@ -772,13 +722,22 @@ This is the default setup from the treemacs page on Github.
 
 #+END_SRC
 
-** Set up smart-parens
+** Set up Clojure/Lisp
 #+BEGIN_SRC emacs-lisp
 
     (use-package lispy
-     :ensure t
+     :demand t
      :init
      (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1))))
+
+    (use-package cider
+     :ensure t
+     :config
+      (setq cider-repl-display-help-banner nil)
+    )
+
+    (use-package clojure-mode
+     :ensure t)
 
     (use-package smartparens
       :demand t
@@ -820,15 +779,6 @@ This is the default setup from the treemacs page on Github.
   (add-hook 'css-mode-hook 'rainbow-mode)
   (add-hook 'scss-mode-hook 'rainbow-mode))
 
-#+END_SRC
-
-** Set up highlight-indent
-#+BEGIN_SRC emacs-lisp
-(use-package highlight-indent-guides
-  :config
-  (setq highlight-indent-guides-auto-character-face-perc 25)
-  (setq highlight-indent-guides-method 'character)
-  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 #+END_SRC
 
 ** Disable Backups
@@ -971,7 +921,7 @@ This is the default setup from the treemacs page on Github.
     (general-define-key :keymaps 'org-mode-map
                         "<f1> <f1>" 'jasong/org-where-am-i)
 
-    (setq org-agenda-files (list "~/Notes/LOG.org")
+    (setq org-agenda-files (list "~/Notes/LOG.org" "~/Notes/GTD.org" "~/Notes/church.org" "~/Notes/organizer.org")
           org-default-notes-file "~/Notes/LOG.org")
 
     (use-package helm-bibtex)
@@ -1304,6 +1254,8 @@ event of an error or nonlocal exit."
          cfw:fchar-right-junction ?┤)
          )
          (require 'calfw-org)
+         (require 'calfw-ical)
+         (require 'calfw-gcal)
 
          (jsg/org-captures)
          (menu-bar-mode 1)
@@ -1351,10 +1303,10 @@ event of an error or nonlocal exit."
    ;; Store all my org files in ~/org.
 (setq org-directory "~/Notes")
 
-
 ;; And all of those files should be in included agenda.
 (setq org-agenda-files '("~/Notes"))
 
+(toggle-frame-maximized)
 
 ;; Open config file by pressing C-x and then c
 (global-set-key (kbd "C-x c") (lambda () (interactive) (find-file "~/.emacs.d/emacs.org")))
