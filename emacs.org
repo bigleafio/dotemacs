@@ -256,16 +256,16 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
              :demand t
              :config
      (setq ivy-use-virtual-buffers t
+           enable-recursive-minibuffers t
            ivy-height 5
+           ivy-use-selectable-prompt t
            ivy-display-style 'fancy
            ivy-initial-inputs-alist nil ; remove initial ^ input.
            ivy-extra-directories nil ; remove . and .. directory.
            ivy-wrap nil
      )
 
-     (setq ivy-initial-inputs-alist nil)
 
-     (setq enable-recursive-minibuffers t)
      (setq ivy-count-format "(%d/%d) ")
      ;; Create and delete a view
      (global-set-key (kbd "C-c v") 'ivy-push-view)
@@ -281,7 +281,9 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
              :ensure t
              :demand t
              :config
-             (ivy-mode t))
+             (ivy-mode t)
+(setq ivy-use-virtual-buffers t)
+(setq enable-recursive-minibuffers t))
 
      (use-package avy
              :ensure t
@@ -689,6 +691,9 @@ This is the default setup from the treemacs page on Github.
 (use-package git-timemachine
   :ensure t)
 
+(use-package gist
+  :ensure t)
+
 #+END_SRC
 
 ** Set up YASnippet
@@ -800,10 +805,51 @@ This is the default setup from the treemacs page on Github.
 ** Python
 #+BEGIN_SRC emacs-lisp
 
+(setq python-indent 2)
 (use-package elpy
  :ensure t
- :defer t
  :config (elpy-enable))
+
+(use-package pyenv-mode
+ :ensure t)
+
+;;fix formattings
+(setq ansi-color-for-comint-mode t)
+(setq python-shell-interpreter "ipython"
+      python-shell-interpreter-args "--simple-prompt -i")
+
+;;the following is maybe useful at some point in time, but for now just start your conda virtaula environment before starting emacs to use it in your python IDE
+;;automatically activate python3 env, taken from http://emacs.stackexchange.com/questions/18059/how-to-activate-python-virtual-environment-in-init-file
+;;(require 'pyvenv)
+;;(pyvenv-activate "python3")
+;;choose between conda environments with M-x pyvenv-workon, taken from http://emacs.stackexchange.com/questions/20092/using-conda-environments-in-emacs
+;;(setenv "WORKON_HOME" "/Users/markusrademacher/anaconda3/envs")
+;;(pyvenv-mode 1)
+
+;; use flycheck not flymake with elpy
+(when (require 'flycheck nil t)
+  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+  (add-hook 'elpy-mode-hook 'flycheck-mode))
+
+
+;; enable autopep8 formatting on save
+(use-package py-autopep8
+ :config
+   (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save))
+
+;; warnings-fix for elpy, taken from https://github.com/jorgenschaefer/elpy/issues/887
+(setq python-shell-completion-native-enable nil)
+
+;;helps to get rid of all the warnings when running python, taken from http://emacs.stackexchange.com/questions/30082/your-python-shell-interpreter-doesn-t-seem-to-support-readline
+(with-eval-after-load 'python
+  (defun python-shell-completion-native-try ()
+    "Return non-nil if can trigger native completion."
+    (let ((python-shell-completion-native-enable t)
+          (python-shell-completion-native-output-timeout
+           python-shell-completion-native-try-output-timeout))
+      (python-shell-completion-native-get-completions
+       (get-buffer-process (current-buffer))
+       nil "_"))))
 
 #+END_SRC
 
@@ -1176,7 +1222,6 @@ event of an error or nonlocal exit."
         )))
       )
 #+END_SRC
-
 
 ** Set up org-todo
 
