@@ -137,7 +137,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
    (tool-bar-mode   -1)
    (tooltip-mode    -1)
    (menu-bar-mode   1)
-   (desktop-save-mode 1)
+  ;; (desktop-save-mode 1)
 
    ;;(set-default-font "Hack 14")
    (add-to-list 'default-frame-alist '(font . "Hack-14:spacing=100"))
@@ -219,7 +219,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 #+BEGIN_SRC emacs-lisp
   ;; Theme
 
-  (load-theme 'darktooth t)
+  (load-theme 'gruvbox t)
 
 
    (use-package smart-mode-line
@@ -277,11 +277,20 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
              :demand t
              :config)
 
+     (use-package perspective
+        :ensure t
+        :config
+          (persp-mode))
+
+     (use-package persp-projectile
+        :ensure t)
+
      (use-package swiper
              :ensure t
              :demand t
              :config
              (ivy-mode t)
+
 (setq ivy-use-virtual-buffers t)
 (setq enable-recursive-minibuffers t))
 
@@ -473,8 +482,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     "/" '(swiper :which-key "Swiper")
     "r" '(recentf-open-files :which-key "RecentF Open Files")
     "SPC" '(counsel-M-x :which-key "M-x")
-    "j" '(cider-jack-in :which-key "Cider Jack In")
-    "pf"  '(helm-find-files :which-key "find files")
     ;; Magit
     "g" '(:ignore t :which-key "Git - Magit")
     "gs"  '(magit-status :which-key "magit status")
@@ -495,10 +502,14 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     ;; Undo
     "u" '(:ignore t :which-key "Undo")
     "uu" '(undo-tree-visualize :which-key "Undo Tree")
+    ;; Project
+    "p" '(:ignore t :which-key "Project")
+    "ps" '(projectile-persp-switch-project :which-key "Persp switch project")
     ;; File
     "f" '(:ignore t :which-key "File")
     "fe" '((lambda () (interactive) (find-file "~/.emacs.d/emacs.org")) :which-key "Edit Configuration")
     "fd"  '(dired :which-key "open dired")
+    "fh"  '(helm-find-files :which-key "find files")
     "ff"  '(counsel-find-file :which-key "find files")
     ;; Window
      "w" '(:ignore t :which-key "Windows")
@@ -517,6 +528,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     ;; Tools
     "t" '(:ignore t :which-key "Tools")
     "tt"  '(treemacs :which-key "treemacs")
+    "tc" '(cider-jack-in :which-key "Cider Jack In")
     "tb"  '(treemacs-sidebar-toggle :which-key "treemacs-sidebar")
     "td"  '(dired-sidebar-toggle-sidebar :which-key "dired-sidebar")
     "ts"  '(sidebar-toggle :which-key "toggle-sidebar")
@@ -815,8 +827,8 @@ This is the default setup from the treemacs page on Github.
 
 ;;fix formattings
 (setq ansi-color-for-comint-mode t)
-(setq python-shell-interpreter "ipython"
-      python-shell-interpreter-args "--simple-prompt -i")
+;;(setq python-shell-interpreter "ipython"
+;;      python-shell-interpreter-args "--simple-prompt -i")
 
 ;;the following is maybe useful at some point in time, but for now just start your conda virtaula environment before starting emacs to use it in your python IDE
 ;;automatically activate python3 env, taken from http://emacs.stackexchange.com/questions/18059/how-to-activate-python-virtual-environment-in-init-file
