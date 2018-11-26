@@ -39,6 +39,11 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ** Intialize
 
  #+BEGIN_SRC emacs-lisp
+
+    (let ((default-directory "~/.emacs.d/"))
+          (normal-top-level-add-subdirs-to-load-path))
+
+
     ;;----------------------------------------------------------------------------
     ;; Adjust garbage collection thresholds during startup, and thereafter
     ;;----------------------------------------------------------------------------
@@ -125,8 +130,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
    (load-directory "~/.emacs.d/lisp")
    (byte-recompile-directory (expand-file-name "~/.emacs.d/lisp") 0)
-   ;;(setq pop-up-frames t)
-   ;;(frames-only-mode)
 
  #+END_SRC
 
@@ -181,14 +184,143 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 #+END_SRC
 
+** Set up custom menu
+#+BEGIN_SRC emacs-lisp
+
+(defvar lawlist-context-menu-map
+  (let ((map (make-sparse-keymap "Context Menu")))
+    (define-key map [help-for-help] (cons "Help" 'help-for-help))
+    (define-key map [seperator-two] '(menu-item "--"))
+    (define-key map [my-menu] (cons "LAWLIST" (make-sparse-keymap "My Menu")))
+    (define-key map [my-menu 01] (cons "Next Line" 'next-line))
+    (define-key map [my-menu 02] (cons "Previous Line" 'previous-line))
+    (define-key map [seperator-one] '(menu-item "--"))
+  map) "Keymap for the LAWLIST context menu.")
+
+(defun lawlist-popup-context-menu  (event &optional prefix)
+  "Popup a context menu."
+  (interactive "@e \nP")
+    (define-key lawlist-context-menu-map [lawlist-major-mode-menu]
+      `(menu-item ,(symbol-name major-mode)
+        ,(mouse-menu-major-mode-map) :visible t))
+    (define-key lawlist-context-menu-map (vector major-mode)
+      `(menu-item ,(concat "YAS " (symbol-name major-mode))
+        ,(gethash major-mode yas--menu-table)
+          :visible (yas--show-menu-p ',major-mode)))
+    (popup-menu lawlist-context-menu-map event prefix))
+
+(global-set-key [mouse-3] 'lawlist-popup-context-menu)
+
+#+END_SRC
+
 ** Set up Tabbar
 
 #+BEGIN_SRC emacs-lisp
+
+   (use-package elscreen
+    :ensure t)
+
+   (defadvice elscreen-e21-tab-update (before elscreen-e21-tab-update-advice activate)
+  "Only show elscreen tabs if more than 1 tab active"
+  (if (> (length (elscreen-get-screen-list)) 1)
+		(setq elscreen-display-tab t)
+	 (setq elscreen-display-tab nil)))
+
+  (elscreen-start)
+
    (use-package tabbar
     :ensure t
     :config
-     (tabbar-mode)
-     (tabbar-local-mode t))
+     ;;(tabbar-mode)
+     ;;(tabbar-local-mode t)
+   )
+
+   (require 'frame-bufs)
+
+   ;;(frame-bufs-mode t)
+
+
+(defun tabbar-buffer-groups ()
+  "Return the list of group names the current buffer belongs to.
+This function is a custom function for tabbar-mode's tabbar-buffer-groups.
+This function group all buffers into 3 groups:
+Those Dired, those user buffer, and those emacs buffer.
+Emacs buffer are those starting with “*”."
+  (list
+   (cond
+    ((string-equal "*" (substring (buffer-name) 0 1))
+     "Emacs Buffer"
+     )
+    ((eq major-mode 'dired-mode)
+     "Dired"
+     )
+    (t
+     "User Buffer"
+     )
+    )))
+
+(setq tabbar-buffer-groups-function 'tabbar-buffer-groups)
+
+(global-set-key [M-s-left] 'tabbar-backward)
+(global-set-key [M-s-right] 'tabbar-forward)
+
+(defface tabbar-selected-associated
+  '((t :background "black" :foreground "yellow" :box (:line-width 2 :color "yellow")))
+  "Face used for the selected tab -- associated with the `frame-bufs-buffer-list`."
+  :group 'tabbar)
+
+(defface tabbar-unselected-associated
+  '((t :background "black" :foreground "white" :box (:line-width 2 :color "white")))
+  "Face used for unselected tabs  -- associated with the `frame-bufs-buffer-list`."
+  :group 'tabbar)
+
+(defface tabbar-selected-unassociated
+  '((t :background "black" :foreground "white" :box (:line-width 2 :color "firebrick")))
+  "Face used for the selected tab -- UNassociated with the `frame-bufs-buffer-list`."
+  :group 'tabbar)
+
+(defface tabbar-unselected-unassociated
+  '((t :background "black" :foreground "white" :box (:line-width 2 :color "blue")))
+  "Face used for unselected tabs -- UNassociated with the `frame-bufs-buffer-list`."
+  :group 'tabbar)
+
+(setq tabbar-background-color "black")
+
+(defsubst tabbar-line-tab (tab)
+  "Return the display representation of tab TAB.
+That is, a propertized string used as an `header-line-format' template
+element.
+Call `tabbar-tab-label-function' to obtain a label for TAB."
+  (concat
+    (propertize
+      (if tabbar-tab-label-function
+          (funcall tabbar-tab-label-function tab)
+        tab)
+      'tabbar-tab tab
+      'local-map (tabbar-make-tab-keymap tab)
+      'help-echo 'tabbar-help-on-tab
+      'mouse-face 'tabbar-highlight
+      'face
+        (cond
+          ((and
+              (tabbar-selected-p tab (tabbar-current-tabset))
+              (memq (current-buffer) (my-buffer-list (selected-frame))))
+            'tabbar-selected-associated)
+          ((and
+              (not (tabbar-selected-p tab (tabbar-current-tabset)))
+              (memq (current-buffer) (my-buffer-list (selected-frame))))
+            'tabbar-unselected-associated)
+          ((and
+              (tabbar-selected-p tab (tabbar-current-tabset))
+              (not (memq (current-buffer) (my-buffer-list (selected-frame)))))
+            'tabbar-selected-unassociated)
+          ((and
+              (not (tabbar-selected-p tab (tabbar-current-tabset)))
+              (not (memq (current-buffer) (my-buffer-list (selected-frame)))))
+            'tabbar-unselected-unassociated))
+      'pointer 'hand)
+    tabbar-separator-value))
+
 
 #+END_SRC
 
@@ -397,7 +529,12 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   :commands (ibuffer-sidebar-toggle-sidebar)
   :config
   (setq ibuffer-sidebar-use-custom-font t)
-  (setq ibuffer-sidebar-face `(:family "Helvetica" :height 140)))
+  (setq ibuffer-sidebar-face `(:family "Helvetica" :height 140))
+  (setq ibuffer-formats
+      '((mark modified read-only " "
+              (name 40 40 :left :elide) " " filename)
+        (mark " "
+              (name 16 -1) " " filename))))
 
 
 #+END_SRC
@@ -630,12 +767,60 @@ This is the default setup from the treemacs page on Github.
 (use-package undo-tree :ensure t)
 #+END_SRC
 
-* Set up Source Code Stuff
+* Development
 ** Aggressive indent
   #+BEGIN_SRC emacs-lisp
   (use-package aggressive-indent
     :ensure t
     :config)
+  #+END_SRC
+
+** Fill Column Indicator
+  #+BEGIN_SRC emacs-lisp
+  (use-package fill-column-indicator
+    :ensure t
+    :config
+           (setq fci-rule-column 100
+                 fci-rule-width 1
+                 fci-rule-color "darkgrey"))
+
+
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'prog-mode-hook 'subword-mode)
+(add-hook 'prog-mode-hook 'fci-mode)
+
+;; fix issues with company and fci-mode
+;; https://github.com/alpaker/Fill-Column-Indicator/issues/54
+;; https://github.com/alpaker/Fill-Column-Indicator/issues/46
+(defvar-local my-fci-mode-stack '()
+  "track fci-mode state to aid advice functions.")
+
+(defun fci-conditional-enable (&rest _)
+  "Conditionally (re-)enable fci-mode."
+  (when (eq (pop my-fci-mode-stack) t)
+    (fci-mode t)))
+
+(defun fci-get-and-disable (&rest _)
+  "Store current status of fci-mode, and disable if needed."
+  (when (boundp 'fci-mode)
+    (push fci-mode my-fci-mode-stack)
+    (when fci-mode
+      (fci-mode -1))))
+
+(defun fci-hack (advised-func &rest args)
+  "Disable fci-mode, call ADVISED-FUNC with ARGS, then re-enable fci-mode."
+  (progn
+    (fci-get-and-disable)
+    (apply advised-func args)
+    (fci-conditional-enable)))
+
+;; disable fci-mode while certain operations are being performed
+(advice-add 'web-mode-on-after-change :around #'fci-hack)
+(advice-add 'web-mode-on-post-command :around #'fci-hack)
+(add-hook 'company-completion-started-hook 'fci-get-and-disable)
+(add-hook 'company-completion-cancelled-hook 'fci-conditional-enable)
+(add-hook 'company-completion-finished-hook 'fci-conditional-enable)
+
   #+END_SRC
 
 ** Company Mode
@@ -644,8 +829,9 @@ This is the default setup from the treemacs page on Github.
 :demand t
  :init
   (progn
-    (setq company-idle-delay 0.2
-          company-minimum-prefix-length 2
+    (setq company-idle-delay 0
+          company-echo-delay 0
+          company-minimum-prefix-length 1
           company-require-match nil
           company-selection-wrap-around t
           company-dabbrev-ignore-case nil
@@ -661,18 +847,24 @@ This is the default setup from the treemacs page on Github.
 
 ** Set up flycheck
 #+BEGIN_SRC emacs-lisp
+
   (use-package exec-path-from-shell
    :ensure t
    :init
     (when (memq window-system '(mac ns x))
           (exec-path-from-shell-initialize)))
+
   (setq ispell-program-name "aspell")
   (setq ispell-silently-savep t)
+
   (use-package flycheck
    :ensure t
    :init (global-flycheck-mode))
+
   (diminish 'flyspell-mode "Fly")
-(setq flyspell-duplicate-distance 0)
+  (setq flyspell-duplicate-distance 0)
+
+  (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 #+END_SRC
 
 ** Set up Git
@@ -680,7 +872,9 @@ This is the default setup from the treemacs page on Github.
 ;;; Magit
 (use-package magit
   :config
-  (require 'evil-magit))
+  (require 'evil-magit)
+  (setq magit-auto-revert-mode 0
+      magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1))
 
 (use-package evil-magit
   :after (magit))
@@ -817,6 +1011,8 @@ This is the default setup from the treemacs page on Github.
 ** Python
 #+BEGIN_SRC emacs-lisp
 
+(setenv "PYTHONPATH" "~/.virtualenvs/elpy/lib/python3.7/site-packages/")
+
 (setq python-indent 2)
 (use-package elpy
  :ensure t
@@ -827,22 +1023,22 @@ This is the default setup from the treemacs page on Github.
 
 ;;fix formattings
 (setq ansi-color-for-comint-mode t)
-;;(setq python-shell-interpreter "ipython"
-;;      python-shell-interpreter-args "--simple-prompt -i")
 
-;;the following is maybe useful at some point in time, but for now just start your conda virtaula environment before starting emacs to use it in your python IDE
-;;automatically activate python3 env, taken from http://emacs.stackexchange.com/questions/18059/how-to-activate-python-virtual-environment-in-init-file
-;;(require 'pyvenv)
-;;(pyvenv-activate "python3")
-;;choose between conda environments with M-x pyvenv-workon, taken from http://emacs.stackexchange.com/questions/20092/using-conda-environments-in-emacs
-;;(setenv "WORKON_HOME" "/Users/markusrademacher/anaconda3/envs")
-;;(pyvenv-mode 1)
-
-;; use flycheck not flymake with elpy
 (when (require 'flycheck nil t)
   (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
   (add-hook 'elpy-mode-hook 'flycheck-mode))
 
+;; enable autopep8 formatting on save
+;; ignoring:
+;; - E501 - Try to make lines fit within --max-line-length characters.
+;; - W293 - Remove trailing whitespace on blank line.
+;; - W391 - Remove trailing blank lines.
+;; - W690 - Fix various deprecated code (via lib2to3).
+(require 'py-autopep8)
+(setq py-autopep8-options '("--ignore=E501,W293,W391,W690"))
+(add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
+
+(define-key global-map (kbd "RET") 'newline-and-indent)
 
 ;; enable autopep8 formatting on save
 (use-package py-autopep8
@@ -865,11 +1061,29 @@ This is the default setup from the treemacs page on Github.
 
 #+END_SRC
 
+** Web
+#+BEGIN_SRC emacs-lisp
+(use-package web-mode
+ :ensure t
+ :config
+    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+    (setq web-mode-markup-indent-offset 2
+          web-mode-css-indent-offset 2
+          web-mode-code-indent-offset 2
+          web-mode-enable-auto-pairing t
+          web-mode-enable-auto-closing t
+          web-mode-enable-current-element-highlight t
+          web-mode-enable-current-column-highlight t)
+ )
+#+END_SRC
+
 * Set up Markdown Mode
 
 #+BEGIN_SRC emacs-lisp
 (use-package markdown-mode
   :ensure t
+  :config (setq-default fill-column 100)
+          (add-hook 'gfm-mode 'auto-fill-mode)
   :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
@@ -1385,4 +1599,4 @@ event of an error or nonlocal exit."
       (setq initial-scratch-message ";; ╔═╗┌─┐┬─┐┌─┐┌┬┐┌─┐┬ ┬\n;; ╚═╗│  ├┬┘├─┤ │ │  ├─┤\n;; ╚═╝└─┘┴└─┴ ┴ ┴ └─┘┴ ┴\n\n")
 
 
- #+END_SRC
+ #+END_SR
