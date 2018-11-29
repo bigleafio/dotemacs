@@ -1,0 +1,111 @@
+
+** Set up Tabbar
+
+#+BEGIN_SRC emacs-lisp
+
+   (use-package elscreen
+    :ensure t)
+
+   (defadvice elscreen-e21-tab-update (before elscreen-e21-tab-update-advice activate)
+  "Only show elscreen tabs if more than 1 tab active"
+  (if (> (length (elscreen-get-screen-list)) 1)
+		(setq elscreen-display-tab t)
+	 (setq elscreen-display-tab nil)))
+
+  ;;(elscreen-start)
+
+   (use-package tabbar
+    :ensure t
+    :config
+     ;;(tabbar-mode)
+     ;;(tabbar-local-mode t)
+   )
+
+  ;; (require 'frame-bufs)
+
+   ;;(frame-bufs-mode t)
+
+
+(defun tabbar-buffer-groups ()
+  "Return the list of group names the current buffer belongs to.
+This function is a custom function for tabbar-mode's tabbar-buffer-groups.
+This function group all buffers into 3 groups:
+Those Dired, those user buffer, and those emacs buffer.
+Emacs buffer are those starting with “*”."
+  (list
+   (cond
+    ((string-equal "*" (substring (buffer-name) 0 1))
+     "Emacs Buffer"
+     )
+    ((eq major-mode 'dired-mode)
+     "Dired"
+     )
+    (t
+     "User Buffer"
+     )
+    )))
+
+(setq tabbar-buffer-groups-function 'tabbar-buffer-groups)
+
+(global-set-key [M-s-left] 'tabbar-backward)
+(global-set-key [M-s-right] 'tabbar-forward)
+
+(defface tabbar-selected-associated
+  '((t :background "black" :foreground "yellow" :box (:line-width 2 :color "yellow")))
+  "Face used for the selected tab -- associated with the `frame-bufs-buffer-list`."
+  :group 'tabbar)
+
+(defface tabbar-unselected-associated
+  '((t :background "black" :foreground "white" :box (:line-width 2 :color "white")))
+  "Face used for unselected tabs  -- associated with the `frame-bufs-buffer-list`."
+  :group 'tabbar)
+
+(defface tabbar-selected-unassociated
+  '((t :background "black" :foreground "white" :box (:line-width 2 :color "firebrick")))
+  "Face used for the selected tab -- UNassociated with the `frame-bufs-buffer-list`."
+  :group 'tabbar)
+
+(defface tabbar-unselected-unassociated
+  '((t :background "black" :foreground "white" :box (:line-width 2 :color "blue")))
+  "Face used for unselected tabs -- UNassociated with the `frame-bufs-buffer-list`."
+  :group 'tabbar)
+
+(setq tabbar-background-color "black")
+
+(defsubst tabbar-line-tab (tab)
+  "Return the display representation of tab TAB.
+That is, a propertized string used as an `header-line-format' template
+element.
+Call `tabbar-tab-label-function' to obtain a label for TAB."
+  (concat
+    (propertize
+      (if tabbar-tab-label-function
+          (funcall tabbar-tab-label-function tab)
+        tab)
+      'tabbar-tab tab
+      'local-map (tabbar-make-tab-keymap tab)
+      'help-echo 'tabbar-help-on-tab
+      'mouse-face 'tabbar-highlight
+      'face
+        (cond
+          ((and
+              (tabbar-selected-p tab (tabbar-current-tabset))
+              (memq (current-buffer) (my-buffer-list (selected-frame))))
+            'tabbar-selected-associated)
+          ((and
+              (not (tabbar-selected-p tab (tabbar-current-tabset)))
+              (memq (current-buffer) (my-buffer-list (selected-frame))))
+            'tabbar-unselected-associated)
+          ((and
+              (tabbar-selected-p tab (tabbar-current-tabset))
+              (not (memq (current-buffer) (my-buffer-list (selected-frame)))))
+            'tabbar-selected-unassociated)
+          ((and
+              (not (tabbar-selected-p tab (tabbar-current-tabset)))
+              (not (memq (current-buffer) (my-buffer-list (selected-frame)))))
+            'tabbar-unselected-unassociated))
+      'pointer 'hand)
+    tabbar-separator-value))
+
+
+#+END_SRC

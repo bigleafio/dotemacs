@@ -140,9 +140,8 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
    (tool-bar-mode   -1)
    (tooltip-mode    -1)
    (menu-bar-mode   1)
-  ;; (desktop-save-mode 1)
+   (desktop-save-mode 1)
 
-   ;;(set-default-font "Hack 14")
    (add-to-list 'default-frame-alist '(font . "Hack-14:spacing=100"))
 
    ;Set up the Fringe
@@ -182,6 +181,34 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
    )
 
+(use-package window-purpose
+ :ensure t
+ :config
+  (purpose-mode)
+
+(require 'window-purpose-x)
+(purpose-x-kill-setup)
+
+(setq pop-up-frames t) ; allows emacs to popup new frames
+
+;; give help buffers the 'popup-frame purpose
+(add-to-list 'purpose-user-mode-purposes
+             '(help-mode . popup-frame))
+(purpose-compile-user-configuration)
+
+;; new rules for buffers with the 'popup-frame purpose
+(add-to-list 'purpose-special-action-sequences
+             '(popup-frame
+               purpose-display-reuse-window-buffer
+               purpose-display-reuse-window-purpose
+               purpose-display-pop-up-frame))
+
+(puthash "python" (purpose-conf "python" :mode-purposes '((python-mode . py))) purpose-x-persp-confs)
+(purpose-x-persp-setup)
+
+(purpose-x-popupify-purpose 'terminal #'purpose-display-at-bottom)
+(purpose-x-popupify-purpose 'general #'purpose-display-at-right))
+
 #+END_SRC
 
 ** Set up custom menu
@@ -210,117 +237,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     (popup-menu lawlist-context-menu-map event prefix))
 
 (global-set-key [mouse-3] 'lawlist-popup-context-menu)
-
-#+END_SRC
-
-** Set up Tabbar
-
-#+BEGIN_SRC emacs-lisp
-
-   (use-package elscreen
-    :ensure t)
-
-   (defadvice elscreen-e21-tab-update (before elscreen-e21-tab-update-advice activate)
-  "Only show elscreen tabs if more than 1 tab active"
-  (if (> (length (elscreen-get-screen-list)) 1)
-		(setq elscreen-display-tab t)
-	 (setq elscreen-display-tab nil)))
-
-  (elscreen-start)
-
-   (use-package tabbar
-    :ensure t
-    :config
-     ;;(tabbar-mode)
-     ;;(tabbar-local-mode t)
-   )
-
-   (require 'frame-bufs)
-
-   ;;(frame-bufs-mode t)
-
-
-(defun tabbar-buffer-groups ()
-  "Return the list of group names the current buffer belongs to.
-This function is a custom function for tabbar-mode's tabbar-buffer-groups.
-This function group all buffers into 3 groups:
-Those Dired, those user buffer, and those emacs buffer.
-Emacs buffer are those starting with “*”."
-  (list
-   (cond
-    ((string-equal "*" (substring (buffer-name) 0 1))
-     "Emacs Buffer"
-     )
-    ((eq major-mode 'dired-mode)
-     "Dired"
-     )
-    (t
-     "User Buffer"
-     )
-    )))
-
-(setq tabbar-buffer-groups-function 'tabbar-buffer-groups)
-
-(global-set-key [M-s-left] 'tabbar-backward)
-(global-set-key [M-s-right] 'tabbar-forward)
-
-(defface tabbar-selected-associated
-  '((t :background "black" :foreground "yellow" :box (:line-width 2 :color "yellow")))
-  "Face used for the selected tab -- associated with the `frame-bufs-buffer-list`."
-  :group 'tabbar)
-
-(defface tabbar-unselected-associated
-  '((t :background "black" :foreground "white" :box (:line-width 2 :color "white")))
-  "Face used for unselected tabs  -- associated with the `frame-bufs-buffer-list`."
-  :group 'tabbar)
-
-(defface tabbar-selected-unassociated
-  '((t :background "black" :foreground "white" :box (:line-width 2 :color "firebrick")))
-  "Face used for the selected tab -- UNassociated with the `frame-bufs-buffer-list`."
-  :group 'tabbar)
-
-(defface tabbar-unselected-unassociated
-  '((t :background "black" :foreground "white" :box (:line-width 2 :color "blue")))
-  "Face used for unselected tabs -- UNassociated with the `frame-bufs-buffer-list`."
-  :group 'tabbar)
-
-(setq tabbar-background-color "black")
-
-(defsubst tabbar-line-tab (tab)
-  "Return the display representation of tab TAB.
-That is, a propertized string used as an `header-line-format' template
-element.
-Call `tabbar-tab-label-function' to obtain a label for TAB."
-  (concat
-    (propertize
-      (if tabbar-tab-label-function
-          (funcall tabbar-tab-label-function tab)
-        tab)
-      'tabbar-tab tab
-      'local-map (tabbar-make-tab-keymap tab)
-      'help-echo 'tabbar-help-on-tab
-      'mouse-face 'tabbar-highlight
-      'face
-        (cond
-          ((and
-              (tabbar-selected-p tab (tabbar-current-tabset))
-              (memq (current-buffer) (my-buffer-list (selected-frame))))
-            'tabbar-selected-associated)
-          ((and
-              (not (tabbar-selected-p tab (tabbar-current-tabset)))
-              (memq (current-buffer) (my-buffer-list (selected-frame))))
-            'tabbar-unselected-associated)
-          ((and
-              (tabbar-selected-p tab (tabbar-current-tabset))
-              (not (memq (current-buffer) (my-buffer-list (selected-frame)))))
-            'tabbar-selected-unassociated)
-          ((and
-              (not (tabbar-selected-p tab (tabbar-current-tabset)))
-              (not (memq (current-buffer) (my-buffer-list (selected-frame)))))
-            'tabbar-unselected-unassociated))
-      'pointer 'hand)
-    tabbar-separator-value))
-
 
 #+END_SRC
 
@@ -545,6 +461,26 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
  :defer t)
 #+END_SRC
 
+** Set up speedbar
+#+BEGIN_SRC emacs-lisp
+(use-package sr-speedbar
+ :ensure t
+ :config
+  (make-face 'speedbar-face)
+  (set-face-font 'speedbar-face "Inconsolata-12")
+  (setq speedbar-mode-hook '(lambda () (buffer-face-set 'speedbar-face)))
+  (defadvice delete-other-windows (after my-sr-speedbar-delete-other-window-advice activate)
+  "Check whether we are in speedbar, if it is, jump to next window."
+  (let ()
+	(when (and (sr-speedbar-window-exist-p sr-speedbar-window)
+               (eq sr-speedbar-window (selected-window)))
+      (other-window 1)
+	)))
+(ad-enable-advice 'delete-other-windows 'after 'my-sr-speedbar-delete-other-window-advice)
+(ad-activate 'delete-other-windows))
+
+#+END_SRC
+
 ** Set up eshell
 #+BEGIN_SRC emacs-lisp
 (require 'eshell)
@@ -755,9 +691,9 @@ This is the default setup from the treemacs page on Github.
   :after treemacs evil
   :ensure t)
 
-(use-package treemacs-projectile
-  :after treemacs projectile
-  :ensure t)
+;;(use-package treemacs-projectile
+;; :after treemacs projectile
+;; :ensure t)
 
 
 

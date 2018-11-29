@@ -3,6 +3,7 @@
 (defvar my-packages
   '(delight
 diminish
+sr-speedbar
 eyebrowse
 vscode-icon
 shackle
@@ -93,4 +94,3 @@ calfw)
     (package-install p)))
 
 (provide 'install-packages)
-
