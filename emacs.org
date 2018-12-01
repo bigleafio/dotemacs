@@ -9,13 +9,11 @@
 
 * Todo
  - [X] Move custom to separate file
- - [ ] Additional ORG setup
- - [ ] Fix startup frame size
+ - [X] Additional ORG setup
+ - [X] Fix startup frame size
 
 * Configuration
-
 To load this, run =(org-babel-load-file "~/emacs.org")=.
-
 ** About me
 
 ** Personal information
@@ -164,8 +162,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
             shackle-default-rule '(:select t))
       (setq helm-display-function 'pop-to-buffer) ; make helm play nice
       (setq shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.4)))
-    :config (shackle-mode)
-   )
+    :config (shackle-mode))
 
   (use-package imenu-list
    :ensure t
@@ -177,19 +174,17 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
                        "|" 'imenu-list-minor-mode
                        "RET" 'imenu-list-goto-entry
                        "i" 'imenu-list-goto-entry
-                       "q" 'imenu-list-quit-window)
-
-   )
+                       "q" 'imenu-list-quit-window))
 
 (use-package window-purpose
  :ensure t
  :config
-  (purpose-mode)
+  (purpose-mode))
 
 (require 'window-purpose-x)
 (purpose-x-kill-setup)
 
-(setq pop-up-frames t) ; allows emacs to popup new frames
+;;(setq pop-up-frames t) ; allows emacs to popup new frames
 
 ;; give help buffers the 'popup-frame purpose
 (add-to-list 'purpose-user-mode-purposes
@@ -207,7 +202,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 (purpose-x-persp-setup)
 
 (purpose-x-popupify-purpose 'terminal #'purpose-display-at-bottom)
-(purpose-x-popupify-purpose 'general #'purpose-display-at-right))
+(purpose-x-popupify-purpose 'general #'purpose-display-at-right)
 
 #+END_SRC
 
@@ -250,7 +245,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (evil-mode 1))
 
 (use-package evil-escape
-  :ensure t
+  :defer t
   :init
   (setq-default evil-escape-key-sequence "jk")
   :config
@@ -300,10 +295,9 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ** Set up Ivy
   #+BEGIN_SRC emacs-lisp
            (use-package ivy
-             :ensure t
              :demand t
              :config
-     (setq ivy-use-virtual-buffers t
+           (setq ivy-use-virtual-buffers t
            enable-recursive-minibuffers t
            ivy-height 5
            ivy-use-selectable-prompt t
@@ -311,39 +305,31 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
            ivy-initial-inputs-alist nil ; remove initial ^ input.
            ivy-extra-directories nil ; remove . and .. directory.
            ivy-wrap nil
-     )
-
-
-     (setq ivy-count-format "(%d/%d) ")
-     ;; Create and delete a view
-     (global-set-key (kbd "C-c v") 'ivy-push-view)
-     (global-set-key (kbd "C-c V") 'ivy-pop-view)
-             (ivy-mode t))
+           ivy-count-format "(%d/%d)"
+           ;; Create and delete a view
+           ;;(global-set-key (kbd "C-c v") 'ivy-push-view)
+           ;;(global-set-key (kbd "C-c V") 'ivy-pop-view)
+           )
+           (ivy-mode t))
 
      (use-package counsel
-             :ensure t
-             :demand t
-             :config)
+             :demand t)
 
      (use-package perspective
-        :ensure t
-        :config
-          (persp-mode))
+        :defer t)
 
      (use-package persp-projectile
-        :ensure t)
+        :defer t)
 
      (use-package swiper
-             :ensure t
              :demand t
              :config
              (ivy-mode t)
 
-(setq ivy-use-virtual-buffers t)
-(setq enable-recursive-minibuffers t))
+             (setq ivy-use-virtual-buffers t)
+             (setq enable-recursive-minibuffers t))
 
      (use-package avy
-             :ensure t
              :demand t
              :config
              (defun avy-line-saving-column ()
@@ -358,14 +344,15 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
           (all-the-icons-ivy-setup))
 
          (use-package eyebrowse
-          :ensure t)
-     (ivy-mode 1)
+          :defer t)
+
     (global-set-key [remap switch-to-buffer] 'ivy-switch-buffer)
 
     (use-package ivy-rich
+     :demand t
      :config
       (ivy-rich-mode 1)
-      (setq ivy-rich-path-style 'abbrev)) ;; Abbreviate paths using abbreviate-file-name (e.g. replace “/home/username” with “~”)
+      (setq ivy-rich-path-style 'abbrev))
 
   #+END_SRC
 
@@ -417,7 +404,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 (use-package dired-sidebar
   :bind (("C-x C-n" . dired-sidebar-toggle-sidebar))
-  :ensure t
+  :defer t
   :commands (dired-sidebar-toggle-sidebar)
   :init
   (add-hook 'dired-sidebar-mode-hook
@@ -441,7 +428,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 (use-package ibuffer-sidebar
   :load-path "~/.emacs.d/lisp/ibuffer-sidebar"
-  :ensure nil
+  :demand t
   :commands (ibuffer-sidebar-toggle-sidebar)
   :config
   (setq ibuffer-sidebar-use-custom-font t)
@@ -457,15 +444,25 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ** Set up ag
 #+BEGIN_SRC emacs-lisp
 (use-package ag
- :ensure t
  :defer t)
 #+END_SRC
 
 ** Set up speedbar
 #+BEGIN_SRC emacs-lisp
+
 (use-package sr-speedbar
- :ensure t
- :config
+  :ensure t
+  :demand t
+  :init
+  (setq speedbar-show-unknown-files t)
+  (setq sr-speedbar-width 35)
+  (setq sr-speedbar-max-width 35)
+  (setq speedbar-use-images t)
+  (setq speedbar-initial-expansion-list-name "quick buffers")
+  (sr-speedbar-open)
+  :config
+  (with-current-buffer sr-speedbar-buffer-name
+    (setq window-size-fixed 'width))
   (make-face 'speedbar-face)
   (set-face-font 'speedbar-face "Inconsolata-12")
   (setq speedbar-mode-hook '(lambda () (buffer-face-set 'speedbar-face)))
@@ -490,6 +487,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 (setq eshell-smart-space-goes-to-end t)
 
 (use-package shell-pop
+  :demand t
   :config
   (custom-set-variables
    '(shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
@@ -501,7 +499,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 #+BEGIN_SRC emacs-lisp
 
 (use-package restart-emacs
-  :ensure t
+  :demand t
   :defer t
   :config (setq restart-emacs-restore-frames t))
 
@@ -524,7 +522,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (ibuffer-sidebar-toggle-sidebar))
 
   (use-package smex
-   :ensure t
+   :demand t
    :config
      (smex-initialize)
      (global-set-key (kbd "M-x") 'smex)
@@ -617,7 +615,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 ** Set up Ace Window
 #+BEGIN_SRC emacs-lisp
 (use-package ace-window
-  :ensure t
   :defer t
   :init
   (progn
@@ -635,8 +632,7 @@ This is the default setup from the treemacs page on Github.
 
 #+BEGIN_SRC emacs-lisp
 (use-package treemacs
-  :ensure t
-  :defer t
+  :demand t
   :init
   (with-eval-after-load 'winum
     (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
@@ -688,19 +684,16 @@ This is the default setup from the treemacs page on Github.
         ("C-x t M-t" . treemacs-find-tag)))
 
 (use-package treemacs-evil
+  :demand t
   :after treemacs evil
   :ensure t)
-
-;;(use-package treemacs-projectile
-;; :after treemacs projectile
-;; :ensure t)
-
-
 
 #+END_SRC
 ** Set up undo-tree
 #+BEGIN_SRC emacs-lisp
-(use-package undo-tree :ensure t)
+(use-package undo-tree
+  :defer t
+  :demand t)
 #+END_SRC
 
 * Development
@@ -708,13 +701,13 @@ This is the default setup from the treemacs page on Github.
   #+BEGIN_SRC emacs-lisp
   (use-package aggressive-indent
     :ensure t
-    :config)
+    :demand t)
   #+END_SRC
 
 ** Fill Column Indicator
   #+BEGIN_SRC emacs-lisp
   (use-package fill-column-indicator
-    :ensure t
+    :defer t
     :config
            (setq fci-rule-column 100
                  fci-rule-width 1
@@ -794,7 +787,7 @@ This is the default setup from the treemacs page on Github.
   (setq ispell-silently-savep t)
 
   (use-package flycheck
-   :ensure t
+   :defer t
    :init (global-flycheck-mode))
 
   (diminish 'flyspell-mode "Fly")
@@ -807,21 +800,23 @@ This is the default setup from the treemacs page on Github.
 #+BEGIN_SRC emacs-lisp
 ;;; Magit
 (use-package magit
+  :demand t
   :config
   (require 'evil-magit)
   (setq magit-auto-revert-mode 0
-      magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1))
+        magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1))
 
 (use-package evil-magit
+  :defer t
   :after (magit))
 
 (use-package diff-hl
-  :ensure t
+  :defer t
   :config
     (diff-hl-mode))
 
 (use-package git-gutter
-    :ensure t
+    :defer t
     :config
     (global-git-gutter-mode 't)
   (global-git-gutter-mode 't)
@@ -831,10 +826,10 @@ This is the default setup from the treemacs page on Github.
     :diminish git-gutter-mode)
 
 (use-package git-timemachine
-  :ensure t)
+  :defer t)
 
 (use-package gist
-  :ensure t)
+  :defer t)
 
 #+END_SRC
 
@@ -857,7 +852,8 @@ This is the default setup from the treemacs page on Github.
     (setq projectile-require-project-root nil)
     :config
     (projectile-mode 1))
-  ;; All The Icons
+
+;; All The Icons
   (use-package all-the-icons :ensure t)
 
 (setq projectile-completion-system 'ivy)
@@ -878,13 +874,13 @@ This is the default setup from the treemacs page on Github.
      (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1))))
 
     (use-package cider
-     :ensure t
+     :defer t
      :config
       (setq cider-repl-display-help-banner nil)
     )
 
     (use-package clojure-mode
-     :ensure t)
+     :defer t)
 
     (use-package smartparens
       :demand t
@@ -920,7 +916,7 @@ This is the default setup from the treemacs page on Github.
             "(" 'sp-backward-slurp-sexp))
 
   (use-package rainbow-mode
-   :ensure t
+   :defer t
    :init
   (add-hook 'prog-mode-hook (rainbow-mode))
   (add-hook 'css-mode-hook 'rainbow-mode)
@@ -937,6 +933,7 @@ This is the default setup from the treemacs page on Github.
 ** Multiple cursors
 #+BEGIN_SRC emacs-lisp
 (use-package multiple-cursors
+  :defer t
   :config
   (setq mc/always-run-for-all 1)
   (global-set-key (kbd "s-d") 'mc/mark-next-like-this)        ;; Cmd+d select next occurrence of region
@@ -951,11 +948,10 @@ This is the default setup from the treemacs page on Github.
 
 (setq python-indent 2)
 (use-package elpy
- :ensure t
- :config (elpy-enable))
+ :demand t)
 
 (use-package pyenv-mode
- :ensure t)
+ :defer t)
 
 ;;fix formattings
 (setq ansi-color-for-comint-mode t)
@@ -978,6 +974,7 @@ This is the default setup from the treemacs page on Github.
 
 ;; enable autopep8 formatting on save
 (use-package py-autopep8
+ :defer t
  :config
    (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save))
 
@@ -1000,7 +997,7 @@ This is the default setup from the treemacs page on Github.
 ** Web
 #+BEGIN_SRC emacs-lisp
 (use-package web-mode
- :ensure t
+ :defer t
  :config
     (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
     (setq web-mode-markup-indent-offset 2
@@ -1017,7 +1014,7 @@ This is the default setup from the treemacs page on Github.
 
 #+BEGIN_SRC emacs-lisp
 (use-package markdown-mode
-  :ensure t
+  :defer t
   :config (setq-default fill-column 100)
           (add-hook 'gfm-mode 'auto-fill-mode)
   :commands (markdown-mode gfm-mode)
@@ -1027,7 +1024,7 @@ This is the default setup from the treemacs page on Github.
   :init (setq markdown-command "multimarkdown"))
 
 (use-package imenu-list
-  :ensure t
+  :defer t
   :bind (("C-'" . imenu-list-smart-toggle))
   :config
   (setq imenu-list-focus-after-activation t
@@ -1046,8 +1043,7 @@ This is the default setup from the treemacs page on Github.
 
 
       (use-package org
-        :ensure t
-        :demand
+        :demand t
         :mode ("\\.org\\'" . org-mode)
         :diminish org-indent-mode
         :init
@@ -1131,7 +1127,7 @@ This is the default setup from the treemacs page on Github.
     (use-package biblio)
 
   (use-package org-ref
-              :ensure t
+              :defer t
               :init
   (add-hook 'org-mode-hook (lambda () (require 'org-ref))))
 
@@ -1240,10 +1236,11 @@ event of an error or nonlocal exit."
 ** Set up Hugo
 #+BEGIN_SRC emacs-lisp
 (use-package ox-hugo
+  :defer t
   :after ox)
 
 (use-package adaptive-wrap
-  :ensure t)
+  :defer t)
 
 #+END_SRC
 
@@ -1306,7 +1303,7 @@ event of an error or nonlocal exit."
         (require 'org-protocol)
 
         (use-package s
-         :ensure t)
+         :defer t)
         (use-package org-download
           :defer t
           )
@@ -1535,4 +1532,4 @@ event of an error or nonlocal exit."
       (setq initial-scratch-message ";; ╔═╗┌─┐┬─┐┌─┐┌┬┐┌─┐┬ ┬\n;; ╚═╗│  ├┬┘├─┤ │ │  ├─┤\n;; ╚═╝└─┘┴└─┴ ┴ ┴ └─┘┴ ┴\n\n")
 
 
- #+END_SR
+ #+END_SRC
