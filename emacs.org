@@ -140,16 +140,44 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
    (menu-bar-mode   1)
    (desktop-save-mode 1)
 
-   (add-to-list 'default-frame-alist '(font . "Hack-14:spacing=100"))
+   (add-to-list 'default-frame-alist '(font . "Hack Nerd Font-14:spacing=100"))
 
    ;Set up the Fringe
    (define-fringe-bitmap 'tilde [64 168 16] nil nil 'center)
    (set-fringe-bitmap-face 'tilde 'fringe)
 
-   (use-package eyebrowse
-    :ensure t
-    :config
-     (eyebrowse-mode t))
+ (use-package eyebrowse
+  :init
+    (setq eyebrowse-wrap-around 1)
+    (setq eyebrowse-new-workspace 1)
+  :config
+    (eyebrowse-mode t)
+    (eyebrowse-setup-opinionated-keys))
+
+  (defun eyebrowse-print-mode-line-indicator ()
+  "Prints the current eyebrowse mode line indicator."
+  (interactive)
+  (let* ((left-delimiter (propertize eyebrowse-mode-line-left-delimiter
+                                     'face 'eyebrowse-mode-line-delimiters))
+         (right-delimiter (propertize eyebrowse-mode-line-right-delimiter
+                                      'face 'eyebrowse-mode-line-delimiters))
+         (separator (propertize eyebrowse-mode-line-separator
+                                'face 'eyebrowse-mode-line-separator))
+         (current-slot (eyebrowse--get 'current-slot))
+         (window-configs (eyebrowse--get 'window-configs)))
+    (message (concat
+              left-delimiter
+              (mapconcat
+               (lambda (window-config)
+                 (let* ((caption (eyebrowse-format-slot window-config))
+                        (slot (car window-config))
+                        (display-caption (if (= slot current-slot)
+                                             (concat caption "*")
+                                           caption)))
+                   display-caption))
+               window-configs separator)
+              right-delimiter))))
+
 
    (use-package vscode-icon
     :ensure t
@@ -160,7 +188,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     :init
       (setq shackle-rules '((compilation-mode :noselect t))
             shackle-default-rule '(:select t))
-      (setq helm-display-function 'pop-to-buffer) ; make helm play nice
       (setq shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.4)))
     :config (shackle-mode))
 
@@ -262,13 +289,15 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 #+BEGIN_SRC emacs-lisp
   ;; Theme
 
-  (load-theme 'gruvbox t)
+  (load-theme 'atom-one-dark t)
 
+   (use-package smart-mode-line-atom-one-dark-theme
+    :ensure t)
 
    (use-package smart-mode-line
     :ensure t
     :init
-     (setq sml/theme 'respectful)
+     (setq sml/theme 'atom-one-dark)
      (setq sml/no-confirm-load-theme t)
      (sml/setup)
     :config
@@ -279,12 +308,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
       (add-to-list 'sml/replacer-regexp-list '("^~/Notes/" ":org:"))
       (add-to-list 'sml/replacer-regexp-list '("^~/blog/" ":blog:"))
       (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":DB:")))
-
-;; Hide minor modes from modeline
-;(use-package rich-minority
-;  :config
-;  (rich-minority-mode 1)
-;  (setf rm-blacklist ""))
 
 ;; Set colors to distinguish between active and inactive windows
 ;;(set-face-attribute 'mode-line nil :background "SlateGray1")
@@ -355,29 +378,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
       (setq ivy-rich-path-style 'abbrev))
 
   #+END_SRC
-
-** Set up Helm
-#+BEGIN_SRC emacs-lisp
-(use-package helm
-  :defer t
-  :init
-  (setq helm-M-x-fuzzy-match t
-	helm-mode-fuzzy-match t
-	helm-buffers-fuzzy-matching t
-	helm-recentf-fuzzy-match t
-	helm-locate-fuzzy-match t
-	helm-semantic-fuzzy-match t
-	helm-imenu-fuzzy-match t
-	helm-completion-in-region-fuzzy-match t
-	helm-candidate-number-list 150
-	helm-split-window-in-side-p t
-	helm-move-to-line-cycle-in-source t
-	helm-echo-input-in-header-line t
-	helm-autoresize-max-height 0
-	helm-autoresize-min-height 20))
-
-
-#+END_SRC
 
 ** Set up Dired
 
@@ -478,7 +478,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
 
 #+END_SRC
 
-** Set up eshell
+** Set up term/eshell
 #+BEGIN_SRC emacs-lisp
 (require 'eshell)
 (require 'em-smart)
@@ -492,6 +492,13 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (custom-set-variables
    '(shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
    '(shell-pop-universal-key "s-=")))
+
+(defadvice ansi-term (after advise-ansi-term-coding-system)
+    (set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix))
+(ad-activate 'ansi-term)
+
+(setq multi-term-program "/bin/zsh")
+(prefer-coding-system 'utf-8)
 
 #+END_SRC
 
@@ -580,7 +587,6 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
     "f" '(:ignore t :which-key "File")
     "fe" '((lambda () (interactive) (find-file "~/.emacs.d/emacs.org")) :which-key "Edit Configuration")
     "fd"  '(dired :which-key "open dired")
-    "fh"  '(helm-find-files :which-key "find files")
     "ff"  '(counsel-find-file :which-key "find files")
     ;; Window
      "w" '(:ignore t :which-key "Windows")
@@ -687,6 +693,9 @@ This is the default setup from the treemacs page on Github.
   :demand t
   :after treemacs evil
   :ensure t)
+
+(setq treemacs-indentation-string (propertize " ⫶ " 'face 'font-lock-comment-face)
+      treemacs-indentation 1)
 
 #+END_SRC
 ** Set up undo-tree
@@ -892,14 +901,11 @@ This is the default setup from the treemacs page on Github.
       (add-hook 'emacs-lisp-mode-hook 'turn-on-smartparens-strict-mode)
       :config
       (setq sp-navigate-interactive-always-progress-point t)
-
       (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
       (sp-local-pair 'clojure-mode "'" nil :actions nil)
       (sp-local-pair 'lisp-interaction-mode "'" nil :actions nil)
       (sp-local-pair 'clojure-interaction-mode "'" nil :actions nil)
       (sp-local-pair 'cider-repl-mode "'" nil :actions nil)
-
-
       (smartparens-global-mode 1)
       )
 
@@ -922,6 +928,17 @@ This is the default setup from the treemacs page on Github.
   (add-hook 'css-mode-hook 'rainbow-mode)
   (add-hook 'scss-mode-hook 'rainbow-mode))
 
+  (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
+
+; Recursively generate tags for all *.clj files,
+; creating tags for def* and namespaces
+(defun create-clj-tags (dir-name)
+ "Create tags file."
+ (interactive "Directory: ")
+ (shell-command
+  (format "%s  --langdef=Clojure --langmap=Clojure:.clj --regex-Clojure='/[ \t\(]*def[a-z]* \([a-z!-]+\)/\1/'  --regex-Clojure='/[ \t\(]*ns \([a-z.]+\)/\1/' -f %s/TAGS -e -R %s" path-to-ctags dir-name (directory-file-name dir-name)))
+ )
+(add-hook 'slime-edit-definition-hooks 'find-tag)
 #+END_SRC
 
 ** Disable Backups
@@ -1123,7 +1140,6 @@ This is the default setup from the treemacs page on Github.
     (setq org-agenda-files (list "~/Notes/LOG.org" "~/Notes/GTD.org" "~/Notes/church.org" "~/Notes/organizer.org")
           org-default-notes-file "~/Notes/LOG.org")
 
-    (use-package helm-bibtex)
     (use-package biblio)
 
   (use-package org-ref
@@ -1490,8 +1506,10 @@ event of an error or nonlocal exit."
 
       (add-hook 'before-save-hook 'delete-trailing-whitespace)
       (setq-default message-log-max nil)
-      ;; Always wrap lines
-      (global-visual-line-mode 1)
+
+      (show-paren-mode 1)
+      ;;remove the delay
+      (setq show-paren-delay 0)
 
       (setq split-height-threshold 0)
       (setq split-width-threshold nil)
