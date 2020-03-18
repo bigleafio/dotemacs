@@ -464,7 +464,7 @@ To load this, run =(org-babel-load-file "~/emacs.org")=.
   (with-current-buffer sr-speedbar-buffer-name
     (setq window-size-fixed 'width))
   (make-face 'speedbar-face)
-  (set-face-font 'speedbar-face "Inconsolata-12")
+  ;;(set-face-font 'speedbar-face "Hack-12")
   (setq speedbar-mode-hook '(lambda () (buffer-face-set 'speedbar-face)))
   (defadvice delete-other-windows (after my-sr-speedbar-delete-other-window-advice activate)
   "Check whether we are in speedbar, if it is, jump to next window."

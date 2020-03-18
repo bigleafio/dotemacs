@@ -1,5 +1,50 @@
 (require 'package)
 
+(setq byte-compile-warnings '(not free-vars unresolved noruntime lexical make-local))
+
+ (eval-and-compile
+  (setq gc-cons-threshold 402653184
+        gc-cons-percentage 0.6))
+
+ (setq mac-option-modifier 'meta)
+ (setq mac-command-modifier 'super)
+ (setq mac-pass-command-to-system nil)
+
+(eval-and-compile
+  (setq load-prefer-newer t
+      package-user-dir "~/.emacs.d/elpa"
+      package--init-file-ensured t
+      package-enable-at-startup nil)
+
+(unless (file-directory-p package-user-dir)
+  (make-directory package-user-dir t))):
+
+(setq use-package-verbose t)
+
+(eval-and-compile
+  (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
+
+(eval-when-compile
+  (require 'package)
+
+ (unless (assoc-default "melpa-stable" package-archives)
+  (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t))
+ (unless (assoc-default "melpa" package-archives)
+  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t))
+ (unless (assoc-default "gnu" package-archives)
+ (add-to-list 'package-archives '("gnu"   . "http://elpa.gnu.org/packages/") t))
+(unless (assoc-default "org" package-archives)
+  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t))
+(unless (assoc-default "marmalade" package-archives)
+  (add-to-list 'package-archives '("marmalade" . "https://marmalade-repo.org/packages/") t))
+(unless package--initialized (package-initialize t))
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(require 'use-package)
+(setq use-package-always-ensure t))
+
+
 (defvar my-packages
   '(delight
     s
@@ -21,13 +66,13 @@
     persp-projectile
     swiper
     avy
-    ll-the-icons-ivy
+    all-the-icons-ivy
     eyebrowse
     ivy-rich
     helm
-    dired
-    dired-x
-    dired-sidebar
+    ;;dired
+    ;;dired-x
+    ;;dired-sidebar
     ibuffer
     ibuffer-sidebar
     ag
@@ -81,6 +126,7 @@
     s
     org-download
     calfw
+    atom-one-dark
     )
     )
 
